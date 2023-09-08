@@ -1,0 +1,27 @@
+{
+  "name": "subledger",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check src",
+    "eslint": "npx eslint --ext .js,.ts,.svelte src"
+  },
+  "dependencies": {
+    "phoenix": "file:../deps/phoenix",
+    "phoenix_html": "file:../deps/phoenix_html"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.0.3",
+    "autoprefixer": "^10.4.15",
+    "eslint-plugin-svelte": "^2.33.0",
+    "postcss": "^8.4.29",
+    "svelte": "^3.57.0",
+    "svelte-check": "^3.5.1",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.3.2"
+  }
+}
