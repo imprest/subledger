@@ -54,12 +54,12 @@ config :subledger, SubledgerWeb.Endpoint,
 
 # Watch static and templates for browser reloading.
 config :subledger, SubledgerWeb.Endpoint,
-  # live_reload: [
-  #   patterns: [
-  #     ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-  #     ~r"lib/subledger_web/(controllers|live|components)/.*(ex|heex)$"
-  #   ]
-  # ]
+  live_reload: [
+    patterns: [
+      # ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      # ~r"lib/subledger_web/(controllers|live|components)/.*(ex|heex)$"
+    ]
+  ]
 
 config :exsync, addition_dirs: ["/lib/subledger_web"]
 
