@@ -1,17 +1,18 @@
 // Ensure this is treated as a module
-export = {}
+export = {};
 
 declare module '*.svelte' {
-  import type { ComponentType } from 'svelte'
-  const component: ComponentType
-  export default component
+	import type { ComponentType } from 'svelte';
+	const component: ComponentType;
+	export default component;
 }
 
 declare global {
-  interface Window {
-    userToken?: any
-  }
-  interface document { }
+	interface Window {
+		userToken?: string;
+	}
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface document {}
 }
 
-declare module 'phoenix'
+declare module 'phoenix';

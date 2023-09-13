@@ -9,13 +9,12 @@ module.exports = {
 	parser: '@typescript-eslint/parser',
 	plugins: ['@typescript-eslint'],
 	parserOptions: {
-		sourceType: 'module',
-		ecmaVersion: 2020,
+		project: './tsconfig.json',
+		tsconfigRootDir: __dirname,
 		extraFileExtensions: ['.svelte']
 	},
 	env: {
 		browser: true,
-		es2017: true,
 		node: true
 	},
 	overrides: [
@@ -26,5 +25,12 @@ module.exports = {
 				parser: '@typescript-eslint/parser'
 			}
 		}
+	],
+	ignorePatterns: [
+		'postcss.config.cjs',
+		'svelte.config.js',
+		'tailwind.config.cjs',
+		'.eslintrc.cjs',
+		'vite.config.ts'
 	]
 };
