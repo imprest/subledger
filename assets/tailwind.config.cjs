@@ -6,7 +6,7 @@ module.exports = {
   darkMode: ['class'],
   content: [
     './src/**/*.{html,js,svelte,ts}',
-    '../lib/ghr_web/{components,controllers}/**/*.{heex,ex}'
+    '../lib/subledger_web/{components,controllers}/**/*.{heex,ex}'
   ],
   theme: {
     extend: {}
