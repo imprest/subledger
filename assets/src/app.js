@@ -3,7 +3,7 @@
 // import "./user_socket.js"
 
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
-import '../../deps/phoenix_html/priv/static/phoenix_html';
+import 'phoenix_html';
 // Establish Phoenix Socket and LiveView configuration.
 // import {Socket} from "phoenix"
 

@@ -16,6 +16,8 @@ defmodule Subledger.Application do
       {Phoenix.PubSub, name: Subledger.PubSub},
       # Start Finch
       {Finch, name: Subledger.Finch},
+      # Start Presence
+      SubledgerWeb.Presence,
       # Start the Endpoint (http/https)
       SubledgerWeb.Endpoint
       # Start a worker by calling: Subledger.Worker.start_link(arg)

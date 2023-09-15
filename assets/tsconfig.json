@@ -1,29 +1,27 @@
 {
-	"extends": "@tsconfig/svelte/tsconfig.json",
-	"compilerOptions": {
-		"outDir": "./dist",
-		"esModuleInterop": true,
-		"paths": {
-			"$lib": ["../src/lib"],
-			"$lib/*": ["../src/lib/*"]
-		},
-		"types": ["node"],
-		"target": "ESNext",
-		"useDefineForClassFields": true,
-		"module": "ESNext",
-		"resolveJsonModule": true,
-		"allowJs": true,
-		"checkJs": true,
-		"isolatedModules": true
-	},
-	"include": ["./src/**/*.d.ts", "./src/**/*.js", "./src/**/*.ts", "./src/**/*.svelte"],
-	"references": [{ "path": "./tsconfig.node.json" }],
-	"exclude": [
-		"../node_modules/**",
-		"./[!ambient.d.ts]**",
-		"../src/service-worker.js",
-		"../src/service-worker.ts",
-		"../src/service-worker.d.ts",
-		"../src/app.js"
-	]
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "paths": {
+      "$lib": ["../src/lib"],
+      "$lib/*": ["../src/lib/*"]
+    },
+    "types": ["node"],
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "isolatedModules": true
+  },
+  "include": ["./src/**/*.d.ts", "./src/**/*.js", "./src/**/*.ts", "./src/**/*.svelte"],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "exclude": [
+    "../node_modules/**",
+    "../src/service-worker.js",
+    "../src/service-worker.ts",
+    "../src/service-worker.d.ts",
+    "../src/app.js"
+  ]
 }
