@@ -1,16 +1,22 @@
 defmodule SubledgerWeb.SubledgerChannel do
   use SubledgerWeb, :channel
+  use ChannelHandler.Router
 
   alias SubledgerWeb.Presence
 
+  event "ledger:get", SubledgerWeb.LedgerHandler, :get
+
   @impl true
-  def join("subledger:lobby", payload, socket) do
-    if authorized?(payload) do
-      {:ok, socket}
-    else
-      {:error, %{reason: "unauthorized"}}
-    end
+  def join("subledger:lobby", _payload, socket) do
+    {:ok, socket}
   end
+  # def join("subledger:lobby", payload, socket) do
+  #   if authorized?(payload) do
+  #     {:ok, socket}
+  #   else
+  #     {:error, %{reason: "unauthorized"}}
+  #   end
+  # end
 
   # Channels can be used in a request/response fashion
   # by sending replies to requests from the client
@@ -42,7 +48,7 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   # Add authorization logic here as required.
-  defp authorized?(_payload) do
-    true
-  end
+  # defp authorized?(_payload) do
+  #   true
+  # end
 end

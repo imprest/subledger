@@ -9,8 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "prettier --check . && eslint .",
-    "format": "prettier --write .",
-    "eslint": "npx eslint --ext .js,.ts,.svelte"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "phoenix": "file:../deps/phoenix",
@@ -20,6 +19,7 @@
     "@sveltejs/vite-plugin-svelte": "^2.4.6",
     "@tsconfig/svelte": "^5.0.2",
     "@types/node": "^20.6.1",
+    "@types/phoenix": "^1.6.1",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "autoprefixer": "^10.4.15",

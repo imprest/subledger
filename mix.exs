@@ -63,7 +63,7 @@ defmodule Subledger.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["cmd --cd assets pnpm add", "cmd --cd assets pnpm run build"],
+      "assets.setup": ["cmd --cd assets pnpm i", "cmd --cd assets pnpm run build"],
       "assets.deploy": ["cmd --cd assets pnpm run build", "phx.digest"]
     ]
   end

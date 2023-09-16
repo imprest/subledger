@@ -1,6 +1,6 @@
 <script lang="ts">
   import Counter from './lib/Counter.svelte';
-  import { appState } from './store';
+  import { appState, getLedger } from './store';
 </script>
 
 <main>
@@ -15,6 +15,7 @@
     <p>{$appState.connected}</p>
   </div>
 
+  <button on:click={() => getLedger('1')}>Get Ledger</button>
   <p>
     Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer"
       >SvelteKit</a
