@@ -5,6 +5,7 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
     create table(:books, primary_key: false) do
       add :id, :string, primary_key: true
       add :org_id, references(:orgs, on_delete: :nothing), null: false
+      add :currency_id, references(:currencies, on_delete: :nothing, type: :string), null: false
       add :fin_year, :string, null: false
       add :period, :daterange, null: false
       add :inserted_by_id, references(:users, on_delete: :nothing), null: false
@@ -26,11 +27,14 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
       add :name, :string, null: false
       add :tin, :string, null: false, default: "C000000000"
       add :address, :text, null: false
+      add :town_city, :string, null: false
+      add :region, :string, null: false
       add :country_id, references(:countries, on_delete: :nothing, type: :string), default: "GHA", null: false
+      add :is_gov, :boolean, null: false, default: false
       add :number, :text, null: false, default: "000000000"
       add :email, :string, null: true
       add :price_level, :string, default: "Trek"
-      add :credit_level, :decimal, default: 0.00, null: false, precision: 20, scale: 2
+      add :credit_limit, :decimal, default: 0.00, null: false, precision: 20, scale: 2
       add :payment_terms, :string, default: "Cash or Immediate Chq"
       add :tags, {:array, :string}
       add :inserted_by_id, references(:users, on_delete: :nothing), null: false

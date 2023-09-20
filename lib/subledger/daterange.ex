@@ -1,4 +1,4 @@
-defmodule Serp.DateRange do
+defmodule Subledger.DateRange do
   @moduledoc """
   Wraps a `Postgrex.Range` and casts to PostgreSQL `daterange` type.
   """

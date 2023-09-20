@@ -3,10 +3,14 @@ defmodule Subledger.Accounts.User do
   import Ecto.Changeset
 
   schema "users" do
+    field :username, :string
+    field :name, :string
     field :email, :string
+    field :is_admin, :boolean
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
-    field :confirmed_at, :naive_datetime
+    field :confirmed_at, :utc_datetime
+    belongs_to :org, Subledger.Setup.Org
 
     timestamps()
   end
@@ -36,7 +40,7 @@ defmodule Subledger.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :username, :name, :org_id, :is_admin])
     |> validate_email(opts)
     |> validate_password(opts)
   end
@@ -54,9 +58,9 @@ defmodule Subledger.Accounts.User do
     |> validate_required([:password])
     |> validate_length(:password, min: 12, max: 72)
     # Examples of additional password validation:
-    # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
-    # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
+    |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
+    |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
+    |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
   end
 

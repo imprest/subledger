@@ -26,7 +26,7 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
 
     create table(:users) do
       add :org_id, references(:orgs, on_delete: :nothing), null: false
-      add :username, :string, null: false
+      add :username, :citext, null: false
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :is_admin, :boolean, null: false, default: false
