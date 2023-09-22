@@ -10,13 +10,16 @@ defmodule SubledgerWeb.SubledgerChannel do
   def join("subledger:lobby", _payload, socket) do
     {:ok, socket}
   end
-  # def join("subledger:lobby", payload, socket) do
-  #   if authorized?(payload) do
-  #     {:ok, socket}
-  #   else
-  #     {:error, %{reason: "unauthorized"}}
-  #   end
-  # end
+
+  def join("subledger:" <> user_id, _payload, socket) do
+    # if authorized?(payload) do
+    if socket.assigns.user_id === String.to_integer(user_id) do
+      Subledger.Repo.put_org_id(socket.assigns.org_id)
+      {:ok, socket}
+    else
+      {:error, %{reason: "unauthorized"}}
+    end
+  end
 
   # Channels can be used in a request/response fashion
   # by sending replies to requests from the client
@@ -46,9 +49,4 @@ defmodule SubledgerWeb.SubledgerChannel do
     push(socket, "presence_state", Presence.list(socket))
     {:noreply, socket}
   end
-
-  # Add authorization logic here as required.
-  # defp authorized?(_payload) do
-  #   true
-  # end
 end

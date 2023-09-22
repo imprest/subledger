@@ -4,7 +4,7 @@ import { writable } from 'svelte/store';
 const socket = new Socket('/socket', { params: { token: window.userToken } });
 socket.connect();
 
-export const channel = socket.channel('subledger:lobby', {});
+export const channel = socket.channel('subledger:1', {});
 channel
   .join()
   .receive('ok', (resp: unknown) => {

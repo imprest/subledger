@@ -11,6 +11,40 @@ defmodule Subledger.Accounts do
   ## Database getters
 
   @doc """
+  Gets a user by username.
+
+  ## Examples
+
+      iex> get_user_by_username("Jdoe")
+      %User{}
+
+      iex> get_user_by_username("Jdoe")
+      nil
+
+  """
+  def get_user_by_username(username) when is_binary(username) do
+    Repo.get_by(User, username: username)
+  end
+
+  @doc """
+  Gets a user by username and password.
+
+  ## Examples
+
+      iex> get_user_by_username_and_password("Jdoe", "correct_password")
+      %User{}
+
+      iex> get_user_by_username_and_password("Jdoe", "invalid_password")
+      nil
+
+  """
+  def get_user_by_username_and_password(username, password)
+      when is_binary(username) and is_binary(password) do
+    user = Repo.get_by(User, [username: username], [skip_org_id: true])
+    if User.valid_password?(user, password), do: user
+  end
+
+  @doc """
   Gets a user by email.
 
   ## Examples
@@ -231,14 +265,14 @@ defmodule Subledger.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+    Repo.one(query, [skip_org_id: true])
   end
 
   @doc """
   Deletes the signed token with the given context.
   """
   def delete_user_session_token(token) do
-    Repo.delete_all(UserToken.token_and_context_query(token, "session"))
+    Repo.delete_all(UserToken.token_and_context_query(token, "session"), [skip_org_id: true])
     :ok
   end
 

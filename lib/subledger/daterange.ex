@@ -12,15 +12,8 @@ defmodule Subledger.DateRange do
 
   def cast(_), do: :error
 
-  def load(%Postgrex.Range{lower: lower, upper: nil}) do
-    {lower, _} = lower |> to_float
-    {:ok, [lower, nil]}
-  end
-
   def load(%Postgrex.Range{lower: lower, upper: upper}) do
-    {lower, _} = lower |> to_float
-    {upper, _} = upper |> to_float
-    {:ok, [lower, upper]}
+    {:ok, Date.range(lower, Date.add(upper, -1))}
   end
 
   def dump([lower, upper]) do
@@ -29,5 +22,4 @@ defmodule Subledger.DateRange do
 
   def dump(_), do: :error
 
-  defp to_float(value), do: value |> Decimal.to_string() |> Float.parse()
 end

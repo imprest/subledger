@@ -29,12 +29,15 @@ defmodule SubledgerWeb.UserSocket do
   def connect(%{"token"=> token}, socket, _connect_info) do
     case Phoenix.Token.verify(socket, "user socket", token, max_age: 1_209_600) do
       {:ok, user_id} ->
-        name =
-          Subledger.Repo.one(from u in "users", select: u.email, where: u.id == ^user_id)
-          |> String.split("@")
-          |> hd
+        query =
+          from u in "users",
+          select: [u.username, u.org_id],
+          where: u.id == ^user_id
 
-        socket = assign(socket, :name, name)
+        [username, org_id] = Subledger.Repo.one(query, [skip_org_id: true])
+
+        socket = assign(socket, :username, username)
+        socket = assign(socket, :org_id, org_id)
         {:ok, assign(socket, :user_id, user_id)}
 
       {:error, _reason} ->

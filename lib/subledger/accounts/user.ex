@@ -6,7 +6,7 @@ defmodule Subledger.Accounts.User do
     field :username, :string
     field :name, :string
     field :email, :string
-    field :is_admin, :boolean
+    field :is_admin, :boolean, default: false
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
