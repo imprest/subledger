@@ -109,9 +109,10 @@ defmodule Subledger.Accounts do
 
   """
   def register_user(attrs) do
+    org_id = attrs.org_id
     %User{}
     |> User.registration_changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert(org_id: org_id)
   end
 
   @doc """

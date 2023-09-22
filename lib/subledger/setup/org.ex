@@ -3,8 +3,8 @@ defmodule Subledger.Setup.Org do
   import Ecto.Changeset
 
   schema "orgs" do
-    field :name, :string
-    field :sname, :string
+    field :name
+    field :sname
     timestamps()
   end
 

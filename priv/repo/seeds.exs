@@ -15,7 +15,7 @@ alias Subledger.{Repo, Accounts, Public, Setup}
 inserted_at = ~U[2023-10-01 08:00:00Z]
 updated_at = ~U[2023-10-01 08:00:00Z]
 
-Repo.insert!(%Public.Country{id: "GHA", name: "Ghana"})
+Repo.insert!(%Public.Country{id: "GHA", name: "Ghana"}, [skip_org_id: true])
 Repo.insert_all(
   Public.Currency,
   [
@@ -23,16 +23,23 @@ Repo.insert_all(
     %{id: "USD", name: "U.S. Dollar", symbol: "$"},
     %{id: "EUR", name: "Euro", symbol: "€"},
     %{id: "GBP", name: "Great British Pound", symbol: "£"}
-  ]
+  ],
+  [skip_org_id: true]
 )
 
-Repo.insert_all(Setup.Org, [
-  %{id: 1, sname: "MGP", name: "M&G Pharmaceuticals Ltd", inserted_at: inserted_at, updated_at: updated_at}
-])
+org = Repo.insert!(
+  %Setup.Org{
+    id: 1, sname: "MGP", name: "M&G Pharmaceuticals Ltd",
+    inserted_at: inserted_at, updated_at: updated_at
+  },
+  [skip_org_id: true])
+
+org_id = org.id
+Subledger.Repo.put_org_id(org_id)
 
 {:ok, u} =
   Accounts.register_user(%{
-    org_id: 1,
+    org_id: org_id,
     username: "hvaria",
     email: "hardikvaria@gmail.com",
     name: "Hardik Varia",
@@ -45,12 +52,12 @@ Repo.update!(Accounts.User.confirm_changeset(u))
 Repo.insert_all(Setup.Book, [
   %{
     id: "1_2023-24",
-    org_id: 1,
+    org_id: org_id,
     fin_year: "2023-24",
     currency_id: "GHS",
     period: [~D[2023-10-01], ~D[2024-10-01]],
-    inserted_by_id: 1,
-    updated_by_id: 1,
+    inserted_by_id: user_id,
+    updated_by_id: user_id,
     inserted_at: inserted_at,
     updated_at: updated_at
   }
@@ -58,7 +65,7 @@ Repo.insert_all(Setup.Book, [
 
 Repo.insert!(%Setup.Ledger{
   id: "1_2023-24_CASH",
-  org_id: 1,
+  org_id: org_id,
   book_id: "1_2023-24",
   code: "CASH",
   name: "Cash",
@@ -73,8 +80,8 @@ Repo.insert!(%Setup.Ledger{
   credit_limit: 0.00,
   payment_terms: "Cash or Immediate Chq",
   tags: ["CASH"],
-  inserted_by_id: 1,
-  updated_by_id: 1,
+  inserted_by_id: user_id,
+  updated_by_id: user_id,
   inserted_at: inserted_at,
   updated_at: updated_at
 })

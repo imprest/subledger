@@ -13,13 +13,16 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
       timestamps()
     end
 
+    create unique_index(:books, [:id, :org_id])
     create unique_index(:books, [:org_id, :fin_year])
     create index(:books, [:org_id])
 
     create table(:ledgers, primary_key: false) do
       add :id, :text, primary_key: true # book_id+code
-      add :org_id, references(:orgs, on_delete: :nothing), null: false
-      add :book_id, references(:books, on_delete: :nothing, type: :string), null: false
+      add :org_id, :integer, null: false
+      add :book_id,
+        references(:books, with: [org_id: :org_id], match: :full, type: :string),
+        null: false
       add :is_active, :boolean, default: true, null: false
       add :op_bal, :decimal, default: 0, null: false, precision: 20, scale: 2
       add :currency_id, references(:currencies, on_delete: :nothing, type: :string), null: false
