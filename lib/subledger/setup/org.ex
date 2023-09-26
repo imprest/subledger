@@ -2,6 +2,7 @@ defmodule Subledger.Setup.Org do
   use Subledger.Schema
   import Ecto.Changeset
 
+  @primary_key {:org_id, :id, autogenerate: true}
   schema "orgs" do
     field :name
     field :sname

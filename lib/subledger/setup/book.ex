@@ -4,7 +4,7 @@ defmodule Subledger.Setup.Book do
 
   @primary_key {:id, :string, autogenerate: false}
   schema "books" do
-    belongs_to :org, Subledger.Setup.Org
+    belongs_to :org, Subledger.Setup.Org, references: :org_id
     belongs_to :currency, Subledger.Public.Currency, type: :string
     field :fin_year, :string
     field :period, Subledger.DateRange

@@ -15,7 +15,8 @@ alias Subledger.{Repo, Accounts, Public, Setup}
 inserted_at = ~U[2023-10-01 08:00:00Z]
 updated_at = ~U[2023-10-01 08:00:00Z]
 
-Repo.insert!(%Public.Country{id: "GHA", name: "Ghana"}, [skip_org_id: true])
+Repo.insert!(%Public.Country{id: "GHA", name: "Ghana"}, skip_org_id: true)
+
 Repo.insert_all(
   Public.Currency,
   [
@@ -24,17 +25,22 @@ Repo.insert_all(
     %{id: "EUR", name: "Euro", symbol: "€"},
     %{id: "GBP", name: "Great British Pound", symbol: "£"}
   ],
-  [skip_org_id: true]
+  skip_org_id: true
 )
 
-org = Repo.insert!(
-  %Setup.Org{
-    id: 1, sname: "MGP", name: "M&G Pharmaceuticals Ltd",
-    inserted_at: inserted_at, updated_at: updated_at
-  },
-  [skip_org_id: true])
+org =
+  Repo.insert!(
+    %Setup.Org{
+      org_id: 1,
+      sname: "MGP",
+      name: "M&G Pharmaceuticals Ltd",
+      inserted_at: inserted_at,
+      updated_at: updated_at
+    },
+    skip_org_id: true
+  )
 
-org_id = org.id
+org_id = org.org_id
 Subledger.Repo.put_org_id(org_id)
 
 {:ok, u} =
@@ -46,9 +52,11 @@ Subledger.Repo.put_org_id(org_id)
     password: "Testing12345",
     is_admin: true
   })
+
 user_id = u.id
 
 Repo.update!(Accounts.User.confirm_changeset(u))
+
 Repo.insert_all(Setup.Book, [
   %{
     id: "1_2023-24",
@@ -70,7 +78,8 @@ Repo.insert!(%Setup.Ledger{
   code: "CASH",
   name: "Cash",
   currency_id: "GHS",
-  address: "Bannerman Road, James Town",
+  address_1: "Bannerman Road, James Town",
+  address_2: "P.O. Box 1681",
   town_city: "Accra",
   region: "GAR",
   is_gov: false,
@@ -80,6 +89,17 @@ Repo.insert!(%Setup.Ledger{
   credit_limit: 0.00,
   payment_terms: "Cash or Immediate Chq",
   tags: ["CASH"],
+  inserted_by_id: user_id,
+  updated_by_id: user_id,
+  inserted_at: inserted_at,
+  updated_at: updated_at
+})
+
+Repo.insert!(%Setup.Permission{
+  org_id: org_id,
+  ledger_id: "1_2023-24_CASH",
+  user_id: user_id,
+  role: :owner,
   inserted_by_id: user_id,
   updated_by_id: user_id,
   inserted_at: inserted_at,

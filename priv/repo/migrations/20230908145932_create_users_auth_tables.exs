@@ -5,7 +5,8 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
     execute "CREATE EXTENSION IF NOT EXISTS citext", ""
     execute "CREATE EXTENSION IF NOT EXISTS pg_stat_statements", ""
 
-    create table(:orgs) do
+    create table(:orgs, primary_key: false) do
+      add :org_id, :bigserial, primary_key: true
       add :sname, :string, null: false
       add :name, :string, null: false
       timestamps()
@@ -25,7 +26,7 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
     end
 
     create table(:users) do
-      add :org_id, references(:orgs, on_delete: :nothing), null: false
+      add :org_id, references(:orgs, column: :org_id), null: false
       add :username, :citext, null: false
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
@@ -36,6 +37,7 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
     end
 
     create unique_index(:users, [:username])
+    create unique_index(:users, [:id, :org_id])
 
     create table(:users_tokens) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
@@ -47,6 +49,5 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
 
     create index(:users_tokens, [:user_id])
     create unique_index(:users_tokens, [:context, :token])
-
   end
 end
