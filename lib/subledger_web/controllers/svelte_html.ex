@@ -4,7 +4,9 @@ defmodule SubledgerWeb.SvelteHTML do
   def index(assigns) do
     ~H"""
     <%= if System.get_env("PHX_SERVER", "false") == "false" do %>
-      <script src="http://localhost:5173/src/main.ts" type="module">
+      <script type="module" src="http://localhost:5173/@vite/client">
+      </script>
+      <script type="module" src="http://localhost:5173/src/main.ts">
       </script>
     <% else %>
       <script defer phx-track-static type="text/javascript" src={~p"/assets/main.js"}>
