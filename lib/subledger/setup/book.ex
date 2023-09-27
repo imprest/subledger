@@ -6,7 +6,7 @@ defmodule Subledger.Setup.Book do
   schema "books" do
     belongs_to :org, Subledger.Setup.Org, references: :org_id
     belongs_to :currency, Subledger.Public.Currency, type: :string
-    field :fin_year, :string
+    field :fin_year, :integer
     field :period, Subledger.DateRange
     belongs_to :inserted_by, Subledger.Accounts.User
     belongs_to :updated_by, Subledger.Accounts.User

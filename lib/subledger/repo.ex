@@ -28,4 +28,6 @@ defmodule Subledger.Repo do
 
   def put_org_id(org_id), do: Process.put(@tenant_key, org_id)
   def get_org_id(), do: Process.get(@tenant_key)
+
+  def json_frag(rows), do: Jason.Fragment.new(rows)
 end

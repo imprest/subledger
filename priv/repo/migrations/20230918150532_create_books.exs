@@ -6,7 +6,7 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
       add :id, :string, primary_key: true
       add :org_id, references(:orgs, column: :org_id), null: false
       add :currency_id, references(:currencies, type: :string), null: false
-      add :fin_year, :string, null: false
+      add :fin_year, :integer, null: false
       add :period, :daterange, null: false
       add :inserted_by_id, references(:users), null: false
       add :updated_by_id, references(:users), null: false
@@ -53,7 +53,7 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
     create unique_index(:ledgers, [:book_id, :code])
 
     create table(:tx, primary_key: false) do
-      # book_id + incrementing tx number
+      # book_id + incrementing tx number (10 digits)
       add :id, :text, primary_key: true
       add :org_id, :bigint, null: false
 

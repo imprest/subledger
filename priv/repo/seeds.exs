@@ -59,9 +59,9 @@ Repo.update!(Accounts.User.confirm_changeset(u))
 
 Repo.insert_all(Setup.Book, [
   %{
-    id: "1_2023-24",
+    id: "1_2023",
     org_id: org_id,
-    fin_year: "2023-24",
+    fin_year: 2023,
     currency_id: "GHS",
     period: [~D[2023-10-01], ~D[2024-10-01]],
     inserted_by_id: user_id,
@@ -72,9 +72,9 @@ Repo.insert_all(Setup.Book, [
 ])
 
 Repo.insert!(%Setup.Ledger{
-  id: "1_2023-24_CASH",
+  id: "1_2023_CASH",
   org_id: org_id,
-  book_id: "1_2023-24",
+  book_id: "1_2023",
   code: "CASH",
   name: "Cash",
   currency_id: "GHS",
@@ -97,7 +97,7 @@ Repo.insert!(%Setup.Ledger{
 
 Repo.insert!(%Setup.Permission{
   org_id: org_id,
-  ledger_id: "1_2023-24_CASH",
+  ledger_id: "1_2023_CASH",
   user_id: user_id,
   role: :owner,
   inserted_by_id: user_id,
