@@ -1,6 +1,16 @@
 <script lang="ts">
   import Counter from './lib/Counter.svelte';
-  import { appState, getLedger } from './store';
+  import { state, getLedger } from './store';
+  import { subscribe, snapshot } from 'valtio/vanilla';
+  import { onMount } from 'svelte';
+
+  let snap = snapshot(state);
+
+  onMount(() => {
+    return subscribe(state, () => {
+      snap = snapshot(state);
+    });
+  });
 </script>
 
 <main>
@@ -12,7 +22,8 @@
 
   <div class="card text-lg">
     <Counter />
-    <p>{$appState.connected}</p>
+    <p>{snap.connected}</p>
+    <p>{JSON.stringify(snap.ledger)}</p>
   </div>
 
   <button on:click={() => getLedger('1')}>Get Ledger</button>

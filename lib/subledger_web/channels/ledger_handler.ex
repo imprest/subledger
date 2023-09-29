@@ -4,7 +4,7 @@ defmodule SubledgerWeb.LedgerHandler do
   alias Subledger.Setup
 
   def get(%{"id" => _id}, _bindings, socket) do
-    ledger = Setup.get_ledger("1_2023-24_CASH")
-    {:reply, {:ok, %{data: "ledger data #{ledger.op_bal}"}}, socket}
+    ledger = Setup.get_ledger("1_2023_CASH")
+    {:reply, {:ok, %{data: "#{ledger.book_id} ledger #{ledger.name}"}}, socket}
   end
 end
