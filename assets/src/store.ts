@@ -17,31 +17,41 @@ channel
   });
 
 channel.onError(() => {
-  disconnected()
+  disconnected();
   console.log('closed');
 });
 
 export const presence = new Presence(channel);
 
+type Ledger = {
+  id: string;
+  name: string;
+  op_bal: number;
+};
+
 export type State = {
-  connected: boolean,
-  ledgers: [],
-  ledger: any
-}
+  connected: boolean;
+  ledgers: Ledger[];
+  ledger?: Ledger;
+};
 
 export const state = proxy<State>({
   connected: false,
   ledgers: [],
-  ledger: {},
+  ledger: undefined
 });
 
-export const connected = () => { state.connected = true }
-export const disconnected = () => { state.connected = false }
+export const connected = () => {
+  state.connected = true;
+};
+export const disconnected = () => {
+  state.connected = false;
+};
 
 export function getLedger(id: string) {
   channel
     .push('ledger:get', { id: id })
-    .receive('ok', (msg: {}) => state.ledger = msg)
+    .receive('ok', (msg: Ledger) => (state.ledger = msg))
     .receive('error', (msg: unknown) => console.error(msg))
     .receive('timeout', () => console.log('timedout'));
 }
