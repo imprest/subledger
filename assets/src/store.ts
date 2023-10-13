@@ -1,5 +1,5 @@
 import { Socket, Presence } from 'phoenix';
-import { proxy } from 'valtio/vanilla';
+import { proxy } from 'sveltio';
 
 const socket = new Socket('/socket', { params: { token: window.userToken } });
 socket.connect();

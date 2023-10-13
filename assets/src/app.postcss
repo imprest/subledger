@@ -1,0 +1,332 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-feature-settings:
+      'rling' 1,
+      'calt' 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+
+    --background: 0 0% 98%; /* zinc-50 */
+    --foreground: 240 5.3% 26.1%; /* zinc-700 */
+    --primary: 45 0.2 270; /* blue */
+    --primary-foreground: 240 4.8% 95.9%; /* zinc-100 */
+    --secondary: 40% 0.23 283; /* zinc-200 */
+    --secondary-foreground: 240 5.9% 10%; /* zinc-900 */
+    --error: 54% 0.22 29; /* rose-700 */
+    --error-foreground: 240 4.8% 95.9%; /* zinc-100 */
+    --accent: 240 3.7% 15.9%; /* zinc-800 */
+    --accent-foreground: 240 5.9% 90%; /* zinc-200 */
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 240 5.3% 26.1%; /* zinc-700 */
+    --border: 240 4.9% 83.9%; /* zinc-300 */
+    --radius: 0.3rem;
+  }
+
+  body {
+    color: rgb(74, 74, 74);
+  }
+
+  main {
+    margin-top: 2rem;
+  }
+
+  a {
+    @apply text-primary-focus;
+  }
+  a.secondary,
+  a.contrast {
+    @apply underline;
+  }
+
+  small {
+    @apply text-sm;
+  }
+  strong {
+    @apply text-gray-900;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold;
+  }
+
+  h1 {
+    @apply text-4xl text-gray-900;
+  }
+  h2 {
+    @apply text-3xl text-gray-900;
+  }
+  h3 {
+    @apply text-2xl text-gray-800;
+  }
+  h4 {
+    @apply text-xl text-gray-700;
+  }
+  h5 {
+    @apply text-lg text-gray-600;
+  }
+  h6 {
+    @apply text-base text-gray-500;
+  }
+
+  hgroup {
+    @apply mb-1;
+
+    > * {
+      @apply mb-0;
+    }
+    > *:last-child {
+      @apply text-gray-500 text-base pl-0.5;
+    }
+  }
+
+  [type='checkbox'],
+  [type='radio'] {
+    @apply border-2;
+  }
+  [type='checkbox'][type='switch'] {
+    @apply border-[3px];
+  }
+
+  progress,
+  [type='checkbox'],
+  [type='radio'],
+  [type='range'] {
+    @apply accent-primary;
+  }
+
+  .skip-link {
+    @apply fixed top-0 left-0 right-0 text-center p-2 transform-gpu ease-in-out duration-300 bg-gray-600 text-white z-30;
+    translate: 0 -100%;
+  }
+
+  .skip-link:focus {
+    translate: 0 0;
+  }
+
+  /* CONTENT */
+  main {
+    @apply h-full;
+    margin-top: var(--header-height);
+  }
+
+  iframe {
+    display: none;
+  }
+
+  select {
+    @apply py-1 pr-10 pl-2;
+  }
+
+  input[type='search'],
+  input[type='date'] {
+    @apply py-1;
+  }
+
+  pre,
+  code,
+  kbd,
+  samp {
+    font-family: 'Menlo', 'Consolas', 'Roboto Mono', 'Ubuntu Monospace', 'Noto Mono', 'Oxygen Mono',
+      'Liberation Mono', monospace, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+      'Noto Color Emoji';
+  }
+
+  kbd {
+    font-weight: bolder;
+  }
+
+  progress {
+    @apply inline-block appearance-none w-full h-2
+    mb-1 overflow-hidden border-0 rounded-sm bg-primary;
+  }
+
+  [dir='rtl'] {
+    @media (prefers-reduced-motion: no-preference) {
+      progress:indeterminate {
+        animation-direction: reverse;
+      }
+    }
+  }
+
+  @keyframes progress-indeterminate {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
+
+@layer components {
+  .header {
+    @apply fixed top-0 left-0 z-10 bg-white border-b border-gray-300 w-full flex;
+    height: var(--header-height);
+  }
+
+  .title {
+    @apply text-2xl;
+  }
+  .sub-title {
+    @apply text-base;
+  }
+
+  /* Navigations */
+  .nav {
+    position: fixed;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+  }
+
+  /* Section Wrappers */
+  .wrapper {
+    @apply px-2 max-w-7xl mx-auto mb-4;
+  }
+
+  .wrapper-full {
+    @apply px-2 max-w-none mb-4;
+  }
+
+  /* BUTTONS */
+  .btn {
+    @apply appearance-none content-center items-center
+      inline-flex mb-1 py-1 px-4 font-semibold shadow-sm rounded-sm
+      cursor-pointer outline-none
+      transition-colors duration-100
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+      disabled:opacity-50 disabled:pointer-events-none ring-offset-background
+      bg-primary text-primary-foreground;
+
+    &:is([aria-current], :hover, :focus-visible) {
+      @apply bg-primary-hover ring-primary-focus text-primary-foreground;
+    }
+
+    &:is(:active) {
+      @apply bg-primary-active;
+    }
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground;
+
+    &:is([aria-current], :hover, :focus-visible) {
+      @apply bg-secondary-hover ring-secondary-focus;
+    }
+
+    &:is(:active) {
+      @apply bg-secondary-active;
+    }
+  }
+
+  .btn-error {
+    @apply bg-error text-error-foreground;
+  }
+  .btn-warning {
+    @apply bg-warning text-warning-foreground;
+  }
+  .btn-info {
+    @apply bg-info text-info-foreground;
+  }
+  .btn-success {
+    @apply bg-success text-success-foreground;
+  }
+
+  /* TABS */
+  .tabs {
+    @apply mb-2 cursor-pointer flex items-stretch justify-between overflow-hidden overflow-x-auto whitespace-nowrap;
+
+    ul {
+      @apply flex items-center flex-grow flex-shrink-0 justify-start border-gray-200 border-b;
+    }
+
+    li a {
+      @apply flex text-base py-2 px-4 items-center justify-center -mb-px border-b;
+    }
+
+    a:hover {
+      @apply text-base text-red-600 border-red-600 border-b -mb-px;
+    }
+
+    li.is-active a {
+      @apply text-base flex py-2 px-4 items-center justify-center -mb-px text-red-600 border-b border-red-600;
+    }
+  }
+
+  /* TAGS */
+  .tags {
+    @apply items-center flex flex-wrap justify-start gap-1;
+  }
+
+  .tag {
+    @apply text-xs mb-2 text-gray-600 bg-gray-100 py-1 px-2 rounded shadow-sm;
+  }
+
+  /* TABLES */
+  .table {
+    @apply divide-y divide-solid divide-gray-300;
+    th {
+      @apply px-2 py-1 font-semibold text-gray-600 align-top cursor-pointer;
+    }
+    thead > tr {
+      @apply border-b-2 border-gray-500;
+    }
+    thead {
+      tr {
+        th:first-child {
+          @apply pl-2;
+        }
+        th:last-child {
+          @apply pr-2;
+        }
+      }
+    }
+    td {
+      @apply px-2 md:py-1;
+    }
+    tbody {
+      tr {
+        @apply align-top hover:bg-highlight print:border-b print:border-gray-600;
+        td:first-child {
+          @apply pl-2;
+        }
+        td:last-child {
+          @apply pr-2;
+        }
+      }
+    }
+
+    &.is-bordered td {
+      border-width: 1px;
+    }
+    &.is-bordered th {
+      border-width: 0px;
+    }
+    &.is-bordered tr {
+      &:last-child td,
+      th {
+        border-bottom-width: 1px;
+      }
+    }
+
+    &.is-striped {
+      tbody {
+        tr:nth-child(even) {
+          @apply hover:bg-highlight;
+          background-color: lightgoldenrodyellow;
+        }
+      }
+    }
+  }
+}
