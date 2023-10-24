@@ -3,6 +3,7 @@ defmodule SubledgerWeb.SubledgerChannel do
   use ChannelHandler.Router
 
   alias SubledgerWeb.Presence
+  alias Subledger.Setup
 
   event "ledger:get", SubledgerWeb.LedgerHandler, :get
 
@@ -34,6 +35,11 @@ defmodule SubledgerWeb.SubledgerChannel do
   def handle_in("shout", payload, socket) do
     broadcast(socket, "shout", payload)
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_in("ledgers:get", _payload, socket) do
+    {:reply, Setup.list_ledgers(socket.assigns.user_id), socket}
   end
 
   @impl true

@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 @layer base {
   :root {
@@ -27,14 +27,17 @@
     --card-foreground: 240 5.3% 26.1%; /* zinc-700 */
     --border: 240 4.9% 83.9%; /* zinc-300 */
     --radius: 0.3rem;
+
+    --header-height: 2.7rem;
   }
 
   body {
-    color: rgb(74, 74, 74);
+    color: hsl(0, 0%, 33%);
+    height: 100vh;
   }
 
-  main {
-    margin-top: 2rem;
+  #app {
+    height: 100vh;
   }
 
   a {
@@ -49,7 +52,7 @@
     @apply text-sm;
   }
   strong {
-    @apply text-gray-900;
+    @apply text-gray-700;
   }
 
   h1,
@@ -62,22 +65,22 @@
   }
 
   h1 {
-    @apply text-4xl text-gray-900;
+    @apply text-4xl text-gray-700;
   }
   h2 {
-    @apply text-3xl text-gray-900;
+    @apply text-3xl text-gray-700;
   }
   h3 {
-    @apply text-2xl text-gray-800;
+    @apply text-2xl text-gray-600;
   }
   h4 {
-    @apply text-xl text-gray-700;
+    @apply text-xl text-gray-500;
   }
   h5 {
-    @apply text-lg text-gray-600;
+    @apply text-lg text-gray-400;
   }
   h6 {
-    @apply text-base text-gray-500;
+    @apply text-base text-gray-400;
   }
 
   hgroup {
@@ -113,12 +116,6 @@
 
   .skip-link:focus {
     translate: 0 0;
-  }
-
-  /* CONTENT */
-  main {
-    @apply h-full;
-    margin-top: var(--header-height);
   }
 
   iframe {
@@ -171,23 +168,11 @@
 }
 
 @layer components {
-  .header {
-    @apply fixed top-0 left-0 z-10 bg-white border-b border-gray-300 w-full flex;
-    height: var(--header-height);
-  }
-
   .title {
     @apply text-2xl;
   }
   .sub-title {
     @apply text-base;
-  }
-
-  /* Navigations */
-  .nav {
-    position: fixed;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
   }
 
   /* Section Wrappers */

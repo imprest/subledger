@@ -9,10 +9,6 @@ module.exports = {
     '../lib/subledger_web/{components,controllers}/**/*.{heex,ex}'
   ],
   theme: {
-    container: {
-      center: true,
-      padding: '2rem'
-    },
     extend: {
       colors: {
         secondary: 'oklch(40% 0.23 283)',

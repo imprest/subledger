@@ -9,7 +9,6 @@ defmodule Subledger.Setup do
   alias Subledger.Setup
 
   def get_ledger(id) do
-    IO.inspect id
     Repo.get!(Setup.Ledger, id)
   end
 

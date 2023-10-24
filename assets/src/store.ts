@@ -48,6 +48,17 @@ export const disconnected = () => {
   state.connected = false;
 };
 
+export function getLedgers() {
+  channel
+    .push('ledgers:get', {})
+    .receive('ok', (msg: { ledgers: Ledger[] }) => {
+      console.log(msg);
+      state.ledgers = msg.ledgers;
+    })
+    .receive('error', (msg: unknown) => console.error(msg))
+    .receive('timeout', () => console.log('timedout'));
+}
+
 export function getLedger(id: string) {
   channel
     .push('ledger:get', { id: id })
