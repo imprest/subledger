@@ -46,7 +46,6 @@ defmodule Subledger.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:bandit, "~> 1.0-pre"},
-      {:channel_handler, "~> 0.6.1"},
       {:exsync, "~> 0.2.4", only: :dev}
     ]
   end
