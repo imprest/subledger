@@ -40,15 +40,14 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledger:get", %{"id" => _id}, socket) do
-    ledger = Setup.get_ledger("1_2023_CASH")
-    {:reply, {:ok, %{data: "#{ledger.book_id} ledger #{ledger.name}"}}, socket}
+  def handle_in("ledger:get", %{"id" => id}, socket) do
+    {:reply, Setup.get_ledger(id), socket}
   end
 
   @impl true
   def handle_info(:after_join, socket) do
     presence = Presence.get_by_key(socket, socket.assigns.name)
-    IO.inspect(presence, label: "Presence Data:")
+    # IO.inspect(presence, label: "Presence Data:")
 
     {:ok, _} =
       Presence.track(socket, socket.assigns.name, %{

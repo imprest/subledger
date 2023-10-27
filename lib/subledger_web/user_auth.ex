@@ -13,6 +13,8 @@ defmodule SubledgerWeb.UserAuth do
   @remember_me_cookie "_subledger_web_user_remember_me"
   @remember_me_options [sign: true, max_age: @max_age, same_site: "Lax"]
 
+  @moduledoc false
+
   @doc """
   Logs the user in.
 

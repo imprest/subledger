@@ -7,10 +7,24 @@ defmodule Subledger.Setup do
   import MySigils
   import Ecto.Query, warn: false
   alias Subledger.Repo
-  alias Subledger.Setup
 
-  def get_ledger(id) do
-    Repo.get!(Setup.Ledger, id)
+  def get_ledger(ledger_id) do
+    q = ~Q"""
+      SELECT COALESCE(to_json(j), '{}'::json)::text as ledger FROM (
+      SELECT id, name, code, is_gov, is_active, op_bal, 
+      tin, town_city, country_id, region, number, address_1, address_2, 
+      email, price_level, credit_limit, payment_terms, tags, book_id, currency_id
+        FROM ledgers where id = $1
+      ) j;
+    """
+
+    case Repo.query(q, [ledger_id]) do
+      {:ok, %{num_rows: 1, rows: rows}} ->
+        {:ok, %{ledger: Repo.json_frag(hd(rows))}}
+
+      {:error, Error} ->
+        Logger.error(Error)
+    end
   end
 
   def list_ledgers(user_id) do
@@ -30,8 +44,8 @@ defmodule Subledger.Setup do
       {:ok, %{num_rows: _cols, rows: rows}} ->
         {:ok, %{ledgers: Repo.json_frag(rows)}}
 
-      {:error, _} ->
-        Logger.error("Error in list_ledgers")
+      {:error, Error} ->
+        Logger.error(Error)
     end
   end
 end

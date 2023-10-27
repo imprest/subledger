@@ -52,7 +52,6 @@ export function getLedgers() {
   channel
     .push('ledgers:get', {})
     .receive('ok', (msg: { ledgers: Ledger[] }) => {
-      console.log(msg);
       state.ledgers = msg.ledgers;
     })
     .receive('error', (msg: unknown) => console.error(msg))
@@ -62,7 +61,7 @@ export function getLedgers() {
 export function getLedger(id: string) {
   channel
     .push('ledger:get', { id: id })
-    .receive('ok', (msg: Ledger) => (state.ledger = msg))
+    .receive('ok', (msg: { ledger: Ledger }) => (state.ledger = msg.ledger))
     .receive('error', (msg: unknown) => console.error(msg))
     .receive('timeout', () => console.log('timedout'));
 }
