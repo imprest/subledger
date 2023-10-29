@@ -25,8 +25,24 @@ export const presence = new Presence(channel);
 
 type Ledger = {
   id: string;
+  code: string;
   name: string;
   op_bal: number;
+  is_gov: boolean;
+  is_active: boolean;
+  tin: string;
+  address_1: string;
+  address_2: string;
+  town_or_city: string;
+  region: string;
+  country_id: string;
+  email: string;
+  price_level: string;
+  credit_limit: number;
+  payment_terms: number;
+  tags: string[];
+  book_id: string;
+  currency_id: string;
 };
 
 export type State = {
