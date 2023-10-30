@@ -23,7 +23,20 @@ channel.onError(() => {
 
 export const presence = new Presence(channel);
 
-type Ledger = {
+type Order = 'asc' | 'desc';
+type Status = 'idle' | 'loading' | 'loaded' | 'error' | 'timedout';
+
+export interface Store<T> {
+  status: Status;
+  error: string;
+  data: T;
+  updated_at?: Date;
+  sortOrder?: Order;
+  // eslint-disable-next-line
+  sortBy?: T extends any[] ? keyof any : keyof T;
+}
+
+export interface Ledger {
   id: string;
   code: string;
   name: string;
@@ -43,17 +56,24 @@ type Ledger = {
   tags: string[];
   book_id: string;
   currency_id: string;
-};
+}
 
 export type State = {
   connected: boolean;
-  ledgers: Ledger[];
+  ledgers: Store<Ledger[]>;
   ledger?: Ledger;
 };
 
 export const state = proxy<State>({
   connected: false,
-  ledgers: [],
+  ledgers: {
+    status: 'idle',
+    data: [],
+    updated_at: undefined,
+    sortOrder: 'asc',
+    sortBy: 'name',
+    error: ''
+  },
   ledger: undefined
 });
 
@@ -65,13 +85,18 @@ export const disconnected = () => {
 };
 
 export function getLedgers() {
+  state.ledgers.status = 'loading';
   channel
     .push('ledgers:get', {})
     .receive('ok', (msg: { ledgers: Ledger[] }) => {
-      state.ledgers = msg.ledgers;
+      state.ledgers.status = 'loaded';
+      state.ledgers.data = msg.ledgers;
     })
-    .receive('error', (msg: unknown) => console.error(msg))
-    .receive('timeout', () => console.log('timedout'));
+    .receive('error', (msg: string) => {
+      state.ledgers.status = 'error';
+      state.ledgers.error = msg;
+    })
+    .receive('timeout', () => (state.ledgers.status = 'timedout'));
 }
 
 export function getLedger(id: string) {
