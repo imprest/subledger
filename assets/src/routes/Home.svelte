@@ -3,18 +3,32 @@
   import { state, getLedger, getLedgers } from '../store';
   import { useSnapshot } from 'sveltio';
   import { moneyFmt } from '../utils';
+  import Modal from '../lib/Modal.svelte';
+
+  let isModalOpen = false;
 
   onMount(() => {
     getLedgers();
   });
 
   const snap = useSnapshot(state);
+
+  function ledgerDetails(id: string) {
+    isModalOpen = true;
+    getLedger(id);
+  }
 </script>
 
 <section>
   <div class="wrapper">
-    <div class="card text-lg">
-      <p class="bg-primary">{JSON.stringify($snap.ledger)}</p>
+    <div class="tabs">
+      <ul class="flex-row-reverse">
+        {#each $snap.books as book (book.id)}
+          <li title={book.period} on:click={() => alert(book.id)}>
+            <a href={`\\app\\${book.id}`}>{book.fin_year}</a>
+          </li>
+        {/each}
+      </ul>
     </div>
   </div>
 </section>
@@ -44,7 +58,7 @@
             <tr>
               <td class="text-center">{i + 1}</td>
               <td>{ledger.name}</td>
-              <td class="text-center" on:click={() => getLedger(ledger.id)}>{ledger.code}</td>
+              <td class="text-center" on:click={() => ledgerDetails(ledger.id)}>{ledger.code}</td>
               <td class="text-center">{ledger.region}</td>
               <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
             </tr>
@@ -54,3 +68,19 @@
     {/if}
   </div>
 </section>
+<Modal open={isModalOpen} on:close={() => (isModalOpen = false)}>
+  <section>
+    <div class="wrapper flex items-center justify-center">
+      {#if $snap.ledger}
+        <table class="table">
+          {#each Object.entries($snap.ledger) as [key, value]}
+            <tr>
+              <th class="text-right">{key}:</th>
+              <td>{value}</td>
+            </tr>
+          {/each}
+        </table>
+      {/if}
+    </div>
+  </section>
+</Modal>

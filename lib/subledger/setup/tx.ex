@@ -39,5 +39,10 @@ defmodule Subledger.Setup.Tx do
     tx
     |> cast(attrs, @fields)
     |> validate_required(@required)
+    |> validate_tx_types(@types)
+  end
+
+  defp validate_tx_types(tx, types) do
+    Enum.any?(tx, types)
   end
 end

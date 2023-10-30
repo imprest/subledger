@@ -3,7 +3,7 @@
   import { useSnapshot } from 'sveltio';
   import { path } from 'elegua';
   import Home from './routes/Home.svelte';
-  import Analysis from './routes/Analysis.svelte';
+  import Activity from './routes/Activity.svelte';
 
   const snap = useSnapshot(state);
 </script>
@@ -16,7 +16,7 @@
 <header
   class="header print:relative fixed top-0 left-0 z-30 border-b border-gray-300 w-full bg-white h-[--header-height]"
 >
-  <nav>
+  <nav class="wrapper">
     <div class="max-w-7xl mx-auto px-4 sm:px-2 lg:px-4">
       <div class="items-center flex">
         <div>
@@ -33,11 +33,11 @@
     </div>
   </nav>
 </header>
-<main class="h-full mt-[--header-height] print:mt-1">
+<main class="h-full mt-[--header-height] print:mt-1 pt-4">
   {#if $path === '/app' || $path === '/app/ledgers'}
     <Home />
-  {:else if $path === '/app/analysis'}
-    <Analysis />
+  {:else if $path === '/app/activity'}
+    <Activity />
   {:else}
     <div>Not Found</div>
   {/if}

@@ -35,6 +35,11 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
+  def handle_in("books:get", _payload, socket) do
+    {:reply, Setup.get_books(socket.assigns.org_id), socket}
+  end
+
+  @impl true
   def handle_in("ledgers:get", _payload, socket) do
     {:reply, Setup.list_ledgers(socket.assigns.user_id), socket}
   end
@@ -46,7 +51,7 @@ defmodule SubledgerWeb.SubledgerChannel do
 
   @impl true
   def handle_info(:after_join, socket) do
-    presence = Presence.get_by_key(socket, socket.assigns.name)
+    # presence = Presence.get_by_key(socket, socket.assigns.name)
     # IO.inspect(presence, label: "Presence Data:")
 
     {:ok, _} =

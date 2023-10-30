@@ -5,7 +5,6 @@ defmodule Subledger.Setup do
 
   require Logger
   import MySigils
-  import Ecto.Query, warn: false
   alias Subledger.Repo
 
   def get_ledger(ledger_id) do
@@ -43,6 +42,24 @@ defmodule Subledger.Setup do
     case Repo.query(q, [user_id]) do
       {:ok, %{num_rows: _cols, rows: rows}} ->
         {:ok, %{ledgers: Repo.json_frag(rows)}}
+
+      {:error, Error} ->
+        Logger.error(Error)
+    end
+  end
+
+  def get_books(org_id) do  
+    q = ~Q"""
+      SELECT COALESCE(json_agg(j), '[]'::json)::text as books FROM (
+        SELECT id, fin_year, period FROM books
+        WHERE org_id = $1
+        ORDER BY fin_year
+      ) j;
+    """
+
+    case Repo.query(q, [org_id]) do
+      {:ok, %{num_rows: _cols, rows: rows}} ->
+        {:ok, %{books: Repo.json_frag(rows)}}
 
       {:error, Error} ->
         Logger.error(Error)

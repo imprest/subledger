@@ -9,6 +9,7 @@ channel
   .join()
   .receive('ok', (resp: unknown) => {
     connected();
+    getBooks();
     console.log('Joined successfully', resp);
   })
   .receive('error', (resp: unknown) => {
@@ -58,14 +59,22 @@ export interface Ledger {
   currency_id: string;
 }
 
+interface Book {
+  id: string;
+  fin_year: number;
+  period: string;
+}
+
 export type State = {
   connected: boolean;
+  books: Book[];
   ledgers: Store<Ledger[]>;
   ledger?: Ledger;
 };
 
 export const state = proxy<State>({
   connected: false,
+  books: [],
   ledgers: {
     status: 'idle',
     data: [],
@@ -83,6 +92,14 @@ export const connected = () => {
 export const disconnected = () => {
   state.connected = false;
 };
+
+export function getBooks() {
+  channel
+    .push('books:get', {})
+    .receive('ok', (msg: { books: Book[] }) => (state.books = msg.books))
+    .receive('error', (msg: unknown) => console.error(msg))
+    .receive('timeout', () => console.log('timedout'));
+}
 
 export function getLedgers() {
   state.ledgers.status = 'loading';
