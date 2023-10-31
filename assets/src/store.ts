@@ -47,7 +47,7 @@ export interface Ledger {
   tin: string;
   address_1: string;
   address_2: string;
-  town_or_city: string;
+  town_city: string;
   region: string;
   country_id: string;
   email: string;

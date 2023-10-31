@@ -1,11 +1,19 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { state, getLedger, getLedgers } from '../store';
+  import type { Ledger } from '../store';
   import { useSnapshot } from 'sveltio';
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
+  import Autocomplete from '../lib/Autocomplete.svelte';
 
   let isModalOpen = false;
+  let text = '';
+  let selected = null;
+
+  $: if (text.length >= 2 && text.length <= 12) {
+    console.log(text);
+  }
 
   onMount(() => {
     getLedgers();
@@ -17,14 +25,46 @@
     isModalOpen = true;
     getLedger(id);
   }
+
+  function handleSelect(e: { detail: Ledger }) {
+    selected = e.detail;
+    text = selected.name;
+    console.log(e.detail);
+  }
 </script>
 
 <section>
   <div class="wrapper">
+    <Autocomplete
+      id="customer"
+      labelName="Filter Customers: "
+      placeholder="Cash"
+      bind:value={text}
+      on:select={handleSelect}
+      data={$snap.ledgers.data}
+      let:item
+    >
+      <div class="flex flex-start px-4 py-2">
+        <div class="flex-auto text-sm sm:overflow-x-auto">
+          {item.name}
+          <br />
+          <small class="text-xs pt">
+            <b>{item.code}</b>
+            <b>{item.town_city}</b>
+            <b>{item.region}</b>
+            <b>{item.is_gov ? 'GOV' : 'PVT'}</b>
+          </small>
+        </div>
+      </div>
+    </Autocomplete>
+  </div>
+</section>
+<section>
+  <div class="wrapper">
     <div class="tabs">
-      <ul class="flex-row-reverse">
+      <ul class="flex-row-reverse" role="menu">
         {#each $snap.books as book (book.id)}
-          <li title={book.period} on:click={() => alert(book.id)}>
+          <li title={book.period}>
             <a href={`\\app\\${book.id}`}>{book.fin_year}</a>
           </li>
         {/each}
