@@ -11,8 +11,7 @@ declare global {
   interface Window {
     userToken?: string;
   }
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface document {}
+  // interface document {}
 }
 
 declare module 'phoenix';

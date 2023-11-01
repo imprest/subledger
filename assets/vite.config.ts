@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
@@ -14,17 +13,6 @@ export default defineConfig(({ command }) => {
   }
 
   return {
-    resolve: {
-      alias: {
-        $store: path.resolve(__dirname, './src/store'),
-        $lib: path.resolve(__dirname, './src/lib'),
-        '$lib/*': path.resolve(__dirname, './src/lib/*'),
-        $components: path.resolve(__dirname, './src/lib/components'),
-        '$components/*': path.resolve(__dirname, './src/lib/components/*'),
-        $ui: path.resolve(__dirname, './src/lib/components/ui'),
-        '$ui/*': path.resolve(__dirname, './src/lib/components/ui/*')
-      }
-    },
     plugins: [svelte()],
     build: {
       target: 'esnext',

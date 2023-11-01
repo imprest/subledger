@@ -1,12 +1,7 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "paths": {
-      "$lib": ["../src/lib"],
-      "$lib/*": ["../src/lib/*"]
-    },
-    "types": ["node"],
+    "lib": ["ESNext", "dom", "dom.iterable"],
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -15,7 +10,17 @@
     "checkJs": true,
     "isolatedModules": true
   },
-  "include": ["./src/**/*.d.ts", "./src/**/*.js", "./src/**/*.ts", "./src/**/*.svelte"],
+  "include": [
+    "./src/**/*.d.ts",
+    "./src/**/*.js",
+    "./src/**/*.ts",
+    "./src/**/*.svelte",
+    "vite.config.ts",
+    ".eslintrc.cjs",
+    "tailwind.config.cjs",
+    "svelte.config.js",
+    "postcss.config.cjs"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

@@ -6,6 +6,7 @@
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
   import Autocomplete from '../lib/Autocomplete.svelte';
+  import { Info } from 'lucide-svelte';
 
   let isModalOpen = false;
   let text = '';
@@ -88,7 +89,6 @@
           <tr>
             <th>#</th>
             <th class="text-left">Name</th>
-            <th>Code</th>
             <th>Region</th>
             <th class="text-right">Balance</th>
           </tr>
@@ -97,8 +97,11 @@
           {#each $snap.ledgers.data as ledger, i (ledger.id)}
             <tr>
               <td class="text-center">{i + 1}</td>
-              <td>{ledger.name}</td>
-              <td class="text-center" on:click={() => ledgerDetails(ledger.id)}>{ledger.code}</td>
+              <td
+                >{ledger.name}<button class="float-right" on:click={() => ledgerDetails(ledger.id)}
+                  ><Info class="inline-block h-4 text-blue-600" /></button
+                ><br /><small>{ledger.code}</small>
+              </td>
               <td class="text-center">{ledger.region}</td>
               <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
             </tr>

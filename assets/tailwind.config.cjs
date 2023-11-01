@@ -1,5 +1,5 @@
 // const colors = require('tailwindcss/colors');
-const { fontFamily } = require('tailwindcss/defaultTheme');
+import { fontFamily } from 'tailwindcss/defaultTheme';
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -11,8 +11,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        secondary: 'oklch(40% 0.23 283)',
-        error: 'oklch(54% 0.22 29)',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
