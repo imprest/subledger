@@ -48,7 +48,7 @@ defmodule Subledger.Setup do
     end
   end
 
-  def get_books(org_id) do  
+  def get_books(org_id) do
     q = ~Q"""
       SELECT COALESCE(json_agg(j), '[]'::json)::text as books FROM (
         SELECT id, fin_year, period FROM books

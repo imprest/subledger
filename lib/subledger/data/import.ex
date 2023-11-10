@@ -248,8 +248,8 @@ defmodule Subledger.Data.Import do
                 _ -> String.to_atom(x["TR_TYPE"])
               end,
             amount: Decimal.new(x["TR_AMT"]),
-            updated_by_id: Map.get(ctx.user_ids, x["DR_LMU"], 1),
-            inserted_by_id: Map.get(ctx.user_ids, x["DR_LMU"], 1),
+            updated_by_id: 1,
+            inserted_by_id: 1,
             inserted_at: to_timestamp(x["TR_LMD"], x["TR_LMT"]),
             updated_at: to_timestamp(x["TR_LMD"], x["TR_LMT"])
           }
