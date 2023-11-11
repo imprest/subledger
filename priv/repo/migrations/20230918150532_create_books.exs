@@ -57,6 +57,9 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
       add :id, :text, primary_key: true
       add :org_id, :bigint, null: false
 
+      add :book_id, references(:books, with: [org_id: :org_id], match: :full, type: :string),
+        null: false
+
       add :ledger_id, references(:ledgers, with: [org_id: :org_id], match: :full, type: :string),
         null: false
 
@@ -73,8 +76,9 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
       add :updated_by_id, references(:users, with: [org_id: :org_id], match: :full), null: false
       add :is_deleted, :boolean, default: false, null: false
       add :verified_at, :date
-      add :verified_by_id, references(:users, with: [org_id: :org_id], match: :full)
+      add :verified_by_id, references(:users, with: [org_id: :org_id])
       add :note, :text
+      add :ref_id, :string
       timestamps()
     end
 

@@ -18,6 +18,7 @@ defmodule Subledger.Setup.Tx do
   @primary_key {:id, :string, autogenerate: false}
   schema "tx" do
     belongs_to :org, Subledger.Setup.Org, references: :org_id
+    belongs_to :book, Subledger.Setup.Book, type: :binary
     belongs_to :ledger, Subledger.Setup.Ledger, type: :binary
     field :date, :date
     field :type, :string, default: "invoice"
@@ -27,6 +28,7 @@ defmodule Subledger.Setup.Tx do
     field :cell_colour, :string, default: "#fff"
     field :is_deleted, :boolean, default: false
     field :note, :string
+    field :ref_id, :string
     belongs_to :inserted_by, Subledger.Accounts.User
     belongs_to :updated_by, Subledger.Accounts.User
     belongs_to :verified_by, Subledger.Accounts.User

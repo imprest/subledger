@@ -15,7 +15,7 @@ defmodule Subledger.Data.Import do
   }
   @default_date Date.from_iso8601!("2016-10-01")
   @default_time Time.from_iso8601!("08:00:00")
-  @default_datetime DateTime.new!(~D[2016-10-01], ~T[08:00:00], "Etc/UTC")
+  # @default_datetime DateTime.new!(~D[2016-10-01], ~T[08:00:00], "Etc/UTC")
   @base_fin_year 2016
 
   defp tx_dbf_files(year) do
@@ -141,10 +141,12 @@ defmodule Subledger.Data.Import do
               name: x["SL_DESC"],
               tin: "C000000000",
               address_1: x["SL_ADD1"],
+              address_2: x["SL_ADD2"],
               town_city: x["SL_ADD2"],
               country_id: "GHA",
               region: x["SL_GRP"],
               number: x["SL_PHONE"],
+              email: x["SL_EMAIL"],
               credit_limit: D.new(0),
               payment_terms: "Cash or Immediate Chq.",
               tags: [x["SL_MOBILE"]],
@@ -159,7 +161,6 @@ defmodule Subledger.Data.Import do
         end
       )
 
-    IO.inspect(ledgers)
     # Get list of current %{id => updated_at} ledgers
     db_ledgers =
       for x <-
@@ -195,7 +196,7 @@ defmodule Subledger.Data.Import do
   def import_tx(ctx, dbf) do
     book_id = ctx.book_id
 
-    tx =
+    txs =
       Dbase.parse(
         dbf,
         [
@@ -216,138 +217,107 @@ defmodule Subledger.Data.Import do
           "TR_LMT"
         ],
         fn x ->
-          tmp = %{
-            book_id: book_id,
-            date: to_date(x["TR_DATE"]),
-            narration:
-              case x["TR_TYPE"] == "SA" or x["TR_TYPE"] == "SB" do
-                true ->
-                  x["TR_NOC"] <> "/" <> Integer.to_string(x["TR_NON"])
+          if x["TR_GLCD"] === "203000" do
+            tmp = %{
+              book_id: book_id,
+              org_id: ctx.org_id,
+              date: to_date(x["TR_DATE"]),
+              narration:
+                case x["TR_TYPE"] == "SA" or x["TR_TYPE"] == "SB" do
+                  true ->
+                    x["TR_NOC"] <> "/" <> Integer.to_string(x["TR_NON"])
 
-                false ->
-                  if String.length(String.trim(x["TR_DESC"])) == 0 do
-                    if String.length(String.trim(x["TR_QTY"])) != 0 do
-                      clean_string(String.trim(x["TR_QTY"]))
+                  false ->
+                    if String.length(String.trim(x["TR_DESC"])) == 0 do
+                      if String.length(String.trim(x["TR_QTY"])) != 0 do
+                        clean_string(String.trim(x["TR_QTY"]))
+                      else
+                        " "
+                      end
                     else
-                      " "
+                      if String.length(String.trim(x["TR_QTY"])) != 0 do
+                        clean_string(String.trim(x["TR_DESC"] <> " | " <> x["TR_QTY"]))
+                      else
+                        clean_string(String.trim(x["TR_DESC"]))
+                      end
                     end
+                end,
+              ref_id:
+                old_tx_id(x["TR_DATE"], x["TR_TYPE"], x["TR_CODE"], x["TR_NOC"], x["TR_NON"]),
+              dr_cr: x["TR_DRCR"],
+              type: x["TR_TYPE"],
+              ledger_id: book_id <> "_" <> x["TR_SLCD"],
+              amount:
+                case x["TR_DRCR"] do
+                  "D" ->
+                    Decimal.new(x["TR_AMT"])
+
+                  "C" ->
+                    D.mult(Decimal.new(x["TR_AMT"]), -1)
+
+                  _ ->
+                    IO.inspect(x)
+                    Decimal.new(x["TR_AMT"])
+                end,
+              updated_by_id: 1,
+              inserted_by_id: 1,
+              inserted_at: to_timestamp(x["TR_LMD"], x["TR_LMT"]),
+              updated_at: to_timestamp(x["TR_LMD"], x["TR_LMT"]),
+              verified_by_id: nil
+            }
+
+            case tmp.type do
+              "SA" ->
+                Map.put(tmp, :type, "invoice")
+
+              "SB" ->
+                Map.put(tmp, :type, "invoice")
+
+              "BP" ->
+                Map.put(tmp, :type, "rtn chq")
+
+              "BR" ->
+                if String.contains?(tmp.ref_id, " CA ") do
+                  Map.put(tmp, :type, "cash")
+                else
+                  if String.contains?(tmp.narration, "momo") do
+                    Map.put(tmp, :type, "momo")
                   else
-                    if String.length(String.trim(x["TR_QTY"])) != 0 do
-                      clean_string(String.trim(x["TR_DESC"] <> " | " <> x["TR_QTY"]))
+                    if String.contains?(tmp.narration, "cash") do
+                      Map.put(tmp, :type, "cash")
                     else
-                      clean_string(String.trim(x["TR_DESC"]))
+                      Map.put(tmp, :type, "chq")
                     end
                   end
-              end,
-            ref_id: old_tx_id(x["TR_DATE"], x["TR_TYPE"], x["TR_CODE"], x["TR_NOC"], x["TR_NON"]),
-            sr_no: x["TR_SRNO"],
-            dr_cr: x["TR_DRCR"],
-            type:
-              case x["TR_TYPE"] do
-                "SB" -> :SA
-                _ -> String.to_atom(x["TR_TYPE"])
-              end,
-            amount: Decimal.new(x["TR_AMT"]),
-            updated_by_id: 1,
-            inserted_by_id: 1,
-            inserted_at: to_timestamp(x["TR_LMD"], x["TR_LMT"]),
-            updated_at: to_timestamp(x["TR_LMD"], x["TR_LMT"])
-          }
+                end
 
-          case tmp.type do
-            :SA ->
-              Map.merge(tmp, %{
-                cr_ledger_id: tmp.book_id <> "_301000",
-                dr_ledger_id:
-                  if String.length(String.trim(x["TR_SLCD"])) !== 0 do
-                    tmp.book_id <> "_" <> x["TR_GLCD"] <> "_" <> x["TR_SLCD"]
+              "JV" ->
+                if tmp.dr_cr === "D" do
+                  Map.put(tmp, :type, "write-off")
+                else
+                  if String.contains?(tmp.narration, "tcc") do
+                    Map.put(tmp, :type, "tcc")
                   else
-                    tmp.book_id <> "_" <> x["TR_GLCD"]
+                    Map.put(tmp, :type, "discount")
                   end
-              })
-
-            :BR ->
-              Map.merge(tmp, %{
-                cr_ledger_id:
-                  if String.length(String.trim(x["TR_SLCD"])) !== 0 do
-                    tmp.book_id <> "_" <> x["TR_GLCD"] <> "_" <> x["TR_SLCD"]
-                  else
-                    tmp.book_id <> "_" <> x["TR_GLCD"]
-                  end,
-                dr_ledger_id: ctx.bank_codes[x["TR_CODE"]]
-              })
-
-            :BP ->
-              Map.merge(tmp, %{
-                dr_ledger_id:
-                  if String.length(String.trim(x["TR_SLCD"])) !== 0 do
-                    tmp.book_id <> "_" <> x["TR_GLCD"] <> "_" <> x["TR_SLCD"]
-                  else
-                    tmp.book_id <> "_" <> x["TR_GLCD"]
-                  end,
-                cr_ledger_id: ctx.bank_codes[x["TR_CODE"]]
-              })
-
-            # Be very careful in modifying CR and CP code
-            :CR ->
-              Map.merge(
-                tmp,
-                %{
-                  cr_ledger_id: "106999",
-                  dr_ledger_id: ctx.bank_codes[x["TR_CODE"]]
-                }
-              )
-
-            # Be very careful in modifying CR and CP code
-            :CP ->
-              Map.merge(
-                tmp,
-                %{
-                  cr_ledger_id: ctx.bank_codes[x["TR_CODE"]],
-                  dr_ledger_id: "106999"
-                }
-              )
-
-            :JV ->
-              Map.merge(
-                tmp,
-                %{
-                  dr_ledger_id:
-                    if String.length(String.trim(x["TR_SLCD"])) !== 0 do
-                      tmp.book_id <> "_" <> x["TR_GLCD"] <> "_" <> x["TR_SLCD"]
-                    else
-                      tmp.book_id <> "_" <> x["TR_GLCD"]
-                    end,
-                  cr_ledger_id:
-                    if String.length(String.trim(x["TR_SLCD"])) !== 0 do
-                      tmp.book_id <> "_" <> x["TR_GLCD"] <> "_" <> x["TR_SLCD"]
-                    else
-                      tmp.book_id <> "_" <> x["TR_GLCD"]
-                    end
-                }
-              )
+                end
+            end
+          else
+            nil
           end
         end
       )
 
-    # This is tricky code so check the private function for details
-    tx = consolidate_CR_CP_into_CO(tx)
-
-    anomaly =
-      Enum.filter(tx, fn x -> x.dr_ledger_id === "106999" || x.cr_ledger_id === "106999" end)
-
-    IO.inspect(anomaly, label: "ANOMALY")
-
     # Get list of current ref_id, update_at tx
     db_tx =
       for x <-
-            Repo.all(from(i in "tx", select: [:id, :ref_id, :updated_at])),
+            Repo.all(from(i in "tx", select: [:id, :ref_id, :updated_at]), org_id: ctx.org_id),
           into: %{},
           do: {x.ref_id, x}
 
     # Determine tx to be inserted or updated i.e. upserted
     upsert_tx =
-      Enum.reduce(tx, [], fn x, acc ->
+      Enum.reduce(txs, [], fn x, acc ->
         case db_tx[x.ref_id] do
           nil ->
             [x | acc]
@@ -362,13 +332,14 @@ defmodule Subledger.Data.Import do
         end
       end)
 
-    # Delete ids that are in upsert_tx -> also present in db
-    # This is required since we want to cascade delete tx_entries associated with updated tx
-    ids = for x <- upsert_tx, Map.get(x, :id) !== nil, do: x.id
-    Repo.query!("DELETE FROM tx WHERE id = ANY($1)", [ids])
-
     last_tx_no =
-      case Repo.one(from(t in "tx", select: max(t.id), where: t.book_id == ^book_id)) do
+      case Repo.one(
+             from(t in "tx",
+               select: max(t.id),
+               where: t.book_id == ^book_id
+             ),
+             skip_org_id: true
+           ) do
         nil -> 1
         id -> String.split(id, "_") |> Enum.at(2) |> String.to_integer() |> Kernel.+(1)
       end
@@ -381,7 +352,7 @@ defmodule Subledger.Data.Import do
       end)
       |> Enum.sort_by(& &1.ref_id)
       |> Enum.map_reduce(last_tx_no, fn x, acc ->
-        x = Map.drop(x, [:amount, :dr_cr, :sr_no, :cr_ledger_id, :dr_ledger_id])
+        x = Map.drop(x, [:dr_cr])
 
         if Map.has_key?(x, :id) do
           {x, acc}
@@ -396,154 +367,25 @@ defmodule Subledger.Data.Import do
 
     # Upsert tx
     {rows, _} =
-      Repo.insert_all(Fin.Tx, tx_with_ids,
+      Repo.insert_all(Setup.Tx, tx_with_ids,
         conflict_target: [:id],
         on_conflict: {:replace_all_except, [:id]}
       )
 
-    ctx = %{ctx | upserted: Map.put(ctx.upserted, Path.basename(dbf, ".dbf"), rows)}
-
-    # Get list of current ref_id -> tx.id as tx_refs
-    tx_refs =
-      for x <- tx_with_ids, reduce: %{} do
-        acc -> Map.put_new(acc, x.ref_id, x.id)
-      end
-
-    # Filter tx_entries that were upserted from tx_refs
-    tx_entries =
-      for x <- tx, Map.has_key?(tx_refs, x.ref_id), do: Map.put_new(x, :id, tx_refs[x.ref_id])
-
-    tx_entries =
-      tx_entries
-      |> Enum.group_by(& &1.id)
-      |> Enum.reduce([], fn {_, v}, acc ->
-        if Enum.count(v) === 1 do
-          y = hd(v)
-
-          [
-            %{
-              book_id: y.book_id,
-              tx_id: y.id,
-              sr_no: 2,
-              ledger_id: y.cr_ledger_id,
-              amount: D.mult(-1, y.amount)
-            },
-            %{
-              book_id: y.book_id,
-              tx_id: y.id,
-              sr_no: 1,
-              ledger_id: y.dr_ledger_id,
-              amount: y.amount
-            }
-            | acc
-          ]
-        else
-          case Map.get(hd(v), :type) do
-            :JV ->
-              [
-                v
-                |> Enum.reverse()
-                |> Enum.map(fn x ->
-                  %{
-                    book_id: x.book_id,
-                    tx_id: x.id,
-                    sr_no: x.sr_no,
-                    ledger_id: if(x.dr_cr === "D", do: x.dr_ledger_id, else: x.cr_ledger_id),
-                    amount: if(x.dr_cr === "D", do: x.amount, else: D.mult(-1, x.amount))
-                  }
-                end)
-                | acc
-              ]
-
-            _ ->
-              entries =
-                v
-                |> Enum.reverse()
-                |> Enum.map(fn x ->
-                  %{
-                    book_id: x.book_id,
-                    tx_id: x.id,
-                    sr_no: x.sr_no,
-                    ledger_id: if(x.dr_cr === "D", do: x.dr_ledger_id, else: x.cr_ledger_id),
-                    amount: if(x.dr_cr === "D", do: x.amount, else: D.mult(-1, x.amount))
-                  }
-                end)
-
-              sr_no_max = Enum.map(v, & &1.sr_no) |> Enum.max()
-              sr_no_max = sr_no_max + 1
-              x = hd(v)
-
-              sum =
-                for x <- Enum.map(v, & &1.amount), reduce: D.new(0) do
-                  acc -> D.add(x, acc)
-                end
-
-              extra_tx_entry = %{
-                book_id: x.book_id,
-                tx_id: x.id,
-                sr_no: sr_no_max,
-                ledger_id: if(x.dr_cr === "D", do: x.cr_ledger_id, else: x.dr_ledger_id),
-                amount: if(x.dr_cr === "D", do: D.mult(-1, sum), else: sum)
-              }
-
-              [
-                entries,
-                extra_tx_entry
-                | acc
-              ]
-          end
-        end
-      end)
-      |> List.flatten()
-      |> Enum.sort_by(& &1.tx_id, :asc)
-
-    # Upsert tx entries
-    {r, _} = Repo.insert_all(Fin.TxEntry, tx_entries)
-    {:ok, %{ctx | upserted: Map.put(ctx.upserted, Path.basename(dbf, ".dbf") <> "_entries", r)}}
-  end
-
-  # This is tricky code so be very careful in modifing
-  # It basically merges Contra entries of type CR & CP into a new type CO transaction
-  # We are using the fact that CR entry from dbf will have it's correspoding CP entry maybe next
-  # or few records afterwards and visa-versa.
-  # If it is not CR/CP entry just add to acc without modifying the tx
-  # CO will have 1 transaction_id but 2 tx_entries to show the contra transaction
-  defp consolidate_CR_CP_into_CO(tx) do
-    consolidate_CR_CP_into_CO(tx, nil, [])
-  end
-
-  defp consolidate_CR_CP_into_CO([], nil, acc), do: acc
-
-  defp consolidate_CR_CP_into_CO([h | t], contra, acc) do
-    if h.type === :CR || h.type === :CP do
-      case contra do
-        nil ->
-          consolidate_CR_CP_into_CO(t, h, acc)
-
-        _ ->
-          if h.type === :CR do
-            x = h |> Map.replace!(:cr_ledger_id, contra.cr_ledger_id) |> Map.replace!(:type, :CO)
-            consolidate_CR_CP_into_CO(t, nil, [x | acc])
-          else
-            x = h |> Map.replace!(:dr_ledger_id, contra.dr_ledger_id) |> Map.replace!(:type, :CO)
-            consolidate_CR_CP_into_CO(t, nil, [x | acc])
-          end
-      end
-    else
-      consolidate_CR_CP_into_CO(t, contra, [h | acc])
-    end
+    # Upsert tx
+    {:ok, %{ctx | upserted: Map.put(ctx.upserted, Path.basename(dbf, ".dbf"), rows)}}
   end
 
   defp gen_id(book_id, number),
     do: "#{book_id}_#{String.pad_leading(Integer.to_string(number), 10, "0")}"
 
-  defp to_bool("T"), do: true
-  defp to_bool("Y"), do: true
-  defp to_bool("F"), do: false
-  defp to_bool("N"), do: false
-  defp to_bool(""), do: false
-  defp nil?(""), do: nil
-  defp nil?(string), do: string
+  # defp to_bool("T"), do: true
+  # defp to_bool("Y"), do: true
+  # defp to_bool("F"), do: false
+  # defp to_bool("N"), do: false
+  # defp to_bool(""), do: false
+  # defp nil?(""), do: nil
+  # defp nil?(string), do: string
 
   defp to_timestamp(lmd, lmt), do: DateTime.new!(to_date(lmd), to_time(lmt))
 

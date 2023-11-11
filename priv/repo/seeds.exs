@@ -59,6 +59,17 @@ Repo.update!(Accounts.User.confirm_changeset(u))
 
 Repo.insert_all(Setup.Book, [
   %{
+    id: "1_2022",
+    org_id: org_id,
+    fin_year: 2022,
+    currency_id: "GHS",
+    period: [~D[2022-10-01], ~D[2023-10-01]],
+    inserted_by_id: user_id,
+    updated_by_id: user_id,
+    inserted_at: inserted_at,
+    updated_at: updated_at
+  },
+  %{
     id: "1_2023",
     org_id: org_id,
     fin_year: 2023,
