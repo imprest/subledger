@@ -20,18 +20,18 @@ module.exports = {
         current: 'currentColor',
         highlight: 'hsl(var(--table-hover))',
         primary: {
-          DEFAULT: 'oklch(var(--primary))',
+          DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
-          hover: 'hsl(var(--primary-hover))',
-          focus: 'hsl(var(--primary-focus))',
-          active: 'hsl(var(--primary-active))'
+          hover: 'hsl(var(--primary))',
+          focus: 'hsl(var(--primary))',
+          active: 'hsl(var(--primary))'
         },
         secondary: {
-          DEFAULT: 'oklch(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-          hover: 'hsl(var(--secondary-hover))',
-          focus: 'hsl(var(--secondary-focus))',
-          active: 'hsl(var(--secondary-active))'
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary))',
+          hover: 'hsl(var(--secondary))',
+          focus: 'hsl(var(--secondary))',
+          active: 'hsl(var(--secondary))'
         },
         error: {
           DEFAULT: 'oklch(var(--error))',

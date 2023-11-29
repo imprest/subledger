@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Filter } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
   export let id = '';
   export let value = '';
@@ -64,8 +65,16 @@
 
 <div class="flex flex-grow items-center gap-1">
   <label for={id}>{labelName}</label>
-  <div class="relative flex flex-grow">
-    <input {id} on:keydown={keyCode} bind:value class="flex-grow" type="search" {placeholder} />
+  <div class="relative flex flex-grow items-center box-shadow">
+    <span class="pointer-events-none absolute pl-1"><Filter class="h-4 w-6" /></span>
+    <input
+      {id}
+      on:keydown={keyCode}
+      bind:value
+      class="flex-grow pl-8"
+      type="search"
+      {placeholder}
+    />
     <div
       class="block min-w-full max-w-full left-0 top-full pt-1 absolute z-20"
       class:hidden={isOpen != true}

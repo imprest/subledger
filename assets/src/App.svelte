@@ -1,9 +1,10 @@
 <script lang="ts">
   import { state } from './store';
   import { useSnapshot } from 'sveltio';
-  import { path } from 'elegua';
+  import { path, resolve, params } from 'elegua';
   import Home from './routes/Home.svelte';
   import Activity from './routes/Activity.svelte';
+  import Ledger from './routes/Ledger.svelte';
 
   const snap = useSnapshot(state);
 </script>
@@ -18,15 +19,18 @@
 >
   <nav>
     <div class="max-w-7xl mx-auto px-4 sm:px-2 lg:px-4">
-      <div class="items-center flex">
+      <div class="flex items-baseline">
         <div>
           <img class="h-8 w-8" src="/images/logo.svg" alt="Logo" />
         </div>
-        <div
-          class="ml-4 min-w-0 flex items-baseline space-x-1 overflow-y-hidden overflow-x-auto scroller grow"
-        >
-          <a class="pr-2 py-2" href="/app/ledgers">Ledgers</a>
-          <a class="pr-2 py-2" href="/app/analysis">Analysis</a>
+        <div class="p-1 min-w-0 flex space-x-1 overflow-y-hidden overflow-x-auto scroller grow">
+          <a
+            class="p-2"
+            href="/app/ledgers"
+            class:selected={$path === '/app' || $path === '/app/ledgers'}>Ledgers</a
+          >
+          <a class="p-2" href="/app/analysis" class:selected={$path === '/app/analysis'}>Analysis</a
+          >
         </div>
         <div>Logout</div>
       </div>
@@ -36,9 +40,17 @@
 <main class="h-full pt-[calc(var(--header-height)+0.5rem)] print:pt-1">
   {#if $path === '/app' || $path === '/app/ledgers'}
     <Home />
+  {:else if resolve($path, '/app/ledger/:id')}
+    <Ledger id={$params['id']} />
   {:else if $path === '/app/activity'}
     <Activity />
   {:else}
     <div>Not Found</div>
   {/if}
 </main>
+
+<style>
+  .selected {
+    font-weight: bold;
+  }
+</style>

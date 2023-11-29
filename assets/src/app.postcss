@@ -13,9 +13,10 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 
+    --default: 0 0% 21%;
     --background: 0 0% 98%; /* zinc-50 */
     --foreground: 240 5.3% 26.1%; /* zinc-700 */
-    --primary: 45 0.2 270; /* blue */
+    --primary: 226 71% 40%; /* blue */
     --primary-foreground: 240 4.8% 95.9%; /* zinc-100 */
     --secondary: 40 0.23 283;
     --secondary-foreground: 240 5.9% 10%; /* zinc-900 */
@@ -32,7 +33,7 @@
   }
 
   body {
-    color: hsl(0, 0%, 21%);
+    color: hsl(--var(--default));
     height: 100vh;
   }
 
@@ -41,7 +42,7 @@
   }
 
   a {
-    @apply text-primary-focus;
+    @apply text-primary;
   }
   a.secondary,
   a.contrast {
@@ -241,11 +242,11 @@
     }
 
     a:hover {
-      @apply text-base text-red-600 border-red-600 border-b -mb-px;
+      @apply text-base text-primary border-primary border-b -mb-px;
     }
 
     li.is-active a {
-      @apply text-base flex py-2 px-4 items-center justify-center -mb-px text-red-600 border-b border-red-600;
+      @apply text-base flex py-2 px-4 items-center justify-center -mb-px text-primary border-b border-primary;
     }
   }
 
@@ -260,20 +261,20 @@
 
   /* TABLES */
   .table {
-    @apply divide-y divide-solid divide-gray-300;
     th {
       @apply px-2 py-1 font-semibold text-gray-600 align-top cursor-pointer;
     }
-    thead > tr {
-      @apply border-b-2 border-gray-500;
-    }
     thead {
       tr {
+        @apply border-b-gray-800;
         th:first-child {
           @apply pl-2;
         }
         th:last-child {
           @apply pr-2;
+        }
+        th {
+          @apply border-b-gray-800;
         }
       }
     }
@@ -282,7 +283,7 @@
     }
     tbody {
       tr {
-        @apply align-top hover:bg-highlight print:border-b print:border-gray-600;
+        @apply align-top hover:bg-gray-200 print:border-b print:border-gray-600;
         td:first-child {
           @apply pl-2;
         }
@@ -308,7 +309,7 @@
     &.is-striped {
       tbody {
         tr:nth-child(even) {
-          @apply hover:bg-highlight;
+          @apply hover:bg-gray-200;
           background-color: lightgoldenrodyellow;
         }
       }
