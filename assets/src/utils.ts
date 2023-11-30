@@ -42,3 +42,12 @@ export function compareValues(key: string, order = 'asc') {
     return order == 'desc' ? comparison * -1 : comparison;
   };
 }
+
+export function debounce(callback: (...args: unknown[]) => unknown, wait = 300) {
+  let timeout: ReturnType<typeof setTimeout>;
+
+  return (...args: unknown[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => callback(...args), wait);
+  };
+}

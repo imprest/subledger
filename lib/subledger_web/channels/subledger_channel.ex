@@ -13,6 +13,7 @@ defmodule SubledgerWeb.SubledgerChannel do
     # if authorized?(payload) do
     if socket.assigns.user_id === String.to_integer(user_id) do
       Subledger.Repo.put_org_id(socket.assigns.org_id)
+      socket = assign(socket, :books, Setup.get_books_list(socket.assigns.org_id))
       {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
@@ -40,8 +41,21 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
+  def handle_in("ledgers:get", %{"book_id" => book_id}, socket) do
+    case book_id do
+      "" ->
+        book_id = hd(socket.assigns.books)
+        {:reply, Setup.list_ledgers(socket.assigns.user_id, book_id), socket}
+
+      _ ->
+        {:reply, Setup.list_ledgers(socket.assigns.user_id, book_id), socket}
+    end
+  end
+
+  @impl true
   def handle_in("ledgers:get", _payload, socket) do
-    {:reply, Setup.list_ledgers(socket.assigns.user_id), socket}
+    book_id = hd(socket.assigns.books)
+    {:reply, Setup.list_ledgers(socket.assigns.user_id, book_id), socket}
   end
 
   @impl true

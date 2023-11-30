@@ -40,6 +40,8 @@
 <main class="h-full pt-[calc(var(--header-height)+0.5rem)] print:pt-1">
   {#if $path === '/app' || $path === '/app/ledgers'}
     <Home />
+  {:else if resolve($path, '/app/ledgers/:book_id')}
+    <Home book_id={$params['book_id']} />
   {:else if resolve($path, '/app/ledger/:id')}
     <Ledger id={$params['id']} />
   {:else if $path === '/app/activity'}

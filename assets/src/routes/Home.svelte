@@ -2,29 +2,17 @@
   import { onMount } from 'svelte';
   import { state, getLedger, getLedgers, type Ledger } from '../store';
   import { useSnapshot } from 'sveltio';
-  import { moneyFmt } from '../utils';
+  import { debounce, moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
   import { Info, Eye } from 'lucide-svelte';
 
+  export let book_id: string = '';
   let isModalOpen = false;
   let text = '';
   let filter: Ledger[] = [];
 
-  $: {
-    let match = text.toLowerCase();
-    filter = $snap.ledgers.data.filter((ledger: Ledger) => {
-      if (text.length < 1) {
-        return true;
-      } else {
-        return (
-          ledger.name.toLowerCase().includes(match) || ledger.code.toLowerCase().startsWith(match)
-        );
-      }
-    });
-  }
-
-  onMount(() => {
-    getLedgers();
+  onMount((book_id: string) => {
+    getLedgers(book_id);
   });
 
   const snap = useSnapshot(state);
@@ -34,6 +22,22 @@
     getLedger(id);
   }
 
+  function filterLedgers() {
+    if (text.trim().length >= 2) {
+      let match = text.toLowerCase();
+      filter = $snap.ledgers.data.filter((ledger: Ledger) => {
+        return (
+          ledger.name.toLowerCase().includes(match) || ledger.code.toLowerCase().startsWith(match)
+        );
+      });
+    } else {
+      filter = $snap.ledgers.data;
+    }
+  }
+
+  $: if ($snap.ledgers.status == 'loaded') {
+    filter = $snap.ledgers.data;
+  }
   // function handleSelect(e: { detail: Ledger }) {
   //   selected = e.detail;
   //   text = selected.name;
@@ -88,6 +92,7 @@
         type="search"
         class="flex-grow pl-2 border-gray-500 border"
         bind:value={text}
+        on:keyup={debounce(filterLedgers, 120)}
       />
     </div>
   </div>

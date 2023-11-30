@@ -5,7 +5,9 @@ defmodule Subledger.Setup do
 
   require Logger
   import MySigils
+  alias Subledger.Setup.Book
   alias Subledger.Repo
+  import Ecto.Query, only: [from: 2]
 
   def get_ledger(ledger_id) do
     q = ~Q"""
@@ -26,7 +28,7 @@ defmodule Subledger.Setup do
     end
   end
 
-  def list_ledgers(user_id) do
+  def list_ledgers(user_id, book_id) do
     q = ~Q"""
       SELECT COALESCE(json_agg(j), '[]'::json)::text as ledgers FROM (
         WITH scope AS (
@@ -35,17 +37,23 @@ defmodule Subledger.Setup do
         )
         SELECT l.*, s.role FROM ledgers l
         LEFT JOIN scope s on s.ledger_id = l.id
+        WHERE book_id = $2
         ORDER BY l.name
       ) j;
     """
 
-    case Repo.query(q, [user_id]) do
+    case Repo.query(q, [user_id, book_id]) do
       {:ok, %{num_rows: _cols, rows: rows}} ->
         {:ok, %{ledgers: Repo.json_frag(rows)}}
 
       {:error, Error} ->
         Logger.error(Error)
     end
+  end
+
+  def get_books_list(org_id) do
+    q = from b in Book, where: b.org_id == ^org_id, select: b.id, order_by: [desc: b.fin_year]
+    Repo.all(q, org_id: org_id)
   end
 
   def get_books(org_id) do

@@ -101,12 +101,13 @@ export function getBooks() {
     .receive('timeout', () => console.log('timedout'));
 }
 
-export function getLedgers() {
+export function getLedgers(book_id: string) {
   state.ledgers.status = 'loading';
   channel
-    .push('ledgers:get', {})
+    .push('ledgers:get', { book_id: book_id })
     .receive('ok', (msg: { ledgers: Ledger[] }) => {
       state.ledgers.status = 'loaded';
+      console.log(msg.ledgers.length);
       state.ledgers.data = msg.ledgers;
     })
     .receive('error', (msg: string) => {
