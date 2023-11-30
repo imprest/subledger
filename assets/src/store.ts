@@ -9,7 +9,6 @@ channel
   .join()
   .receive('ok', (resp: unknown) => {
     connected();
-    getBooks();
     console.log('Joined successfully', resp);
   })
   .receive('error', (resp: unknown) => {
@@ -68,6 +67,7 @@ interface Book {
 export type State = {
   connected: boolean;
   books: Book[];
+  book_id: string;
   ledgers: Store<Ledger[]>;
   ledger?: Ledger;
 };
@@ -75,6 +75,7 @@ export type State = {
 export const state = proxy<State>({
   connected: false,
   books: [],
+  book_id: '_',
   ledgers: {
     status: 'idle',
     data: [],
@@ -94,20 +95,28 @@ export const disconnected = () => {
 };
 
 export function getBooks() {
+  if (state.books.length > 0) return;
   channel
     .push('books:get', {})
-    .receive('ok', (msg: { books: Book[] }) => (state.books = msg.books))
+    .receive('ok', (msg: { books: Book[] }) => {
+      state.books = msg.books;
+      state.book_id = msg.books[0].id;
+    })
     .receive('error', (msg: unknown) => console.error(msg))
     .receive('timeout', () => console.log('timedout'));
 }
 
 export function getLedgers(book_id: string) {
+  if (state.ledgers.status === 'loaded' && state.book_id === book_id) return;
+
   state.ledgers.status = 'loading';
+  if (book_id !== '') {
+    state.book_id = book_id;
+  }
   channel
     .push('ledgers:get', { book_id: book_id })
     .receive('ok', (msg: { ledgers: Ledger[] }) => {
       state.ledgers.status = 'loaded';
-      console.log(msg.ledgers.length);
       state.ledgers.data = msg.ledgers;
     })
     .receive('error', (msg: string) => {

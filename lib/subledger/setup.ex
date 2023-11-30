@@ -61,7 +61,7 @@ defmodule Subledger.Setup do
       SELECT COALESCE(json_agg(j), '[]'::json)::text as books FROM (
         SELECT id, fin_year, period FROM books
         WHERE org_id = $1
-        ORDER BY fin_year
+        ORDER BY fin_year desc
       ) j;
     """
 

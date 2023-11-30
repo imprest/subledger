@@ -14,6 +14,9 @@ dependencies:
   phoenix_html:
     specifier: file:../deps/phoenix_html
     version: file:../deps/phoenix_html
+  svelte-pilot:
+    specifier: ^0.6.1
+    version: 0.6.1(svelte@4.2.7)
   sveltio:
     specifier: ^1.0.10
     version: 1.0.10(valtio@1.12.1)
@@ -46,9 +49,6 @@ devDependencies:
   autoprefixer:
     specifier: ^10.4.16
     version: 10.4.16(postcss@8.4.31)
-  elegua:
-    specifier: ^2.2.2
-    version: 2.2.2
   eslint-config-prettier:
     specifier: ^9.0.0
     version: 9.0.0(eslint@8.54.0)
@@ -848,6 +848,10 @@ packages:
     resolution: {integrity: sha512-xrE//a3O7TP0vaJ8ikzkD2c2NgcVUvsEe2IvFTntV4Yd1Z9FVzh+gW+enX96L0psrbaFMcVcH2l90xNuGDWc8w==}
     dev: true
 
+  /cast-string@0.6.4:
+    resolution: {integrity: sha512-lcizm+ZFpgljMGx2EZjw+S8ezgxwBpU893yTFODQkiL6Eld7cvwYgeVVx2pQSGMI2ZuvJfrKXI7vYjzOUi6a3A==}
+    dev: false
+
   /chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -984,10 +988,6 @@ packages:
 
   /electron-to-chromium@1.4.597:
     resolution: {integrity: sha512-0XOQNqHhg2YgRVRUrS4M4vWjFCFIP2ETXcXe/0KIQBjXE9Cpy+tgzzYfuq6HGai3hWq0YywtG+5XK8fyG08EjA==}
-    dev: true
-
-  /elegua@2.2.2:
-    resolution: {integrity: sha512-Vev6i5gSz1n6+3V6wxBli4+AnkI0GEkLTAG7qtiSJqmA7y9DR79ZcD9bWWuqP56CtADFV7nEX4bQWDDmf1Z+iA==}
     dev: true
 
   /es6-promise@3.3.1:
@@ -1485,6 +1485,10 @@ packages:
     dependencies:
       p-locate: 5.0.0
     dev: true
+
+  /lodash-es@4.17.21:
+    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+    dev: false
 
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
@@ -2084,6 +2088,17 @@ packages:
       svelte: 4.2.7
     dev: true
 
+  /svelte-pilot@0.6.1(svelte@4.2.7):
+    resolution: {integrity: sha512-skxDc4AYXScXOzTUhDvm2sLLfb4AUCbJvlYm/M2b2gCAvQMiTbxlEQBA6bkdIqhR13qtfwmul/51I8+Si8BrQA==}
+    peerDependencies:
+      svelte: ^4
+    dependencies:
+      cast-string: 0.6.4
+      lodash-es: 4.17.21
+      svelte: 4.2.7
+      url-router: 13.0.0
+    dev: false
+
   /svelte-preprocess@5.1.1(postcss@8.4.31)(svelte@4.2.7)(typescript@5.3.2):
     resolution: {integrity: sha512-p/Dp4hmrBW5mrCCq29lEMFpIJT2FZsRlouxEc5qpbOmXRbaFs7clLs8oKPwD3xCFyZfv1bIhvOzpQkhMEVQdMw==}
     engines: {node: '>= 14.10.0'}
@@ -2268,6 +2283,10 @@ packages:
     dependencies:
       punycode: 2.3.1
     dev: true
+
+  /url-router@13.0.0:
+    resolution: {integrity: sha512-ePA6wkquLJfX+mjEcFvFzdLx/PuthtUN0u6eqK/EIux8iQY7Ky03UTCyerDqlvA5lgyImtwNbtTIjp1a1/VtKQ==}
+    dev: false
 
   /use-sync-external-store@1.2.0(react@18.2.0):
     resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}

@@ -15,6 +15,7 @@
     "lucide-svelte": "^0.293.0",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",
+    "svelte-pilot": "^0.6.1",
     "sveltio": "^1.0.10",
     "valtio": "^1.12.1"
   },
@@ -27,7 +28,6 @@
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "autoprefixer": "^10.4.16",
-    "elegua": "^2.2.2",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-svelte": "^2.35.1",
     "postcss": "^8.4.31",

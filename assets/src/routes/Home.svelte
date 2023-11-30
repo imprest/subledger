@@ -1,21 +1,25 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { state, getLedger, getLedgers, type Ledger } from '../store';
   import { useSnapshot } from 'sveltio';
   import { debounce, moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
-  import { Info, Eye } from 'lucide-svelte';
+  import { Info } from 'lucide-svelte';
+  import { Link } from 'svelte-pilot';
 
   export let book_id: string = '';
   let isModalOpen = false;
   let text = '';
   let filter: Ledger[] = [];
 
-  onMount((book_id: string) => {
-    getLedgers(book_id);
-  });
-
   const snap = useSnapshot(state);
+
+  // onMount(() => {
+  //   if (book_id === '') {
+  //     getLedgers($snap.book_id);
+  //   } else {
+  //     getLedgers(book_id);
+  //   }
+  // });
 
   function ledgerDetails(id: string) {
     isModalOpen = true;
@@ -33,6 +37,10 @@
     } else {
       filter = $snap.ledgers.data;
     }
+  }
+
+  $: {
+    getLedgers(book_id);
   }
 
   $: if ($snap.ledgers.status == 'loaded') {
@@ -75,8 +83,8 @@
     <div class="tabs">
       <ul class="flex-row-reverse" role="menu">
         {#each $snap.books as book (book.id)}
-          <li title={book.period}>
-            <a href={`\\app\\${book.id}`}>{book.fin_year}</a>
+          <li title={book.period} class:is-active={$snap.book_id === book.id}>
+            <Link to={`/ledgers?fin_year=${book.id}`}>{book.fin_year}</Link>
           </li>
         {/each}
       </ul>
@@ -124,14 +132,11 @@
                 <button on:click={() => ledgerDetails(ledger.id)}
                   ><Info class="inline-block h-4 text-blue-600" /></button
                 >
-                {ledger.name}
+                <Link to={`/ledgers/${encodeURIComponent(ledger.id)}`}>{ledger.name}</Link>
                 <ul class="tags inline-block pl-2">
                   <li class="tag inline bg-orange-200">{ledger.code}</li>
                   <li class="tag inline bg-blue-200">{ledger.region}</li>
                 </ul>
-                <a class="float-right" href="/app/ledger/{ledger.id}"
-                  ><Eye class="inline-block h-4 text-blue-600" /></a
-                >
               </td>
               <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
             </tr>

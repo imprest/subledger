@@ -1,9 +1,12 @@
+import { ClientApp } from 'svelte-pilot';
 import './app.postcss';
-import App from './App.svelte';
+import router from './router';
 
-const app = new App({
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  target: document.getElementById('app')!
-});
-
-export default app;
+router.start(
+  () =>
+    new ClientApp({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      target: document.getElementById('app') as HTMLElement,
+      props: { router }
+    })
+);
