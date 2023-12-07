@@ -1,5 +1,5 @@
 import { Router } from 'svelte-pilot';
-import { getBooks } from './store';
+import { getBooks } from './store.svelte';
 
 export default new Router({
   base: '/app',

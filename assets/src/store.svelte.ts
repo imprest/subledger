@@ -1,5 +1,4 @@
 import { Socket, Presence } from 'phoenix';
-import { proxy } from 'sveltio';
 
 const socket = new Socket('/socket', { params: { token: window.userToken } });
 socket.connect();
@@ -64,7 +63,7 @@ interface Book {
   period: string;
 }
 
-export type State = {
+export type appState = {
   connected: boolean;
   books: Book[];
   book_id: string;
@@ -72,7 +71,7 @@ export type State = {
   ledger?: Ledger;
 };
 
-export const state = proxy<State>({
+export const appState = $state<appState>({
   connected: false,
   books: [],
   book_id: '_',
@@ -88,48 +87,48 @@ export const state = proxy<State>({
 });
 
 export const connected = () => {
-  state.connected = true;
+  appState.connected = true;
 };
 export const disconnected = () => {
-  state.connected = false;
+  appState.connected = false;
 };
 
 export function getBooks() {
-  if (state.books.length > 0) return;
+  if (appState.books.length > 0) return;
   channel
     .push('books:get', {})
     .receive('ok', (msg: { books: Book[] }) => {
-      state.books = msg.books;
-      state.book_id = msg.books[0].id;
+      appState.books = msg.books;
+      appState.book_id = msg.books[0].id;
     })
     .receive('error', (msg: unknown) => console.error(msg))
     .receive('timeout', () => console.log('timedout'));
 }
 
 export function getLedgers(book_id: string) {
-  if (state.ledgers.status === 'loaded' && state.book_id === book_id) return;
+  if (appState.ledgers.status === 'loaded' && appState.book_id === book_id) return;
 
-  state.ledgers.status = 'loading';
+  appState.ledgers.status = 'loading';
   if (book_id !== '') {
-    state.book_id = book_id;
+    appState.book_id = book_id;
   }
   channel
     .push('ledgers:get', { book_id: book_id })
     .receive('ok', (msg: { ledgers: Ledger[] }) => {
-      state.ledgers.status = 'loaded';
-      state.ledgers.data = msg.ledgers;
+      appState.ledgers.status = 'loaded';
+      appState.ledgers.data = msg.ledgers;
     })
     .receive('error', (msg: string) => {
-      state.ledgers.status = 'error';
-      state.ledgers.error = msg;
+      appState.ledgers.status = 'error';
+      appState.ledgers.error = msg;
     })
-    .receive('timeout', () => (state.ledgers.status = 'timedout'));
+    .receive('timeout', () => (appState.ledgers.status = 'timedout'));
 }
 
 export function getLedger(id: string) {
   channel
     .push('ledger:get', { id: id })
-    .receive('ok', (msg: { ledger: Ledger }) => (state.ledger = msg.ledger))
+    .receive('ok', (msg: { ledger: Ledger }) => (appState.ledger = msg.ledger))
     .receive('error', (msg: unknown) => console.error(msg))
     .receive('timeout', () => console.log('timedout'));
 }

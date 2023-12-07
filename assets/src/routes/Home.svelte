@@ -1,51 +1,38 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
-  import { state, getLedger, getLedgers, type Ledger } from '../store';
-  import { useSnapshot } from 'sveltio';
+  import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
   import { debounce, moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
   import { Info } from 'lucide-svelte';
   import { Link } from 'svelte-pilot';
 
-  export let book_id: string = '';
-  let isModalOpen = false;
-  let text = '';
-  let filter: Ledger[] = [];
-
-  const snap = useSnapshot(state);
-
-  // onMount(() => {
-  //   if (book_id === '') {
-  //     getLedgers($snap.book_id);
-  //   } else {
-  //     getLedgers(book_id);
-  //   }
-  // });
+  let { book_id = '' } = $props();
+  let isModalOpen = $state(false);
+  let text = $state('');
+  let filter: Ledger[] = $state([]);
 
   function ledgerDetails(id: string) {
     isModalOpen = true;
     getLedger(id);
   }
 
-  function filterLedgers() {
+  let ledgersStatus = $derived(appState.ledgers.status);
+
+  $effect.pre(() => getLedgers(book_id));
+
+  $effect(() => {
     if (text.trim().length >= 2) {
       let match = text.toLowerCase();
-      filter = $snap.ledgers.data.filter((ledger: Ledger) => {
+      filter = appState.ledgers.data.filter((ledger: Ledger) => {
         return (
           ledger.name.toLowerCase().includes(match) || ledger.code.toLowerCase().startsWith(match)
         );
       });
     } else {
-      filter = $snap.ledgers.data;
+      filter = appState.ledgers.data;
     }
-  }
-
-  $: {
-    getLedgers(book_id);
-  }
-
-  $: if ($snap.ledgers.status == 'loaded') {
-    filter = $snap.ledgers.data;
-  }
+  });
   // function handleSelect(e: { detail: Ledger }) {
   //   selected = e.detail;
   //   text = selected.name;
@@ -82,8 +69,8 @@
   <div class="wrapper">
     <div class="tabs">
       <ul class="flex-row-reverse" role="menu">
-        {#each $snap.books as book (book.id)}
-          <li title={book.period} class:is-active={$snap.book_id === book.id}>
+        {#each appState.books as book (book.id)}
+          <li title={book.period} class:is-active={appState.book_id === book.id}>
             <Link to={`/ledgers?fin_year=${book.id}`}>{book.fin_year}</Link>
           </li>
         {/each}
@@ -100,22 +87,21 @@
         type="search"
         class="flex-grow pl-2 border-gray-500 border"
         bind:value={text}
-        on:keyup={debounce(filterLedgers, 120)}
       />
     </div>
   </div>
 </section>
 <section>
   <div class="wrapper">
-    {#if $snap.ledgers.status === 'idle'}
+    {#if ledgersStatus === 'idle'}
       <div>Idle</div>
-    {:else if $snap.ledgers.status === 'loading'}
+    {:else if ledgersStatus === 'loading'}
       <div>Loading...</div>
-    {:else if $snap.ledgers.status === 'timedout'}
+    {:else if ledgersStatus === 'timedout'}
       <div>Request Timed Out</div>
-    {:else if $snap.ledgers.status === 'error'}
-      <div>Error occurred: {$snap.ledgers.error}</div>
-    {:else if $snap.ledgers.status === 'loaded'}
+    {:else if ledgersStatus === 'error'}
+      <div>Error occurred: {appState.ledgers.error}</div>
+    {:else if ledgersStatus === 'loaded'}
       <table class="table w-full is-bordered is-striped">
         <thead>
           <tr>
@@ -149,14 +135,16 @@
 <Modal open={isModalOpen} on:close={() => (isModalOpen = false)}>
   <section>
     <div class="wrapper flex items-center justify-center">
-      {#if $snap.ledger}
+      {#if appState.ledger}
         <table class="table">
-          {#each Object.entries($snap.ledger) as [key, value]}
-            <tr>
-              <th class="text-right">{key}:</th>
-              <td>{value}</td>
-            </tr>
-          {/each}
+          <tbody>
+            {#each Object.entries(appState.ledger) as [key, value]}
+              <tr>
+                <th class="text-right">{key}:</th>
+                <td>{value}</td>
+              </tr>
+            {/each}
+          </tbody>
         </table>
       {/if}
     </div>

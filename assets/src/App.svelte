@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { state } from './store';
-  import { useSnapshot } from 'sveltio';
+  import { appState } from './store.svelte';
   import { Link, View } from 'svelte-pilot';
-
-  const snap = useSnapshot(state);
 </script>
 
-{#if !$snap.connected}
+{#if !appState.connected}
   <div title="In Off-line mode" class="fixed bottom-0 right-3 text-red-600 text-4xl cursor-pointer">
     •
   </div>
