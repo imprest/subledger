@@ -35,11 +35,18 @@ export interface Store<T> {
   sortBy?: T extends any[] ? keyof any : keyof T;
 }
 
+export interface Tx {
+  date: string;
+  amount: number;
+  narration: string;
+}
+
 export interface Ledger {
   id: string;
   code: string;
   name: string;
   op_bal: number;
+  cl_bal?: number;
   is_gov: boolean;
   is_active: boolean;
   tin: string;
@@ -55,6 +62,7 @@ export interface Ledger {
   tags: string[];
   book_id: string;
   currency_id: string;
+  txs: Tx[];
 }
 
 interface Book {

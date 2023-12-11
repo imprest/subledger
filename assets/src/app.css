@@ -29,7 +29,7 @@
     --border: 240 4.9% 83.9%; /* zinc-300 */
     --radius: 0.3rem;
 
-    --header-height: 2.7rem;
+    --header-height: 2.6rem;
   }
 
   body {
@@ -41,7 +41,7 @@
     height: 100vh;
   }
 
-  a {
+  a:hover {
     @apply text-primary;
   }
   a.secondary,

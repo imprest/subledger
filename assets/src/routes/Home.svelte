@@ -19,7 +19,19 @@
 
   let ledgersStatus = $derived(appState.ledgers.status);
 
-  $effect.pre(() => getLedgers(book_id));
+  $effect(() => {
+    if (book_id === '') {
+      book_id = appState.book_id;
+    }
+
+    if (ledgersStatus === 'idle') {
+      getLedgers(book_id);
+    }
+
+    if (ledgersStatus === 'loaded' && book_id !== appState.book_id) {
+      getLedgers(book_id);
+    }
+  });
 
   $effect(() => {
     if (text.trim().length >= 2) {
@@ -107,7 +119,8 @@
           <tr>
             <th>#</th>
             <th class="text-left">Name</th>
-            <th class="text-right">Balance</th>
+            <th class="text-right">Opening</th>
+            <th class="text-right">Closing</th>
           </tr>
         </thead>
         <tbody>
@@ -125,6 +138,7 @@
                 </ul>
               </td>
               <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
+              <td class="text-right">{moneyFmt(ledger.cl_bal)}</td>
             </tr>
           {/each}
         </tbody>

@@ -34,10 +34,16 @@ defmodule Subledger.Setup do
         WITH scope AS (
           SELECT ledger_id, role FROM permissions
           WHERE user_id = $1
+        ),
+        txs AS (
+          SELECT tx.ledger_id, SUM(tx.amount) as changes
+          FROM tx
+          WHERE book_id = $2
+          GROUP BY tx.ledger_id
         )
-        SELECT l.*, s.role FROM ledgers l
-        LEFT JOIN scope s on s.ledger_id = l.id
-        WHERE book_id = $2
+        SELECT l.id, l.code, l.name, l.region, l.op_bal, (l.op_bal+t.changes) as cl_bal FROM ledgers l, txs t
+
+        WHERE book_id = $2 AND l.id = t.ledger_id
         ORDER BY l.name
       ) j;
     """
