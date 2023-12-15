@@ -2,7 +2,7 @@
 
 <script lang="ts">
   import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
-  import { debounce, moneyFmt } from '../utils';
+  import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
   import { Info } from 'lucide-svelte';
   import { Link } from 'svelte-pilot';
@@ -18,6 +18,7 @@
   }
 
   let ledgersStatus = $derived(appState.ledgers.status);
+  let ledgers = $derived(appState.ledgers.data);
 
   $effect(() => {
     if (book_id === '') {
@@ -36,13 +37,16 @@
   $effect(() => {
     if (text.trim().length >= 2) {
       let match = text.toLowerCase();
-      filter = appState.ledgers.data.filter((ledger: Ledger) => {
-        return (
-          ledger.name.toLowerCase().includes(match) || ledger.code.toLowerCase().startsWith(match)
-        );
-      });
+      filter = ledgers
+        ? ledgers.filter((ledger: Ledger) => {
+            return (
+              ledger.name.toLowerCase().includes(match) ||
+              ledger.code.toLowerCase().startsWith(match)
+            );
+          })
+        : [];
     } else {
-      filter = appState.ledgers.data;
+      filter = ledgers ? ledgers : [];
     }
   });
   // function handleSelect(e: { detail: Ledger }) {
@@ -118,7 +122,7 @@
         <table class="table w-full is-bordered is-striped">
           <thead>
             <tr>
-              <th>#</th>
+              <th class="text-right">#</th>
               <th class="text-left">Name</th>
               <th class="text-right">Opening</th>
               <th class="text-right">Closing</th>
@@ -127,12 +131,13 @@
           <tbody>
             {#each filter as ledger, i (ledger.id)}
               <tr>
-                <td class="text-center">{i + 1}</td>
+                <td class="text-right">{i + 1}</td>
                 <td>
                   <Link to={`/ledgers/${encodeURIComponent(ledger.id)}`}>{ledger.name}</Link>
                   <ul class="tags inline-block pl-2">
                     <li class="tag inline bg-orange-200">{ledger.code}</li>
                     <li class="tag inline bg-blue-200">{ledger.region}</li>
+                    <li class="tag inline bg-purple-300">{ledger.is_gov ? 'GOV' : 'PVT'}</li>
                   </ul>
                   <button on:click={() => ledgerDetails(ledger.id)}
                     ><Info class="inline-block h-4 text-blue-600" /></button

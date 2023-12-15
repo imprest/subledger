@@ -130,7 +130,7 @@ defmodule Subledger.Data.Import do
               is_active: true,
               currency_id: "GHS",
               is_gov:
-                if x["SL_FAX"] == "GOV" do
+                if x["SL_FAX"] === "GOV" do
                   true
                 else
                   false

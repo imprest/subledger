@@ -252,11 +252,12 @@
 
   /* TAGS */
   .tags {
-    @apply items-center flex flex-wrap justify-start gap-1;
+    @apply flex flex-wrap justify-start gap-1;
   }
 
   .tag {
-    @apply text-xs mb-2 text-gray-600 bg-gray-100 py-1 px-2 rounded shadow-sm;
+    @apply text-gray-600 bg-gray-100 py-1 px-2 rounded shadow-sm align-middle;
+    font-size: 0.7rem;
   }
 
   /* TABLES */

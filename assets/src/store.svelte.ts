@@ -42,6 +42,7 @@ export interface Tx {
   type: string;
   narration: string;
   amount: number;
+  bal: number;
   text_colour: string;
   cell_colour: string;
   ref_id: string;
