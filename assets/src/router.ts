@@ -18,9 +18,9 @@ export default new Router({
           props: (route) => ({ book_id: route.query.string('fin_year') })
         },
         {
-          path: '/ledgers/:id',
+          path: '/ledgers/:ledger_id',
           component: () => import('./routes/Ledger.svelte'),
-          props: (route) => ({ id: route.params.string('id') })
+          props: (route) => ({ id: route.params.string('ledger_id') })
         },
         {
           path: '/analysis',

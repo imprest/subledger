@@ -11,10 +11,28 @@ defmodule Subledger.Setup do
 
   def get_ledger(ledger_id) do
     q = ~Q"""
-      SELECT COALESCE(to_json(j), '{}'::json)::text as ledger FROM (
-      SELECT id, name, code, is_gov, is_active, op_bal, 
-      tin, town_city, country_id, region, number, address_1, address_2, 
-      email, price_level, credit_limit, payment_terms, tags, book_id, currency_id
+      SELECT row_to_json(j)::text as ledger 
+      FROM (
+        WITH op_bal AS (
+          SELECT op_bal FROM ledgers WHERE id = $1
+        ),
+        txs AS (
+          SELECT *,
+          CASE WHEN amount > 0 THEN amount ELSE NULL END AS debit,
+          CASE WHEN amount < 0 THEN ABS(amount) ELSE NULL END AS credit,
+          o.op_bal + (SUM(amount) OVER(ORDER BY date, id)) AS bal
+          FROM tx, op_bal o WHERE ledger_id = $1
+          ORDER BY date, id
+        ),
+        total_debit AS (SELECT COALESCE(SUM(debit), 0) as total_debit FROM txs),
+        total_credit AS (SELECT COALESCE(SUM(credit), 0) as total_credit FROM txs)
+        SELECT id, name, code, is_gov, is_active, op_bal, 
+        tin, town_city, country_id, region, number, address_1, address_2, 
+          email, price_level, credit_limit, payment_terms, tags, book_id, currency_id,
+        (SELECT total_debit FROM total_debit) AS total_debit,
+        (SELECT total_credit FROM total_credit) AS total_credit,
+        (SELECT op_bal+(SELECT total_debit FROM total_debit)-(SELECT total_credit FROM total_credit)) AS cl_bal,
+        (SELECT COALESCE(json_agg(p), '[]'::json) FROM (SELECT * from txs) p) AS txs
         FROM ledgers where id = $1
       ) j;
     """

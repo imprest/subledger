@@ -114,45 +114,47 @@
     {:else if ledgersStatus === 'error'}
       <div>Error occurred: {appState.ledgers.error}</div>
     {:else if ledgersStatus === 'loaded'}
-      <table class="table w-full is-bordered is-striped">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th class="text-left">Name</th>
-            <th class="text-right">Opening</th>
-            <th class="text-right">Closing</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each filter as ledger, i (ledger.id)}
+      <div class="overflow-x-auto">
+        <table class="table w-full is-bordered is-striped">
+          <thead>
             <tr>
-              <td class="text-center">{i + 1}</td>
-              <td>
-                <button on:click={() => ledgerDetails(ledger.id)}
-                  ><Info class="inline-block h-4 text-blue-600" /></button
-                >
-                <Link to={`/ledgers/${encodeURIComponent(ledger.id)}`}>{ledger.name}</Link>
-                <ul class="tags inline-block pl-2">
-                  <li class="tag inline bg-orange-200">{ledger.code}</li>
-                  <li class="tag inline bg-blue-200">{ledger.region}</li>
-                </ul>
-              </td>
-              <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
-              <td class="text-right">{moneyFmt(ledger.cl_bal)}</td>
+              <th>#</th>
+              <th class="text-left">Name</th>
+              <th class="text-right">Opening</th>
+              <th class="text-right">Closing</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {#each filter as ledger, i (ledger.id)}
+              <tr>
+                <td class="text-center">{i + 1}</td>
+                <td>
+                  <Link to={`/ledgers/${encodeURIComponent(ledger.id)}`}>{ledger.name}</Link>
+                  <ul class="tags inline-block pl-2">
+                    <li class="tag inline bg-orange-200">{ledger.code}</li>
+                    <li class="tag inline bg-blue-200">{ledger.region}</li>
+                  </ul>
+                  <button on:click={() => ledgerDetails(ledger.id)}
+                    ><Info class="inline-block h-4 text-blue-600" /></button
+                  >
+                </td>
+                <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
+                <td class="text-right">{moneyFmt(ledger.cl_bal)}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     {/if}
   </div>
 </section>
 <Modal open={isModalOpen} on:close={() => (isModalOpen = false)}>
   <section>
     <div class="wrapper flex items-center justify-center">
-      {#if appState.ledger}
+      {#if appState.ledger.data}
         <table class="table">
           <tbody>
-            {#each Object.entries(appState.ledger) as [key, value]}
+            {#each Object.entries(appState.ledger.data) as [key, value]}
               <tr>
                 <th class="text-right">{key}:</th>
                 <td>{value}</td>

@@ -1,8 +1,9 @@
 defmodule SubledgerWeb.SubledgerChannel do
+  @moduledoc "Main interface for client api"
   use SubledgerWeb, :channel
 
-  alias SubledgerWeb.Presence
   alias Subledger.Setup
+  alias SubledgerWeb.Presence
 
   @impl true
   def join("subledger:lobby", _payload, socket) do

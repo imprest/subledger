@@ -28,7 +28,7 @@ type Status = 'idle' | 'loading' | 'loaded' | 'error' | 'timedout';
 export interface Store<T> {
   status: Status;
   error: string;
-  data: T;
+  data?: T;
   updated_at?: Date;
   sortOrder?: Order;
   // eslint-disable-next-line
@@ -36,9 +36,22 @@ export interface Store<T> {
 }
 
 export interface Tx {
+  id: string;
+  ledger_id: string;
   date: string;
-  amount: number;
+  type: string;
   narration: string;
+  amount: number;
+  text_colour: string;
+  cell_colour: string;
+  ref_id: string;
+  note: string;
+  inserted_by: string;
+  updated_by: string;
+  verified_by: string;
+  inserted_at: string;
+  updated_at: string;
+  verified_at: string;
 }
 
 export interface Ledger {
@@ -46,7 +59,9 @@ export interface Ledger {
   code: string;
   name: string;
   op_bal: number;
-  cl_bal?: number;
+  total_debit: number;
+  total_credit: number;
+  cl_bal: number;
   is_gov: boolean;
   is_active: boolean;
   tin: string;
@@ -76,7 +91,7 @@ export type appState = {
   books: Book[];
   book_id: string;
   ledgers: Store<Ledger[]>;
-  ledger?: Ledger;
+  ledger: Store<Ledger>;
 };
 
 export const appState = $state<appState>({
@@ -91,7 +106,12 @@ export const appState = $state<appState>({
     sortBy: 'name',
     error: ''
   },
-  ledger: undefined
+  ledger: {
+    status: 'idle',
+    data: undefined,
+    updated_at: undefined,
+    error: ''
+  }
 });
 
 export const connected = () => {
@@ -134,11 +154,20 @@ export function getLedgers(book_id: string) {
 }
 
 export function getLedger(id: string) {
+  if (appState.ledger.status === 'loaded' && appState.ledger.data?.id === id) return;
+  appState.ledger.status = 'loading';
+
   channel
     .push('ledger:get', { id: id })
-    .receive('ok', (msg: { ledger: Ledger }) => (appState.ledger = msg.ledger))
-    .receive('error', (msg: unknown) => console.error(msg))
-    .receive('timeout', () => console.log('timedout'));
+    .receive('ok', (msg: { ledger: Ledger }) => {
+      appState.ledger.status = 'loaded';
+      appState.ledger.data = msg.ledger;
+    })
+    .receive('error', (msg: string) => {
+      appState.ledger.status = 'error';
+      appState.ledger.error = msg;
+    })
+    .receive('timeout', () => (appState.ledger.status = 'timedout'));
 }
 
 export default socket;
