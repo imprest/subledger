@@ -5,8 +5,8 @@ defmodule Subledger.Setup do
 
   require Logger
   import MySigils
-  alias Subledger.Setup.Book
   alias Subledger.Repo
+  alias Subledger.Setup.Book
   import Ecto.Query, only: [from: 2]
 
   def get_ledger(ledger_id) do
@@ -18,20 +18,18 @@ defmodule Subledger.Setup do
         ),
         txs AS (
           SELECT *,
-          CASE WHEN amount > 0 THEN amount ELSE NULL END AS debit,
-          CASE WHEN amount < 0 THEN ABS(amount) ELSE NULL END AS credit,
           o.op_bal + (SUM(amount) OVER(ORDER BY date, id)) AS bal
           FROM tx, op_bal o WHERE ledger_id = $1
           ORDER BY date, id
         ),
-        total_debit AS (SELECT COALESCE(SUM(debit), 0) as total_debit FROM txs),
-        total_credit AS (SELECT COALESCE(SUM(credit), 0) as total_credit FROM txs)
+        total_debit AS (SELECT COALESCE(SUM(amount), 0) as total_debit FROM txs WHERE amount >= 0),
+        total_credit AS (SELECT COALESCE(SUM(amount), 0) as total_credit FROM txs WHERE amount < 0)
         SELECT id, name, code, is_gov, is_active, op_bal, 
         tin, town_city, country_id, region, number, address_1, address_2, 
           email, price_level, credit_limit, payment_terms, tags, book_id, currency_id,
         (SELECT total_debit FROM total_debit) AS total_debit,
         (SELECT total_credit FROM total_credit) AS total_credit,
-        (SELECT op_bal+(SELECT total_debit FROM total_debit)-(SELECT total_credit FROM total_credit)) AS cl_bal,
+        (SELECT op_bal+(SELECT total_debit FROM total_debit)+(SELECT total_credit FROM total_credit)) AS cl_bal,
         (SELECT COALESCE(json_agg(p), '[]'::json) FROM (SELECT * from txs) p) AS txs
         FROM ledgers where id = $1
       ) j;
