@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-  import { appState, getLedger, type Tx } from '../store.svelte';
+  import { appState, getLedger, type TxType } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
 
   let { id = '' } = $props();
@@ -14,15 +14,64 @@
     getLedger(id);
   });
 
-  let newTxs = $state([]);
+  type newTx = {
+    date: string;
+    type: TxType;
+    narration: string;
+    debit: number;
+    credit: number;
+    amount: number;
+  };
 
+  const types: TxType = [
+    'invoice',
+    'rtn chq',
+    'write-off',
+    'discount',
+    'cash',
+    'chq',
+    'momo',
+    'tcc'
+  ];
+
+  let newTxs: newTx[] = $state([]);
+
+  const today = new Date();
   function addTx() {
-    newTxs.push({ date: '2023-12-12', type: 'invoice', narration: '', debit: 0.0, credit: 0.0 });
+    newTxs.push({
+      date: today.toISOString().substring(0, 10),
+      type: 'invoice',
+      narration: '',
+      debit: 0,
+      credit: 0,
+      amount: 0
+    });
   }
 
   let debit = $derived(newTxs.reduce((sum, { debit }) => sum + debit, 0));
   let credit = $derived(newTxs.reduce((sum, { credit }) => sum + credit, 0));
   let total = $derived(newTxs.reduce((sum, { debit, credit }) => sum + debit - credit, 0));
+
+  function debitOrCreditTx(type: TxType) {
+    if (type === 'invoice' || type === 'rtn chq' || type === 'debit-note') {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function submit() {
+    let txs = newTxs.map((tx) => {
+      let t = { ...tx };
+      if (debitOrCreditTx(tx.type)) {
+        t.amount = tx.credit * -1;
+      } else {
+        t.amount = tx.debit;
+      }
+      return t;
+    });
+    console.table(txs);
+  }
 </script>
 
 <section>
@@ -50,7 +99,7 @@
         >
       </h3>
       <div class="overflow-x-auto">
-        <table class="table w-full is-striped">
+        <table class="table w-full is-striped table-auto">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
               <th>Date</th>
@@ -64,8 +113,8 @@
           <tbody>
             {#each ledger.txs as t (t.id)}
               <tr>
-                <td class="text-center">{dateFmt(new Date(t.date))}</td>
-                <td class="text-center hidden sm:table-cell">{t.type}</td>
+                <td class="text-center w-6">{dateFmt(new Date(t.date))}</td>
+                <td class="text-center w-10 hidden sm:table-cell">{t.type}</td>
                 <td class="text-left">{t.narration}</td>
                 <td class="text-right">{moneyFmt(t.amount >= 0 ? t.amount : 0)}</td>
                 <td class="text-right">{moneyFmt(t.amount < 0 ? Math.abs(t.amount) : 0)}</td>
@@ -90,42 +139,63 @@
 </section>
 <section class="print:hidden">
   <div class="wrapper">
-    <div class="flex flex-row-reverse pr-2">
-      <button class="btn btn-primary" onclick={() => addTx()}>+</button>
-    </div>
     {#if newTxs.length > 0}
-      <div class="overflow-x-auto">
-        <table class="table is-striped">
+      <div class="overflow-auto">
+        <table class="table-fixed">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
-              <th class="text-right">#</th>
-              <th>Date</th>
-              <th>Type</th>
+              <th class="text-right px-2">#</th>
+              <th class="px-2">Date</th>
+              <th class="w-5">Type</th>
               <th class="text-left">Narration</th>
               <th class="text-right">Debit</th>
               <th class="text-right">Credit</th>
-              <th class="text-right">Balance</th>
+              <th class="text-right">Action</th>
             </tr>
           </thead>
           <tbody>
             {#each newTxs as t, i}
-              <tr>
+              <tr class="*:p-1 *:w-1">
                 <td class="text-right">{i + 1}</td>
                 <td class="text-center"><input type="date" value={t.date} /></td>
-                <td><input value={t.type} /></td>
+                <td>
+                  <select id="type" bind:value={t.type} class="pr-0">
+                    {#each types as v}
+                      <option>{v}</option>
+                    {/each}
+                  </select>
+                </td>
                 <td class="text-left"><input value={t.narration} /></td>
-                <td><input type="number" bind:value={t.debit} class="text-right" step="0.01" /></td>
-                <td><input type="number" bind:value={t.credit} class="text-right" step="0.01" /></td
+                <td
+                  ><input
+                    bind:value={t.debit}
+                    class="text-right"
+                    disabled={debitOrCreditTx(t.type)}
+                  /></td
                 >
-                <td><button class="btn btn-error" onclick={() => newTxs.splice(i, 1)}>-</button></td
+                <td>
+                  <input
+                    bind:value={t.credit}
+                    class="text-right"
+                    disabled={!debitOrCreditTx(t.type)}
+                  /></td
+                >
+                <td class="inline"
+                  ><button class="btn px-2 mt-1 mb-0" onclick={() => addTx()}>+</button>
+                  <button class="btn px-2 mt-1 mb-0" onclick={() => newTxs.splice(i, 1)}>-</button
+                  ></td
                 >
               </tr>
             {/each}
           </tbody>
           <tfoot class="border-b border-t border-gray-700">
-            <tr>
-              <th></th>
-              <th></th>
+            <tr class="*:p-1">
+              <th> </th>
+              <th>
+                <button class="sumbit btn btn-primary block mb-0" onclick={() => submit()}
+                  >Submit</button
+                >
+              </th>
               <th></th>
               <th></th>
               <th class="text-right">{moneyFmt(debit)}</th>
@@ -134,8 +204,10 @@
             </tr>
           </tfoot>
         </table>
-        <button class="sumbit btn btn-primary">Submit</button>
-        <button class="sumbit btn">Clear</button>
+      </div>
+    {:else}
+      <div class="flex flex-row-reverse pr-2">
+        <button class="btn btn-primary" onclick={() => addTx()}>+</button>
       </div>
     {/if}
   </div>

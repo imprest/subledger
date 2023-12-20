@@ -24,6 +24,15 @@ export const presence = new Presence(channel);
 
 type Order = 'asc' | 'desc';
 type Status = 'idle' | 'loading' | 'loaded' | 'error' | 'timedout';
+export type TxType =
+  | 'invoice'
+  | 'rtn chq'
+  | 'write-off'
+  | 'discount'
+  | 'cash'
+  | 'chq'
+  | 'momo'
+  | 'tcc';
 
 export interface Store<T> {
   status: Status;
