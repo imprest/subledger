@@ -65,6 +65,12 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
+  def handle_in("ledger:add_txs", %{"txs" => txs}, socket) do
+    IO.inspect(txs)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info(:after_join, socket) do
     # presence = Presence.get_by_key(socket, socket.assigns.name)
     # IO.inspect(presence, label: "Presence Data:")

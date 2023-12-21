@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-  import { appState, getLedger, type TxType } from '../store.svelte';
+  import { appState, getLedger, addTxs, type TxType } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
 
   let { id = '' } = $props();
@@ -23,14 +23,14 @@
     amount: number;
   };
 
-  const types: TxType = [
+  const types: TxType[] = [
     'invoice',
+    'chq',
+    'cash',
+    'momo',
     'rtn chq',
     'write-off',
     'discount',
-    'cash',
-    'chq',
-    'momo',
     'tcc'
   ];
 
@@ -53,7 +53,7 @@
   let total = $derived(newTxs.reduce((sum, { debit, credit }) => sum + debit - credit, 0));
 
   function debitOrCreditTx(type: TxType) {
-    if (type === 'invoice' || type === 'rtn chq' || type === 'debit-note') {
+    if (type === 'invoice' || type === 'rtn chq') {
       return false;
     } else {
       return true;
@@ -70,7 +70,7 @@
       }
       return t;
     });
-    console.table(txs);
+    addTxs(txs);
   }
 </script>
 
@@ -99,7 +99,7 @@
         >
       </h3>
       <div class="overflow-x-auto">
-        <table class="table w-full is-striped table-auto">
+        <table class="table w-full table-auto is-bordered">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
               <th>Date</th>
@@ -123,7 +123,7 @@
             {/each}
           </tbody>
           <tfoot class="border-b border-t border-gray-700">
-            <tr>
+            <tr class="h-10">
               <th></th>
               <th class="hidden sm:table-cell"></th>
               <th class="text-right">Total:</th>
@@ -141,21 +141,21 @@
   <div class="wrapper">
     {#if newTxs.length > 0}
       <div class="overflow-auto">
-        <table class="table-fixed">
+        <table class="table w-full is-bordered">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
-              <th class="text-right px-2">#</th>
-              <th class="px-2">Date</th>
+              <th class="text-right max-w-5">#</th>
+              <th class="w-5">Date</th>
               <th class="w-5">Type</th>
-              <th class="text-left">Narration</th>
-              <th class="text-right">Debit</th>
-              <th class="text-right">Credit</th>
-              <th class="text-right">Action</th>
+              <th class="text-left min-w-10">Narration</th>
+              <th class="text-right min-w-10">Debit</th>
+              <th class="text-right min-w-10">Credit</th>
+              <th class="text-right w-5">Action</th>
             </tr>
           </thead>
           <tbody>
             {#each newTxs as t, i}
-              <tr class="*:p-1 *:w-1">
+              <tr class="*:align-middle">
                 <td class="text-right">{i + 1}</td>
                 <td class="text-center"><input type="date" value={t.date} /></td>
                 <td>
@@ -165,39 +165,43 @@
                     {/each}
                   </select>
                 </td>
-                <td class="text-left"><input value={t.narration} /></td>
+                <td class="text-left"><input class="w-full" bind:value={t.narration} /></td>
                 <td
                   ><input
                     bind:value={t.debit}
-                    class="text-right"
+                    class="text-right w-full"
                     disabled={debitOrCreditTx(t.type)}
                   /></td
                 >
                 <td>
                   <input
                     bind:value={t.credit}
-                    class="text-right"
+                    class="text-right w-full"
                     disabled={!debitOrCreditTx(t.type)}
                   /></td
                 >
-                <td class="inline"
-                  ><button class="btn px-2 mt-1 mb-0" onclick={() => addTx()}>+</button>
-                  <button class="btn px-2 mt-1 mb-0" onclick={() => newTxs.splice(i, 1)}>-</button
-                  ></td
-                >
+                <td>
+                  <span>
+                    <button class="btn rounded-full px-2 mt-1 mb-0" onclick={() => addTx()}
+                      >+</button
+                    >
+                    <button
+                      class="btn rounded-full px-2 mt-1 mb-0"
+                      onclick={() => newTxs.splice(i, 1)}>-</button
+                    >
+                  </span>
+                </td>
               </tr>
             {/each}
           </tbody>
           <tfoot class="border-b border-t border-gray-700">
             <tr class="*:p-1">
               <th> </th>
+              <th></th>
+              <th></th>
               <th>
-                <button class="sumbit btn btn-primary block mb-0" onclick={() => submit()}
-                  >Submit</button
-                >
+                <button class="btn btn-primary mb-0" onclick={() => submit()}>Submit</button>
               </th>
-              <th></th>
-              <th></th>
               <th class="text-right">{moneyFmt(debit)}</th>
               <th class="text-right">{moneyFmt(credit)}</th>
               <th class="text-right">{moneyFmt(total)}</th>

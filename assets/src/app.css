@@ -295,12 +295,16 @@
     }
 
     &.is-bordered td {
+      @apply border-gray-600;
       border-width: 1px;
     }
     &.is-bordered th {
       border-width: 0px;
     }
     &.is-bordered tr {
+      td:first-child {
+        @apply border-l-2;
+      }
       &:last-child td,
       th {
         border-bottom-width: 1px;

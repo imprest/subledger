@@ -1,4 +1,5 @@
 defmodule Subledger.Data.Dbase do
+  @moduledoc false
   @decimal_zero Decimal.new("0.00")
 
   def parse(file, columns \\ [], map_fn \\ fn x -> x end) do
@@ -33,7 +34,7 @@ defmodule Subledger.Data.Dbase do
     :lists.reverse(records)
   end
 
-  # TODO check if size of remaining bin > a_rec_size else stop processing since record is incomplete
+  # Maybe check if size of remaining bin > a_rec_size else stop processing since record is incomplete
   defp parse_records(bin, fields, columns, map_fn, a_rec_size, rec_count, records) do
     <<deleted::1-bytes, rec::binary-size(a_rec_size), rest::binary>> = bin
 
@@ -77,44 +78,25 @@ defmodule Subledger.Data.Dbase do
     end
   end
 
-  defp parse_data(data, type, decimal_count) do
-    case type do
-      "C" ->
-        data
+  # Parse data based on data_type i.e. Character, Integer, Numeric etc
+  defp parse_data(data, "C", _decimal_count), do: data
+  defp parse_data(data, "D", _decimal_count), do: data
+  defp parse_data(_data, "M", _decimal_count), do: nil
 
-      "N" ->
-        if decimal_count === 0 do
-          case data do
-            "" ->
-              0
+  defp parse_data("", "N", 0), do: 0
 
-            _ ->
-              try do
-                String.to_integer(data)
-              rescue
-                _ -> 0
-              end
-          end
-        else
-          case data do
-            "" ->
-              @decimal_zero
+  defp parse_data(data, "N", 0) do
+    String.to_integer(data)
+  catch
+    _ -> 0
+  end
 
-            _ ->
-              try do
-                Decimal.new(data)
-              rescue
-                _ -> @decimal_zero
-              end
-          end
-        end
+  defp parse_data("", "N", _), do: @decimal_zero
 
-      "D" ->
-        data
-
-      "M" ->
-        nil
-    end
+  defp parse_data(data, "N", _) do
+    Decimal.new(data)
+  catch
+    _ -> @decimal_zero
   end
 
   # There will always be 1 field/column for a table

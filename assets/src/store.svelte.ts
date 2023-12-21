@@ -180,4 +180,16 @@ export function getLedger(id: string) {
     .receive('timeout', () => (appState.ledger.status = 'timedout'));
 }
 
+export function addTxs(txs) {
+  channel
+    .push('ledger:add_txs', { txs: txs })
+    .receive('ok', (msg) => {
+      console.log(msg);
+    })
+    .receive('error', (msg) => {
+      console.log(msg);
+    })
+    .receive('timeout', () => alert('Could not save. Server timeout'));
+}
+
 export default socket;

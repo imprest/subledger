@@ -1,11 +1,13 @@
 defmodule Subledger.Data.Import do
+  @moduledoc false
   require Logger
 
+  import Ecto.Query
+
+  alias Decimal, as: D
+  alias Subledger.Data.Dbase
   alias Subledger.Repo
   alias Subledger.Setup
-  alias Subledger.Data.Dbase
-  alias Decimal, as: D
-  import Ecto.Query
 
   @data_folder "/home/hvaria/Documents/backup"
   @folder_prefix "MGP"
@@ -39,7 +41,7 @@ defmodule Subledger.Data.Import do
     }
   end
 
-  defp years_to_sync() do
+  defp years_to_sync do
     today = Date.utc_today()
     year = today.year
     month = today.month
@@ -55,7 +57,7 @@ defmodule Subledger.Data.Import do
     for {k, v} <- @dbf_files, into: %{}, do: {k, Path.join(full_path, v)}
   end
 
-  def all_fin_years() do
+  def all_fin_years do
     for year <- years_to_sync(), do: fin_year(year)
   end
 
@@ -71,9 +73,6 @@ defmodule Subledger.Data.Import do
       :upserted => %{}
     }
 
-    IO.inspect(ctx)
-    # TODO: Don't import items from dbf but from own maintained csv else id's will inc on each
-    # import if done via Repo.insert_all on_conflict
     with :ok <- ensure_files_exist?(f),
          {:ok, ctx} <- import_subledgers(ctx, f.subledgers),
          {:ok, ctx} <- import_tx(ctx, f.oct),
@@ -256,7 +255,6 @@ defmodule Subledger.Data.Import do
                     D.mult(Decimal.new(x["TR_AMT"]), -1)
 
                   _ ->
-                    IO.inspect(x)
                     Decimal.new(x["TR_AMT"])
                 end,
               updated_by_id: 1,
