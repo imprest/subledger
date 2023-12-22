@@ -18,8 +18,8 @@
     date: string;
     type: TxType;
     narration: string;
-    debit: number;
-    credit: number;
+    debit?: number;
+    credit?: number;
     amount: number;
   };
 
@@ -48,9 +48,9 @@
     });
   }
 
-  let debit = $derived(newTxs.reduce((sum, { debit }) => sum + debit, 0));
-  let credit = $derived(newTxs.reduce((sum, { credit }) => sum + credit, 0));
-  let total = $derived(newTxs.reduce((sum, { debit, credit }) => sum + debit - credit, 0));
+  let debit = $derived(newTxs.reduce((sum, { debit }) => sum + debit!, 0));
+  let credit = $derived(newTxs.reduce((sum, { credit }) => sum + credit!, 0));
+  let total = $derived(newTxs.reduce((sum, { debit, credit }) => sum + debit! - credit!, 0));
 
   function debitOrCreditTx(type: TxType) {
     if (type === 'invoice' || type === 'rtn chq') {
@@ -64,12 +64,22 @@
     let txs = newTxs.map((tx) => {
       let t = { ...tx };
       if (debitOrCreditTx(tx.type)) {
-        t.amount = tx.credit * -1;
+        t.amount = tx.credit! * -1;
       } else {
-        t.amount = tx.debit;
+        t.amount = tx.debit!;
       }
+      delete t.debit;
+      delete t.credit;
       return t;
     });
+    if (txs.some((tx) => tx.amount === 0)) {
+      alert('New transactions amount are not valid.');
+      return;
+    }
+    if (txs.some((tx) => tx.narration.length === 0)) {
+      alert('New transactions has an "Empty" narration.');
+      return;
+    }
     addTxs(txs);
   }
 </script>
@@ -99,7 +109,7 @@
         >
       </h3>
       <div class="overflow-x-auto">
-        <table class="table w-full table-auto is-bordered">
+        <table class="table w-full table-auto is-bordered is-hoverable">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
               <th>Date</th>
@@ -143,7 +153,7 @@
       <div class="overflow-auto">
         <table class="table w-full is-bordered">
           <thead>
-            <tr class="border-b border-gray-700" style="background-color: white;">
+            <tr class="border-b border-gray-700">
               <th class="text-right max-w-5">#</th>
               <th class="w-5">Date</th>
               <th class="w-5">Type</th>
@@ -159,7 +169,15 @@
                 <td class="text-right">{i + 1}</td>
                 <td class="text-center"><input type="date" value={t.date} /></td>
                 <td>
-                  <select id="type" bind:value={t.type} class="pr-0">
+                  <select
+                    id="type"
+                    bind:value={t.type}
+                    class="pr-0"
+                    onchange={() => {
+                      t.debit = 0;
+                      t.credit = 0;
+                    }}
+                  >
                     {#each types as v}
                       <option>{v}</option>
                     {/each}
@@ -169,14 +187,14 @@
                 <td
                   ><input
                     bind:value={t.debit}
-                    class="text-right w-full"
+                    class="text-right w-full disabled:hidden"
                     disabled={debitOrCreditTx(t.type)}
                   /></td
                 >
                 <td>
                   <input
                     bind:value={t.credit}
-                    class="text-right w-full"
+                    class="text-right w-full disabled:hidden"
                     disabled={!debitOrCreditTx(t.type)}
                   /></td
                 >

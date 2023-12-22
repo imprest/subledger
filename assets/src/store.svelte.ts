@@ -182,7 +182,7 @@ export function getLedger(id: string) {
 
 export function addTxs(txs) {
   channel
-    .push('ledger:add_txs', { txs: txs })
+    .push('ledger:add_txs', { txs: txs, ledger_id: appState.ledger.data!.id })
     .receive('ok', (msg) => {
       console.log(msg);
     })

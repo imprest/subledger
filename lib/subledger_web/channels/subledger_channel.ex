@@ -65,7 +65,8 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledger:add_txs", %{"txs" => txs}, socket) do
+  def handle_in("ledger:add_txs", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
+    IO.inspect(ledger_id)
     IO.inspect(txs)
     {:noreply, socket}
   end

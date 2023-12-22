@@ -284,13 +284,19 @@
     }
     tbody {
       tr {
-        @apply align-top hover:bg-gray-200 print:border-b print:border-gray-600;
+        @apply align-top print:border-b print:border-gray-600;
         td:first-child {
           @apply pl-2;
         }
         td:last-child {
           @apply pr-2;
         }
+      }
+    }
+
+    &.is-hoverable {
+      tr {
+        @apply hover:bg-gray-200;
       }
     }
 
