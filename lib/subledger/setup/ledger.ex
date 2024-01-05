@@ -1,5 +1,7 @@
 defmodule Subledger.Setup.Ledger do
+  @moduledoc false
   use Subledger.Schema
+
   import Ecto.Changeset
 
   @required [:is_active, :code, :name, :op_bal, :book_id]

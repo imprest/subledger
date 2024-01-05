@@ -1,5 +1,7 @@
 defmodule Subledger.Setup.Org do
+  @moduledoc false
   use Subledger.Schema
+
   import Ecto.Changeset
 
   @primary_key {:org_id, :id, autogenerate: true}

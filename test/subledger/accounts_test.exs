@@ -1,10 +1,11 @@
 defmodule Subledger.AccountsTest do
   use Subledger.DataCase
 
-  alias Subledger.Accounts
-
   import Subledger.AccountsFixtures
-  alias Subledger.Accounts.{User, UserToken}
+
+  alias Subledger.Accounts
+  alias Subledger.Accounts.User
+  alias Subledger.Accounts.UserToken
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do

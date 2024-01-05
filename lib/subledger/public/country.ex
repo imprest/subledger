@@ -1,5 +1,7 @@
 defmodule Subledger.Public.Country do
+  @moduledoc false
   use Subledger.Schema
+
   import Ecto.Changeset
 
   @primary_key {:id, :string, autogenerate: false}

@@ -1,4 +1,5 @@
 defmodule Subledger.Accounts.UserNotifier do
+  @moduledoc false
   import Swoosh.Email
 
   alias Subledger.Mailer

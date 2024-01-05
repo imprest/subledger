@@ -1,6 +1,9 @@
 defmodule Subledger.Accounts.UserToken do
+  @moduledoc false
   use Subledger.Schema
+
   import Ecto.Query
+
   alias Subledger.Accounts.UserToken
 
   @hash_algorithm :sha256

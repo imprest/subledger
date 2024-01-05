@@ -1,9 +1,10 @@
 defmodule SubledgerWeb.UserConfirmationControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
+  import Subledger.AccountsFixtures
+
   alias Subledger.Accounts
   alias Subledger.Repo
-  import Subledger.AccountsFixtures
 
   setup do
     %{user: user_fixture()}

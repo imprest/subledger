@@ -1,5 +1,7 @@
 defmodule Subledger.Setup.Tx do
+  @moduledoc false
   use Subledger.Schema
+
   import Ecto.Changeset
 
   @required [:ledger_id, :date, :type, :narration, :amount, :inserted_by_id, :updated_by_id]

@@ -10,7 +10,10 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Subledger.{Repo, Accounts, Public, Setup}
+alias Subledger.Accounts
+alias Subledger.Public
+alias Subledger.Repo
+alias Subledger.Setup
 
 inserted_at = ~U[2023-10-01 08:00:00Z]
 updated_at = ~U[2023-10-01 08:00:00Z]

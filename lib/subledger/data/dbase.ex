@@ -39,7 +39,7 @@ defmodule Subledger.Data.Dbase do
     <<deleted::1-bytes, rec::binary-size(a_rec_size), rest::binary>> = bin
 
     if deleted === " " do
-      case parse_record_by_fields(rec, fields, columns, %{}) |> map_fn.() do
+      case rec |> parse_record_by_fields(fields, columns, %{}) |> map_fn.() do
         nil ->
           parse_records(rest, fields, columns, map_fn, a_rec_size, rec_count - 1, records)
 
@@ -59,7 +59,7 @@ defmodule Subledger.Data.Dbase do
     [field | f] = fields
     len = field.length
     <<data::binary-size(len), rest::binary>> = rec
-    data = String.trim(data) |> parse_data(field.type, field.decimal_count)
+    data = data |> String.trim() |> parse_data(field.type, field.decimal_count)
     parse_record_by_fields(rest, f, [], Map.put(acc, field.name, data))
   end
 
@@ -68,13 +68,11 @@ defmodule Subledger.Data.Dbase do
     len = field.length
     <<data::binary-size(len), rest::binary>> = rec
 
-    case MapSet.member?(columns, field.name) do
-      true ->
-        data = String.trim(data) |> parse_data(field.type, field.decimal_count)
-        parse_record_by_fields(rest, f, columns, Map.put(acc, field.name, data))
-
-      false ->
-        parse_record_by_fields(rest, f, columns, acc)
+    if MapSet.member?(columns, field.name) do
+      data = data |> String.trim() |> parse_data(field.type, field.decimal_count)
+      parse_record_by_fields(rest, f, columns, Map.put(acc, field.name, data))
+    else
+      parse_record_by_fields(rest, f, columns, acc)
     end
   end
 
@@ -100,28 +98,23 @@ defmodule Subledger.Data.Dbase do
   end
 
   # There will always be 1 field/column for a table
-  defp parse_fields(<<field_header::32-bytes, rest::binary>>),
-    do: parse_fields([parse_field(field_header)], 1, rest)
+  defp parse_fields(<<field_header::32-bytes, rest::binary>>), do: parse_fields([parse_field(field_header)], 1, rest)
 
   defp parse_fields(fields, count, bin) do
     <<stop::1-bytes, rest::binary>> = bin
 
-    case stop === <<13>> do
-      true ->
-        <<zero::1-bytes, records::binary>> = rest
+    if stop === <<13>> do
+      <<zero::1-bytes, records::binary>> = rest
 
-        case zero === <<0>> do
-          true ->
-            {:lists.reverse(fields), count, records}
-
-          false ->
-            {:lists.reverse(fields), count, rest}
-        end
-
-      false ->
-        <<field_header::32-bytes, rest::binary>> = bin
-        field = parse_field(field_header)
-        parse_fields([field | fields], count + 1, rest)
+      if zero === <<0>> do
+        {:lists.reverse(fields), count, records}
+      else
+        {:lists.reverse(fields), count, rest}
+      end
+    else
+      <<field_header::32-bytes, rest::binary>> = bin
+      field = parse_field(field_header)
+      parse_fields([field | fields], count + 1, rest)
     end
   end
 

@@ -1,3 +1,5 @@
 <.flash_group flash={@flash} />
-<script>window.userToken = "<%= assigns[:user_token] %>" </script>
+<script>
+  window.userToken = "<%= assigns[:user_token] %>" 
+</script>
 <%= @inner_content %>

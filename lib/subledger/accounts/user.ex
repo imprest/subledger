@@ -1,5 +1,7 @@
 defmodule Subledger.Accounts.User do
+  @moduledoc false
   use Subledger.Schema
+
   import Ecto.Changeset
 
   schema "users" do
@@ -60,9 +62,7 @@ defmodule Subledger.Accounts.User do
     # Examples of additional password validation:
     |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
     |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/,
-      message: "at least one digit or punctuation character"
-    )
+    |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
   end
 
@@ -129,7 +129,7 @@ defmodule Subledger.Accounts.User do
   Confirms the account by setting `confirmed_at`.
   """
   def confirm_changeset(user) do
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    now = DateTime.truncate(DateTime.utc_now(), :second)
     change(user, confirmed_at: now)
   end
 

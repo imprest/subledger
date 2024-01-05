@@ -21,5 +21,4 @@ defmodule Subledger.DateRange do
   end
 
   def dump(_), do: :error
-
 end

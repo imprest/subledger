@@ -1,5 +1,7 @@
 defmodule Subledger.Setup.Permission do
+  @moduledoc false
   use Subledger.Schema
+
   import Ecto.Changeset
 
   @required [:ledger_id, :user_id, :org_id, :inserted_by_id, :updated_by_id, :role]

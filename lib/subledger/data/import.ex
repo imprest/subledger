@@ -1,13 +1,13 @@
 defmodule Subledger.Data.Import do
   @moduledoc false
-  require Logger
-
   import Ecto.Query
 
   alias Decimal, as: D
   alias Subledger.Data.Dbase
   alias Subledger.Repo
   alias Subledger.Setup
+
+  require Logger
 
   @data_folder "/home/hvaria/Documents/backup"
   @folder_prefix "MGP"
@@ -21,8 +21,8 @@ defmodule Subledger.Data.Import do
   @base_fin_year 2016
 
   defp tx_dbf_files(year) do
-    y1_suffix = year |> to_string |> String.slice(2..3)
-    y2_suffix = year |> Kernel.+(1) |> to_string |> String.slice(2..3)
+    y1_suffix = year |> to_string() |> String.slice(2..3)
+    y2_suffix = year |> Kernel.+(1) |> to_string() |> String.slice(2..3)
     full_path = Path.join(@data_folder, @folder_prefix <> y1_suffix)
 
     %{
@@ -46,14 +46,15 @@ defmodule Subledger.Data.Import do
     year = today.year
     month = today.month
 
-    case month >= 10 do
-      true -> Enum.to_list(@base_fin_year..year)
-      false -> Enum.to_list(@base_fin_year..(year - 1))
+    if month >= 10 do
+      Enum.to_list(@base_fin_year..year)
+    else
+      Enum.to_list(@base_fin_year..(year - 1))
     end
   end
 
   defp gen_dbf_files(year) do
-    full_path = @mgp_folder <> (year |> to_string |> String.slice(2..3))
+    full_path = @mgp_folder <> (year |> to_string() |> String.slice(2..3))
     for {k, v} <- @dbf_files, into: %{}, do: {k, Path.join(full_path, v)}
   end
 
@@ -154,8 +155,6 @@ defmodule Subledger.Data.Import do
               inserted_at: to_timestamp(x["SL_LMD"], x["SL_LMT"]),
               updated_at: to_timestamp(x["SL_LMD"], x["SL_LMT"])
             }
-          else
-            nil
           end
         end
       )
@@ -222,27 +221,24 @@ defmodule Subledger.Data.Import do
               org_id: ctx.org_id,
               date: to_date(x["TR_DATE"]),
               narration:
-                case x["TR_TYPE"] == "SA" or x["TR_TYPE"] == "SB" do
-                  true ->
-                    x["TR_NOC"] <> "/" <> Integer.to_string(x["TR_NON"])
-
-                  false ->
-                    if String.length(String.trim(x["TR_DESC"])) == 0 do
-                      if String.length(String.trim(x["TR_QTY"])) != 0 do
-                        clean_string(String.trim(x["TR_QTY"]))
-                      else
-                        " "
-                      end
+                if x["TR_TYPE"] == "SA" or x["TR_TYPE"] == "SB" do
+                  x["TR_NOC"] <> "/" <> Integer.to_string(x["TR_NON"])
+                else
+                  if String.length(String.trim(x["TR_DESC"])) == 0 do
+                    if String.length(String.trim(x["TR_QTY"])) != 0 do
+                      clean_string(String.trim(x["TR_QTY"]))
                     else
-                      if String.length(String.trim(x["TR_QTY"])) != 0 do
-                        clean_string(String.trim(x["TR_DESC"] <> " | " <> x["TR_QTY"]))
-                      else
-                        clean_string(String.trim(x["TR_DESC"]))
-                      end
+                      " "
                     end
+                  else
+                    if String.length(String.trim(x["TR_QTY"])) != 0 do
+                      clean_string(String.trim(x["TR_DESC"] <> " | " <> x["TR_QTY"]))
+                    else
+                      clean_string(String.trim(x["TR_DESC"]))
+                    end
+                  end
                 end,
-              ref_id:
-                old_tx_id(x["TR_DATE"], x["TR_TYPE"], x["TR_CODE"], x["TR_NOC"], x["TR_NON"]),
+              ref_id: old_tx_id(x["TR_DATE"], x["TR_TYPE"], x["TR_CODE"], x["TR_NOC"], x["TR_NON"]),
               dr_cr: x["TR_DRCR"],
               type: x["TR_TYPE"],
               ledger_id: book_id <> "_" <> x["TR_SLCD"],
@@ -300,8 +296,6 @@ defmodule Subledger.Data.Import do
                   end
                 end
             end
-          else
-            nil
           end
         end
       )
@@ -339,7 +333,7 @@ defmodule Subledger.Data.Import do
              skip_org_id: true
            ) do
         nil -> 1
-        id -> String.split(id, "_") |> Enum.at(2) |> String.to_integer() |> Kernel.+(1)
+        id -> id |> String.split("_") |> Enum.at(2) |> String.to_integer() |> Kernel.+(1)
       end
 
     {tx_with_ids, _} =
@@ -374,8 +368,7 @@ defmodule Subledger.Data.Import do
     {:ok, %{ctx | upserted: Map.put(ctx.upserted, Path.basename(dbf, ".dbf"), rows)}}
   end
 
-  defp gen_id(book_id, number),
-    do: "#{book_id}_#{String.pad_leading(Integer.to_string(number), 10, "0")}"
+  defp gen_id(book_id, number), do: "#{book_id}_#{String.pad_leading(Integer.to_string(number), 10, "0")}"
 
   # defp to_bool("T"), do: true
   # defp to_bool("Y"), do: true
@@ -399,15 +392,13 @@ defmodule Subledger.Data.Import do
   defp to_time(time), do: Time.from_iso8601!(time)
 
   def clean_string(bin) do
-    case String.valid?(bin) do
-      true ->
-        bin
-
-      false ->
-        bin
-        |> String.codepoints()
-        |> Enum.filter(&String.valid?(&1))
-        |> Enum.join()
+    if String.valid?(bin) do
+      bin
+    else
+      bin
+      |> String.codepoints()
+      |> Enum.filter(&String.valid?(&1))
+      |> Enum.join()
     end
   end
 end

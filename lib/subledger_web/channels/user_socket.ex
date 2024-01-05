@@ -1,5 +1,6 @@
 defmodule SubledgerWeb.UserSocket do
   use Phoenix.Socket
+
   import Ecto.Query, only: [from: 2]
 
   # A Socket handler
@@ -26,15 +27,15 @@ defmodule SubledgerWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
-  def connect(%{"token"=> token}, socket, _connect_info) do
+  def connect(%{"token" => token}, socket, _connect_info) do
     case Phoenix.Token.verify(socket, "user socket", token, max_age: 1_209_600) do
       {:ok, user_id} ->
         query =
           from u in "users",
-          select: [u.username, u.org_id],
-          where: u.id == ^user_id
+            select: [u.username, u.org_id],
+            where: u.id == ^user_id
 
-        [username, org_id] = Subledger.Repo.one(query, [skip_org_id: true])
+        [username, org_id] = Subledger.Repo.one(query, skip_org_id: true)
 
         socket = assign(socket, :username, username)
         socket = assign(socket, :org_id, org_id)
@@ -55,7 +56,7 @@ defmodule SubledgerWeb.UserSocket do
   #     Elixir.GhrWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
-  #def id(_socket), do: nil
+  # def id(_socket), do: nil
   @impl true
   def id(socket), do: "user_socket:#{socket.assigns.user_id}"
 end

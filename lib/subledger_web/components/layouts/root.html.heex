@@ -9,7 +9,8 @@
     </.live_title>
     <%= if System.get_env("PHX_SERVER", "false") == "false" do %>
       <link rel="stylesheet" href="http://localhost:5173/src/app.css" />
-      <script src="http://localhost:5173/src/app.js" type="module"></script>
+      <script src="http://localhost:5173/src/app.js" type="module">
+      </script>
       <link phx-track-static rel="stylesheet" href={~p"/assets/main.css"} />
     <% else %>
       <link phx-track-static rel="stylesheet" href={~p"/assets/main.css"} />

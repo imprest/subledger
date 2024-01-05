@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { X } from 'lucide-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -27,6 +26,6 @@
     <slot />
   </div>
   <button on:click={close} class="fixed top-5 right-5 text-white z-50" aria-label="close">
-    <X />
+    X
   </button>
 </div>

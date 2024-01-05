@@ -1,8 +1,9 @@
 defmodule SubledgerWeb.UserSettingsControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  alias Subledger.Accounts
   import Subledger.AccountsFixtures
+
+  alias Subledger.Accounts
 
   setup :register_and_log_in_user
 

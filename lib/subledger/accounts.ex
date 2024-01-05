@@ -4,9 +4,11 @@ defmodule Subledger.Accounts do
   """
 
   import Ecto.Query, warn: false
-  alias Subledger.Repo
 
-  alias Subledger.Accounts.{User, UserToken, UserNotifier}
+  alias Subledger.Accounts.User
+  alias Subledger.Accounts.UserNotifier
+  alias Subledger.Accounts.UserToken
+  alias Subledger.Repo
 
   ## Database getters
 
@@ -38,9 +40,8 @@ defmodule Subledger.Accounts do
       nil
 
   """
-  def get_user_by_username_and_password(username, password)
-      when is_binary(username) and is_binary(password) do
-    user = Repo.get_by(User, [username: username], [skip_org_id: true])
+  def get_user_by_username_and_password(username, password) when is_binary(username) and is_binary(password) do
+    user = Repo.get_by(User, [username: username], skip_org_id: true)
     if User.valid_password?(user, password), do: user
   end
 
@@ -72,8 +73,7 @@ defmodule Subledger.Accounts do
       nil
 
   """
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
+  def get_user_by_email_and_password(email, password) when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
     if User.valid_password?(user, password), do: user
   end
@@ -110,6 +110,7 @@ defmodule Subledger.Accounts do
   """
   def register_user(attrs) do
     org_id = attrs.org_id
+
     %User{}
     |> User.registration_changeset(attrs)
     |> Repo.insert(org_id: org_id)
@@ -266,14 +267,14 @@ defmodule Subledger.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query, [skip_org_id: true])
+    Repo.one(query, skip_org_id: true)
   end
 
   @doc """
   Deletes the signed token with the given context.
   """
   def delete_user_session_token(token) do
-    Repo.delete_all(UserToken.token_and_context_query(token, "session"), [skip_org_id: true])
+    Repo.delete_all(UserToken.token_and_context_query(token, "session"), skip_org_id: true)
     :ok
   end
 

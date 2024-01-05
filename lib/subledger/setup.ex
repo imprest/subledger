@@ -3,11 +3,13 @@ defmodule Subledger.Setup do
   The Setup context.
   """
 
-  require Logger
+  import Ecto.Query, only: [from: 2]
   import MySigils
+
   alias Subledger.Repo
   alias Subledger.Setup.Book
-  import Ecto.Query, only: [from: 2]
+
+  require Logger
 
   def get_ledger(ledger_id) do
     q = ~Q"""

@@ -20,14 +20,15 @@ defmodule SubledgerWeb.ConnCase do
   using do
     quote do
       # The default endpoint for testing
-      @endpoint SubledgerWeb.Endpoint
-
       use SubledgerWeb, :verified_routes
+
+      import Phoenix.ConnTest
 
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
       import SubledgerWeb.ConnCase
+
+      @endpoint SubledgerWeb.Endpoint
     end
   end
 

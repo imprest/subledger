@@ -18,12 +18,12 @@ defmodule Subledger.DataCase do
 
   using do
     quote do
-      alias Subledger.Repo
-
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
       import Subledger.DataCase
+
+      alias Subledger.Repo
     end
   end
 

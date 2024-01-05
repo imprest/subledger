@@ -4,7 +4,6 @@
   import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
-  import { Info } from 'lucide-svelte';
   import { Link } from 'svelte-pilot';
 
   let { book_id = '' } = $props();
@@ -140,7 +139,7 @@
                     <li class="tag inline bg-purple-300">{ledger.is_gov ? 'GOV' : 'PVT'}</li>
                   </ul>
                   <button on:click={() => ledgerDetails(ledger.id)}
-                    ><Info class="inline-block h-4 text-blue-600" /></button
+                    ><span class="inline-block h-4 text-blue-600">i</span></button
                   >
                 </td>
                 <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
