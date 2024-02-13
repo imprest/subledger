@@ -8,20 +8,16 @@ defmodule Subledger.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Telemetry supervisor
       SubledgerWeb.Telemetry,
-      # Start the Ecto repository
       Subledger.Repo,
-      # Start the PubSub system
+      {DNSCluster, query: Application.get_env(:subledger, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Subledger.PubSub},
-      # Start Finch
+      # Start the Finch HTTP client for sending emails
       {Finch, name: Subledger.Finch},
       # Start Presence
       SubledgerWeb.Presence,
       # Start the Endpoint (http/https)
       SubledgerWeb.Endpoint
-      # Start a worker by calling: Subledger.Worker.start_link(arg)
-      # {Subledger.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

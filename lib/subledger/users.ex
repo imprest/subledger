@@ -1,49 +1,17 @@
-defmodule Subledger.Accounts do
+defmodule Subledger.Users do
   @moduledoc """
-  The Accounts context.
+  The Users context.
   """
 
   import Ecto.Query, warn: false
 
-  alias Subledger.Accounts.User
-  alias Subledger.Accounts.UserNotifier
-  alias Subledger.Accounts.UserToken
   alias Subledger.Repo
+  alias Subledger.Users.Permission
+  alias Subledger.Users.User
+  alias Subledger.Users.UserNotifier
+  alias Subledger.Users.UserToken
 
   ## Database getters
-
-  @doc """
-  Gets a user by username.
-
-  ## Examples
-
-      iex> get_user_by_username("Jdoe")
-      %User{}
-
-      iex> get_user_by_username("Jdoe")
-      nil
-
-  """
-  def get_user_by_username(username) when is_binary(username) do
-    Repo.get_by(User, username: username)
-  end
-
-  @doc """
-  Gets a user by username and password.
-
-  ## Examples
-
-      iex> get_user_by_username_and_password("Jdoe", "correct_password")
-      %User{}
-
-      iex> get_user_by_username_and_password("Jdoe", "invalid_password")
-      nil
-
-  """
-  def get_user_by_username_and_password(username, password) when is_binary(username) and is_binary(password) do
-    user = Repo.get_by(User, [username: username], skip_org_id: true)
-    if User.valid_password?(user, password), do: user
-  end
 
   @doc """
   Gets a user by email.
@@ -79,6 +47,23 @@ defmodule Subledger.Accounts do
   end
 
   @doc """
+  Gets a user by username and password.
+
+  ## Examples
+
+      iex> get_user_by_username_and_password("foobar", "correct_password")
+      %User{}
+
+      iex> get_user_by_username_and_password("foobar", "invalid_password")
+      nil
+
+  """
+  def get_user_by_username_and_password(username, password) when is_binary(username) and is_binary(password) do
+    user = Repo.get_by(User, username: username)
+    if User.valid_password?(user, password), do: user
+  end
+
+  @doc """
   Gets a single user.
 
   Raises `Ecto.NoResultsError` if the User does not exist.
@@ -109,11 +94,9 @@ defmodule Subledger.Accounts do
 
   """
   def register_user(attrs) do
-    org_id = attrs.org_id
-
     %User{}
     |> User.registration_changeset(attrs)
-    |> Repo.insert(org_id: org_id)
+    |> Repo.insert()
   end
 
   @doc """
@@ -190,7 +173,7 @@ defmodule Subledger.Accounts do
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, [context]))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, [context]))
   end
 
   @doc ~S"""
@@ -243,7 +226,7 @@ defmodule Subledger.Accounts do
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -267,14 +250,14 @@ defmodule Subledger.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query, skip_org_id: true)
+    Repo.one(query)
   end
 
   @doc """
   Deletes the signed token with the given context.
   """
   def delete_user_session_token(token) do
-    Repo.delete_all(UserToken.token_and_context_query(token, "session"), skip_org_id: true)
+    Repo.delete_all(UserToken.by_token_and_context_query(token, "session"))
     :ok
   end
 
@@ -322,7 +305,7 @@ defmodule Subledger.Accounts do
   defp confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["confirm"]))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, ["confirm"]))
   end
 
   ## Reset password
@@ -379,11 +362,105 @@ defmodule Subledger.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  @doc """
+  Returns the list of permissions.
+
+  ## Examples
+
+      iex> list_permissions()
+      [%Permission{}, ...]
+
+  """
+  def list_permissions do
+    Repo.all(Permission)
+  end
+
+  @doc """
+  Gets a single permission.
+
+  Raises `Ecto.NoResultsError` if the Permission does not exist.
+
+  ## Examples
+
+      iex> get_permission!(123)
+      %Permission{}
+
+      iex> get_permission!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_permission!(id), do: Repo.get!(Permission, id)
+
+  @doc """
+  Creates a permission.
+
+  ## Examples
+
+      iex> create_permission(%{field: value})
+      {:ok, %Permission{}}
+
+      iex> create_permission(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_permission(attrs \\ %{}) do
+    %Permission{}
+    |> Permission.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a permission.
+
+  ## Examples
+
+      iex> update_permission(permission, %{field: new_value})
+      {:ok, %Permission{}}
+
+      iex> update_permission(permission, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_permission(%Permission{} = permission, attrs) do
+    permission
+    |> Permission.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a permission.
+
+  ## Examples
+
+      iex> delete_permission(permission)
+      {:ok, %Permission{}}
+
+      iex> delete_permission(permission)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_permission(%Permission{} = permission) do
+    Repo.delete(permission)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking permission changes.
+
+  ## Examples
+
+      iex> change_permission(permission)
+      %Ecto.Changeset{data: %Permission{}}
+
+  """
+  def change_permission(%Permission{} = permission, attrs \\ %{}) do
+    Permission.changeset(permission, attrs)
   end
 end

@@ -1,10 +1,9 @@
 defmodule SubledgerWeb.UserConfirmationControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  import Subledger.AccountsFixtures
-
-  alias Subledger.Accounts
+  alias Subledger.Users
   alias Subledger.Repo
+  import Subledger.UsersFixtures
 
   setup do
     %{user: user_fixture()}
@@ -31,11 +30,11 @@ defmodule SubledgerWeb.UserConfirmationControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "confirm"
+      assert Repo.get_by!(Users.UserToken, user_id: user.id).context == "confirm"
     end
 
     test "does not send confirmation token if User is confirmed", %{conn: conn, user: user} do
-      Repo.update!(Accounts.User.confirm_changeset(user))
+      Repo.update!(Users.User.confirm_changeset(user))
 
       conn =
         post(conn, ~p"/users/confirm", %{
@@ -47,7 +46,7 @@ defmodule SubledgerWeb.UserConfirmationControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      refute Repo.get_by(Accounts.UserToken, user_id: user.id)
+      refute Repo.get_by(Users.UserToken, user_id: user.id)
     end
 
     test "does not send confirmation token if email is invalid", %{conn: conn} do
@@ -61,7 +60,7 @@ defmodule SubledgerWeb.UserConfirmationControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.all(Accounts.UserToken) == []
+      assert Repo.all(Users.UserToken) == []
     end
   end
 
@@ -80,7 +79,7 @@ defmodule SubledgerWeb.UserConfirmationControllerTest do
     test "confirms the given token once", %{conn: conn, user: user} do
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_user_confirmation_instructions(user, url)
+          Users.deliver_user_confirmation_instructions(user, url)
         end)
 
       conn = post(conn, ~p"/users/confirm/#{token}")
@@ -89,9 +88,9 @@ defmodule SubledgerWeb.UserConfirmationControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "User confirmed successfully"
 
-      assert Accounts.get_user!(user.id).confirmed_at
+      assert Users.get_user!(user.id).confirmed_at
       refute get_session(conn, :user_token)
-      assert Repo.all(Accounts.UserToken) == []
+      assert Repo.all(Users.UserToken) == []
 
       # When not logged in
       conn = post(conn, ~p"/users/confirm/#{token}")
@@ -117,7 +116,7 @@ defmodule SubledgerWeb.UserConfirmationControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "User confirmation link is invalid or it has expired"
 
-      refute Accounts.get_user!(user.id).confirmed_at
+      refute Users.get_user!(user.id).confirmed_at
     end
   end
 end

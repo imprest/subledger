@@ -3,41 +3,31 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
 
   def change do
     execute "CREATE EXTENSION IF NOT EXISTS citext", ""
-    execute "CREATE EXTENSION IF NOT EXISTS pg_stat_statements", ""
 
     create table(:orgs, primary_key: false) do
-      add :org_id, :bigserial, primary_key: true
-      add :sname, :string, null: false
-      add :name, :string, null: false
-      timestamps()
+      add :id, :bigserial, primary_key: true
+      add :sname, :text, null: false
+      add :name, :text, null: false
+
+      timestamps(type: :utc_datetime)
     end
 
     create unique_index(:orgs, [:sname])
 
-    create table(:countries, primary_key: false) do
-      add :id, :text, primary_key: true
-      add :name, :text, null: false
-    end
-
-    create table(:currencies, primary_key: false) do
-      add :id, :text, primary_key: true
-      add :name, :text, null: false
-      add :symbol, :text, null: false
-    end
-
     create table(:users) do
-      add :org_id, references(:orgs, column: :org_id), null: false
+      add :org_id, references(:orgs, on_delete: :nothing), null: false
       add :username, :citext, null: false
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :is_admin, :boolean, null: false, default: false
       add :name, :string, null: false
-      add :confirmed_at, :utc_datetime
-      timestamps()
+      add :confirmed_at, :naive_datetime
+      timestamps(type: :utc_datetime)
     end
 
-    create unique_index(:users, [:username])
     create unique_index(:users, [:id, :org_id])
+    create unique_index(:users, [:username])
+    create unique_index(:users, [:org_id, :username])
 
     create table(:users_tokens) do
       add :user_id, references(:users, on_delete: :delete_all), null: false

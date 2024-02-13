@@ -1,10 +1,11 @@
 defmodule Subledger.Public.Currency do
   @moduledoc false
-  use Subledger.Schema
+  use Ecto.Schema
 
   import Ecto.Changeset
 
   @primary_key {:id, :string, autogenerate: false}
+  @foreign_key_type :string
   schema "currencies" do
     field :name, :string
     field :symbol, :string
@@ -13,7 +14,7 @@ defmodule Subledger.Public.Currency do
   @doc false
   def changeset(currency, attrs) do
     currency
-    |> cast(attrs, [:id, :name, :symbol])
-    |> validate_required([:id, :name, :symbol])
+    |> cast(attrs, [:name, :symbol])
+    |> validate_required([:name, :symbol])
   end
 end

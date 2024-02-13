@@ -15,12 +15,12 @@ export default new Router({
         {
           path: '/ledgers',
           component: () => import('./routes/Home.svelte'),
-          props: (route) => ({ book_id: route.query.string('fin_year') })
+          props: (route) => ({ book_id: route.query.number('fin_year') })
         },
         {
           path: '/ledgers/:ledger_id',
           component: () => import('./routes/Ledger.svelte'),
-          props: (route) => ({ id: route.params.string('ledger_id') })
+          props: (route) => ({ id: route.params.number('ledger_id') })
         },
         {
           path: '/analysis',

@@ -1,9 +1,8 @@
 defmodule SubledgerWeb.UserSettingsControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  import Subledger.AccountsFixtures
-
-  alias Subledger.Accounts
+  alias Subledger.Users
+  import Subledger.UsersFixtures
 
   setup :register_and_log_in_user
 
@@ -40,7 +39,7 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(new_password_conn.assigns.flash, :info) =~
                "Password updated successfully"
 
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Users.get_user_by_email_and_password(user.email, "new valid password")
     end
 
     test "does not update password on invalid data", %{conn: conn} do
@@ -79,7 +78,7 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "A link to confirm your email"
 
-      assert Accounts.get_user_by_email(user.email)
+      assert Users.get_user_by_email(user.email)
     end
 
     test "does not update email on invalid data", %{conn: conn} do
@@ -103,7 +102,7 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
 
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
+          Users.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 
       %{token: token, email: email}
@@ -116,8 +115,8 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "Email changed successfully"
 
-      refute Accounts.get_user_by_email(user.email)
-      assert Accounts.get_user_by_email(email)
+      refute Users.get_user_by_email(user.email)
+      assert Users.get_user_by_email(email)
 
       conn = get(conn, ~p"/users/settings/confirm_email/#{token}")
 
@@ -134,7 +133,7 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "Email change link is invalid or it has expired"
 
-      assert Accounts.get_user_by_email(user.email)
+      assert Users.get_user_by_email(user.email)
     end
 
     test "redirects if user is not logged in", %{token: token} do

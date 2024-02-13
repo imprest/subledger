@@ -1,7 +1,7 @@
 defmodule SubledgerWeb.UserRegistrationControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  import Subledger.AccountsFixtures
+  import Subledger.UsersFixtures
 
   describe "GET /users/register" do
     test "renders registration page", %{conn: conn} do

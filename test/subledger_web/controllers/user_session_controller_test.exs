@@ -1,7 +1,7 @@
 defmodule SubledgerWeb.UserSessionControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  import Subledger.AccountsFixtures
+  import Subledger.UsersFixtures
 
   setup do
     %{user: user_fixture()}

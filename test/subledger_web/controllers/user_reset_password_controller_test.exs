@@ -1,10 +1,9 @@
 defmodule SubledgerWeb.UserResetPasswordControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  import Subledger.AccountsFixtures
-
-  alias Subledger.Accounts
+  alias Subledger.Users
   alias Subledger.Repo
+  import Subledger.UsersFixtures
 
   setup do
     %{user: user_fixture()}
@@ -31,7 +30,7 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "reset_password"
+      assert Repo.get_by!(Users.UserToken, user_id: user.id).context == "reset_password"
     end
 
     test "does not send reset password token if email is invalid", %{conn: conn} do
@@ -45,7 +44,7 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.all(Accounts.UserToken) == []
+      assert Repo.all(Users.UserToken) == []
     end
   end
 
@@ -53,7 +52,7 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
     setup %{user: user} do
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_user_reset_password_instructions(user, url)
+          Users.deliver_user_reset_password_instructions(user, url)
         end)
 
       %{token: token}
@@ -77,7 +76,7 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
     setup %{user: user} do
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_user_reset_password_instructions(user, url)
+          Users.deliver_user_reset_password_instructions(user, url)
         end)
 
       %{token: token}
@@ -98,7 +97,7 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "Password reset successfully"
 
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Users.get_user_by_email_and_password(user.email, "new valid password")
     end
 
     test "does not reset password on invalid data", %{conn: conn, token: token} do

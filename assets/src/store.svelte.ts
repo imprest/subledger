@@ -85,13 +85,13 @@ export interface Ledger {
   credit_limit: number;
   payment_terms: number;
   tags: string[];
-  book_id: string;
+  book_id: number;
   currency_id: string;
   txs: Tx[];
 }
 
 interface Book {
-  id: string;
+  id: number;
   fin_year: number;
   period: string;
 }
@@ -99,7 +99,7 @@ interface Book {
 export type appState = {
   connected: boolean;
   books: Book[];
-  book_id: string;
+  book_id: number;
   ledgers: Store<Ledger[]>;
   ledger: Store<Ledger>;
 };
@@ -107,7 +107,7 @@ export type appState = {
 export const appState = $state<appState>({
   connected: false,
   books: [],
-  book_id: '_',
+  book_id: 0,
   ledgers: {
     status: 'idle',
     data: [],
@@ -143,11 +143,11 @@ export function getBooks() {
     .receive('timeout', () => console.log('timedout'));
 }
 
-export function getLedgers(book_id: string) {
+export function getLedgers(book_id: number) {
   if (appState.ledgers.status === 'loaded' && appState.book_id === book_id) return;
 
   appState.ledgers.status = 'loading';
-  if (book_id !== '') {
+  if (book_id !== 0) {
     appState.book_id = book_id;
   }
   channel

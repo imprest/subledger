@@ -1,11 +1,13 @@
-defmodule Subledger.Data.Import do
+defmodule Subledger.Import do
   @moduledoc false
   import Ecto.Query
 
   alias Decimal, as: D
-  alias Subledger.Data.Dbase
+  alias Subledger.Books
+  alias Subledger.Ledgers.Ledger
+  alias Subledger.Ledgers.Tx
   alias Subledger.Repo
-  alias Subledger.Setup
+  alias Subledger.Users.Permission
 
   require Logger
 
@@ -58,6 +60,23 @@ defmodule Subledger.Data.Import do
     for {k, v} <- @dbf_files, into: %{}, do: {k, Path.join(full_path, v)}
   end
 
+  def make_user_1_owner do
+    permissions =
+      for x <- Repo.all(Ledger, select: [:id], where: [org_id: 1]),
+          do: %{
+            ledger_id: x.id,
+            org_id: 1,
+            user_id: 1,
+            role: :owner,
+            inserted_by_id: 1,
+            updated_by_id: 1,
+            inserted_at: DateTime.utc_now(:second),
+            updated_at: DateTime.utc_now(:second)
+          }
+
+    Repo.insert_all(Permission, permissions)
+  end
+
   def all_fin_years do
     for year <- years_to_sync(), do: fin_year(year)
   end
@@ -65,13 +84,16 @@ defmodule Subledger.Data.Import do
   def fin_year(year) do
     f = Map.merge(gen_dbf_files(year), tx_dbf_files(year))
 
+    book_id = year |> Books.get_book_by_year!() |> Map.get(:id)
+
     ctx = %{
       :org_id => 1,
       :year => year,
-      :book_id => "1_#{year}",
+      :book_id => book_id,
       :start_date => Date.new!(year, 10, 1),
       :end_date => Date.new!(year + 1, 10, 1),
-      :upserted => %{}
+      :upserted => %{},
+      :ledger_code_to_id => %{}
     }
 
     with :ok <- ensure_files_exist?(f),
@@ -88,7 +110,7 @@ defmodule Subledger.Data.Import do
          {:ok, ctx} <- import_tx(ctx, f.jul),
          {:ok, ctx} <- import_tx(ctx, f.aug),
          {:ok, ctx} <- import_tx(ctx, f.sep) do
-      Logger.info("Imported #{ctx.year}:\n#{inspect(Map.drop(ctx, [:year]), pretty: true)}")
+      Logger.info("Imported #{ctx.year}:\n#{inspect(Map.drop(ctx, [:year, :ledger_code_to_id]), pretty: true)}")
     else
       unexpected ->
         Logger.error("Error occurred #{inspect(%{:error => unexpected})}")
@@ -105,7 +127,7 @@ defmodule Subledger.Data.Import do
 
   defp import_subledgers(ctx, dbf) do
     ledgers =
-      Dbase.parse(
+      ExDbase.parse(
         dbf,
         [
           "SL_GLCD",
@@ -118,6 +140,7 @@ defmodule Subledger.Data.Import do
           "SL_EMAIL",
           "SL_FAX",
           "SL_MOBILE",
+          "SL_STNO",
           "SL_OPBAL",
           "SL_LMU",
           "SL_LMD"
@@ -126,7 +149,6 @@ defmodule Subledger.Data.Import do
           if x["SL_GLCD"] === "203000" do
             %{
               org_id: 1,
-              id: ctx.book_id <> "_" <> x["SL_CODE"],
               is_active: true,
               currency_id: "GHS",
               is_gov:
@@ -135,11 +157,10 @@ defmodule Subledger.Data.Import do
                 else
                   false
                 end,
-              book_id: ctx.book_id,
+              book: %{book_id: ctx.book_id, op_bal: Decimal.new(x["SL_OPBAL"]), org_id: 1},
               code: x["SL_CODE"],
-              op_bal: Decimal.new(x["SL_OPBAL"]),
               name: x["SL_DESC"],
-              tin: "C000000000",
+              tin: x["SL_STNO"],
               address_1: x["SL_ADD1"],
               address_2: x["SL_ADD2"],
               town_city: x["SL_ADD2"],
@@ -159,32 +180,39 @@ defmodule Subledger.Data.Import do
         end
       )
 
-    # Get list of current %{id => updated_at} ledgers
-    db_ledgers =
-      for x <-
-            Repo.all(from(i in "ledgers", select: [:id, :updated_at]), org_id: ctx.org_id),
-          into: %{},
-          do: {x.id, x}
+    upsert_ledgers = Enum.map(ledgers, fn x -> Map.drop(x, [:book]) end)
 
-    # Determine subledgers to be inserted or updated i.e. upserted
-    upsert_ledgers =
-      Enum.reduce(ledgers, [], fn x, acc ->
-        case db_ledgers[x.id] do
-          # id not in database ids so insert
-          nil -> [x | acc]
-          # id in db determine if it needs to be updated i.e. if updated_at > db record
-          y -> if Date.compare(x.updated_at, y.updated_at) === :gt, do: [x | acc], else: acc
-        end
-      end)
-
-    # Upsert items
+    # Upsert ledgers
     {rows, _} =
-      Repo.insert_all(Setup.Ledger, upsert_ledgers,
-        conflict_target: [:id],
+      Repo.insert_all(Ledger, upsert_ledgers,
+        conflict_target: [:org_id, :code],
         on_conflict: {:replace_all_except, [:id]}
       )
 
-    {:ok, %{ctx | upserted: Map.put(ctx.upserted, :subledgers, rows)}}
+    # Get Map of %{code => ledger_id}
+    ledger_ids =
+      for {code, id} <- Repo.all(from l in Ledger, select: {l.code, l.id}), reduce: %{} do
+        acc -> Map.put(acc, code, id)
+      end
+
+    # Generate books_ledgers records i.e. assoc books to ledgers and it's op_bal
+    upsert_books_ledgers =
+      Enum.map(ledgers, fn x ->
+        book = x.book
+        ledger_id = Map.get(ledger_ids, x.code)
+        Map.put(book, :ledger_id, ledger_id)
+      end)
+
+    # Insert op_bal
+    {op_rows, _} =
+      Repo.insert_all(Books.BookLedger, upsert_books_ledgers,
+        conflict_target: [:org_id, :book_id, :ledger_id],
+        on_conflict: :replace_all
+      )
+
+    ctx = %{ctx | upserted: Map.put(ctx.upserted, :op_bals, op_rows)}
+    ctx = %{ctx | ledger_code_to_id: ledger_ids}
+    {:ok, %{ctx | upserted: Map.put(ctx.upserted, :ledgers, rows)}}
   end
 
   defp old_tx_id(date, type, code, noc, non) do
@@ -195,7 +223,7 @@ defmodule Subledger.Data.Import do
     book_id = ctx.book_id
 
     txs =
-      Dbase.parse(
+      ExDbase.parse(
         dbf,
         [
           "TR_TYPE",
@@ -216,7 +244,10 @@ defmodule Subledger.Data.Import do
         ],
         fn x ->
           if x["TR_GLCD"] === "203000" do
+            ledger_id = Map.get(ctx.ledger_code_to_id, x["TR_SLCD"])
+
             tmp = %{
+              id: Uniq.UUID.uuid7(),
               book_id: book_id,
               org_id: ctx.org_id,
               date: to_date(x["TR_DATE"]),
@@ -239,9 +270,8 @@ defmodule Subledger.Data.Import do
                   end
                 end,
               ref_id: old_tx_id(x["TR_DATE"], x["TR_TYPE"], x["TR_CODE"], x["TR_NOC"], x["TR_NON"]),
-              dr_cr: x["TR_DRCR"],
               type: x["TR_TYPE"],
-              ledger_id: book_id <> "_" <> x["TR_SLCD"],
+              ledger_id: ledger_id,
               amount:
                 case x["TR_DRCR"] do
                   "D" ->
@@ -256,43 +286,46 @@ defmodule Subledger.Data.Import do
               updated_by_id: 1,
               inserted_by_id: 1,
               inserted_at: to_timestamp(x["TR_LMD"], x["TR_LMT"]),
-              updated_at: to_timestamp(x["TR_LMD"], x["TR_LMT"]),
-              verified_by_id: nil
+              updated_at: to_timestamp(x["TR_LMD"], x["TR_LMT"])
             }
 
             case tmp.type do
               "SA" ->
-                Map.put(tmp, :type, "invoice")
+                tmp
+                |> Map.put(:type, :invoice)
+                |> Map.put(:is_paid, true)
 
               "SB" ->
-                Map.put(tmp, :type, "invoice")
+                tmp
+                |> Map.put(:type, :invoice)
+                |> Map.put(:is_paid, true)
 
               "BP" ->
-                Map.put(tmp, :type, "rtn chq")
+                Map.put(tmp, :type, :rtn_chq)
 
               "BR" ->
                 if String.contains?(tmp.ref_id, " CA ") do
-                  Map.put(tmp, :type, "cash")
+                  Map.put(tmp, :type, :cash)
                 else
                   if String.contains?(tmp.narration, "momo") do
-                    Map.put(tmp, :type, "momo")
+                    Map.put(tmp, :type, :momo)
                   else
                     if String.contains?(tmp.narration, "cash") do
-                      Map.put(tmp, :type, "cash")
+                      Map.put(tmp, :type, :cash)
                     else
-                      Map.put(tmp, :type, "chq")
+                      Map.put(tmp, :type, :chq)
                     end
                   end
                 end
 
               "JV" ->
-                if tmp.dr_cr === "D" do
-                  Map.put(tmp, :type, "write-off")
+                if x["TR_DRCR"] === "D" do
+                  Map.put(tmp, :type, :debit)
                 else
                   if String.contains?(tmp.narration, "tcc") do
-                    Map.put(tmp, :type, "tcc")
+                    Map.put(tmp, :type, :tcc)
                   else
-                    Map.put(tmp, :type, "discount")
+                    Map.put(tmp, :type, :write_off)
                   end
                 end
             end
@@ -300,10 +333,10 @@ defmodule Subledger.Data.Import do
         end
       )
 
-    # Get list of current ref_id, update_at tx
+    # Get list of txs = %{ref_id => %{id, updated_at}}
     db_tx =
       for x <-
-            Repo.all(from(i in "tx", select: [:id, :ref_id, :updated_at]), org_id: ctx.org_id),
+            Repo.all(from i in "txs", select: [:id, :ref_id, :updated_at], where: [book_id: ^book_id]),
           into: %{},
           do: {x.ref_id, x}
 
@@ -316,7 +349,6 @@ defmodule Subledger.Data.Import do
 
           y ->
             if Date.compare(x.updated_at, y.updated_at) === :gt do
-              # x = Map.put(x, :no, y.no)
               [Map.put(x, :id, y.id) | acc]
             else
               acc
@@ -324,59 +356,12 @@ defmodule Subledger.Data.Import do
         end
       end)
 
-    last_tx_no =
-      case Repo.one(
-             from(t in "tx",
-               select: max(t.id),
-               where: t.book_id == ^book_id
-             ),
-             skip_org_id: true
-           ) do
-        nil -> 1
-        id -> id |> String.split("_") |> Enum.at(2) |> String.to_integer() |> Kernel.+(1)
-      end
-
-    {tx_with_ids, _} =
-      upsert_tx
-      |> Enum.group_by(& &1.ref_id)
-      |> Enum.reduce([], fn {_, v}, acc ->
-        [Enum.max_by(v, & &1.updated_at, DateTime) | acc]
-      end)
-      |> Enum.sort_by(& &1.ref_id)
-      |> Enum.map_reduce(last_tx_no, fn x, acc ->
-        x = Map.drop(x, [:dr_cr])
-
-        if Map.has_key?(x, :id) do
-          {x, acc}
-        else
-          {Map.put_new(
-             x,
-             :id,
-             gen_id(book_id, acc)
-           ), acc + 1}
-        end
-      end)
-
     # Upsert tx
-    {rows, _} =
-      Repo.insert_all(Setup.Tx, tx_with_ids,
-        conflict_target: [:id],
-        on_conflict: {:replace_all_except, [:id]}
-      )
+    {rows, _} = Repo.insert_all(Tx, upsert_tx, conflict_target: [:id], on_conflict: {:replace_all_except, [:id]})
 
     # Upsert tx
     {:ok, %{ctx | upserted: Map.put(ctx.upserted, Path.basename(dbf, ".dbf"), rows)}}
   end
-
-  defp gen_id(book_id, number), do: "#{book_id}_#{String.pad_leading(Integer.to_string(number), 10, "0")}"
-
-  # defp to_bool("T"), do: true
-  # defp to_bool("Y"), do: true
-  # defp to_bool("F"), do: false
-  # defp to_bool("N"), do: false
-  # defp to_bool(""), do: false
-  # defp nil?(""), do: nil
-  # defp nil?(string), do: string
 
   defp to_timestamp(lmd, lmt), do: DateTime.new!(to_date(lmd), to_time(lmt))
 

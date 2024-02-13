@@ -6,7 +6,7 @@
   import Modal from '../lib/Modal.svelte';
   import { Link } from 'svelte-pilot';
 
-  let { book_id = '' } = $props();
+  let { book_id } = $props();
   let isModalOpen = $state(false);
   let text = $state('');
   let filter: Ledger[] = $state([]);
@@ -20,7 +20,7 @@
   let ledgers = $derived(appState.ledgers.data);
 
   $effect(() => {
-    if (book_id === '') {
+    if (book_id === 0) {
       book_id = appState.book_id;
     }
 

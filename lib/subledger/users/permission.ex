@@ -1,21 +1,25 @@
-defmodule Subledger.Setup.Permission do
+defmodule Subledger.Users.Permission do
   @moduledoc false
-  use Subledger.Schema
+  use Ecto.Schema
 
   import Ecto.Changeset
+
+  alias Subledger.Ledgers.Ledger
+  alias Subledger.Users.User
 
   @required [:ledger_id, :user_id, :org_id, :inserted_by_id, :updated_by_id, :role]
   @fields @required
 
   @primary_key false
   schema "permissions" do
-    belongs_to :org, Subledger.Setup.Org, references: :org_id, primary_key: true
-    belongs_to :ledger, Subledger.Setup.Ledger, type: :binary, primary_key: true
-    belongs_to :user, Subledger.Accounts.User, primary_key: true
     field :role, Ecto.Enum, values: [:owner, :editor, :viewer], default: :viewer
-    belongs_to :inserted_by, Subledger.Accounts.User
-    belongs_to :updated_by, Subledger.Accounts.User
-    timestamps()
+    field :org_id, :integer, primary_key: true
+    belongs_to :user, User, primary_key: true
+    belongs_to :ledger, Ledger, primary_key: true
+    belongs_to :inserted_by, User
+    belongs_to :updated_by, User
+
+    timestamps(type: :utc_datetime)
   end
 
   @doc false
