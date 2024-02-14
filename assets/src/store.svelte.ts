@@ -150,37 +150,33 @@ export function getLedgers(book_id: number) {
   if (book_id !== 0) {
     appState.book_id = book_id;
   }
-  channel
-    .push('ledgers:get', { book_id: book_id })
-    .receive('ok', (msg: { ledgers: Ledger[] }) => {
-      appState.ledgers.status = 'loaded';
-      appState.ledgers.data = msg.ledgers;
-    })
-    .receive('error', (msg: string) => {
-      appState.ledgers.status = 'error';
-      appState.ledgers.error = msg;
-    })
-    .receive('timeout', () => (appState.ledgers.status = 'timedout'));
+  get('ledgers', { book_id: book_id });
 }
 
 export function getLedger(id: string) {
   if (appState.ledger.status === 'loaded' && appState.ledger.data?.id === id) return;
-  appState.ledger.status = 'loading';
-
-  channel
-    .push('ledger:get', { id: id })
-    .receive('ok', (msg: { ledger: Ledger }) => {
-      appState.ledger.status = 'loaded';
-      appState.ledger.data = msg.ledger;
-    })
-    .receive('error', (msg: string) => {
-      appState.ledger.status = 'error';
-      appState.ledger.error = msg;
-    })
-    .receive('timeout', () => (appState.ledger.status = 'timedout'));
+  get('ledger', { id: id });
 }
 
-export function addTxs(txs) {
+type store = 'ledgers' | 'ledger';
+
+function get(store: store, args: object) {
+  appState[store].status = 'loading';
+  channel
+    .push(store + ':get', args)
+    .receive('ok', (msg) => {
+      appState[store].status = 'loaded';
+      appState[store].error = '';
+      appState[store].data = msg[store];
+    })
+    .receive('error', (msg: string) => {
+      appState[store].status = 'error';
+      appState[store].error = msg;
+    })
+    .receive('timeout', () => (appState[store].status = 'timedout'));
+}
+
+export function addTxs(txs: object) {
   channel
     .push('ledger:add_txs', { txs: txs, ledger_id: appState.ledger.data!.id })
     .receive('ok', (msg) => {
