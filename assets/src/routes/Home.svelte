@@ -138,9 +138,9 @@
                     <li class="tag inline bg-blue-200">{ledger.region}</li>
                     <li class="tag inline bg-purple-300">{ledger.is_gov ? 'GOV' : 'PVT'}</li>
                   </ul>
-                  <button on:click={() => ledgerDetails(ledger.id)}
-                    ><span class="inline-block h-4 text-blue-600">i</span></button
-                  >
+                  <button on:click={() => ledgerDetails(ledger.id)}>
+                    <span class="hero-information-circle text-blue-600"></span>
+                  </button>
                 </td>
                 <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
                 <td class="text-right">{moneyFmt(ledger.cl_bal)}</td>

@@ -40,6 +40,8 @@ defmodule Subledger.MixProject do
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_view, "~> 0.20.2"},
       {:floki, ">= 0.30.0", only: :test},
+      {:heroicons,
+       github: "tailwindlabs/heroicons", tag: "v2.1.1", sparse: "optimized", app: false, compile: false, depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 0.6"},

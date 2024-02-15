@@ -1,7 +1,11 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "lib": ["ESNext", "dom", "dom.iterable"],
+    "lib": [
+      "ESNext",
+      "dom",
+      "dom.iterable"
+    ],
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -17,7 +21,6 @@
     "./src/**/*.svelte",
     "vite.config.ts",
     ".eslintrc.cjs",
-    "tailwind.config.cjs",
     "svelte.config.js",
     "postcss.config.cjs"
   ],
