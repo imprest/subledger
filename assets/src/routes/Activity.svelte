@@ -1,4 +1,4 @@
 <script lang="ts">
 </script>
 
-<h1>Analysis</h1>
+<h1>Activity</h1>

@@ -1,8 +1,15 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
-  import { appState } from './store.svelte';
-  import { Link, View } from 'svelte-pilot';
+  import { appState, getBooks } from './store.svelte';
+  // import { Link, View } from 'svelte-pilot';
+  import Router from 'svelte-spa-router';
+  import routes from './routes';
 
   let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
+  $effect(() => {
+    getBooks();
+  });
 </script>
 
 {#if !appState.connected}
@@ -22,8 +29,8 @@
         <div
           class="ml-4 min-w-0 flex item-baseline space-x-1 overflow-y-hidden overflow-x-auto scroller grow"
         >
-          <Link to="/" class="m-1 px-1">Ledgers</Link>
-          <Link to="/analysis" class="m-1 px-1">Analysis</Link>
+          <a href="#/" class="m-1 px-1">Ledgers</a>
+          <a href="#/activity" class="m-1 px-1">Activity</a>
         </div>
         <div class="p-2 print:hidden">
           <a
@@ -38,5 +45,5 @@
   </nav>
 </header>
 <main class="h-full pt-[calc(var(--header-height)+0.25rem)] print:pt-1">
-  <View />
+  <Router {routes} />
 </main>

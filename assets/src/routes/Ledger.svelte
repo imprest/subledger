@@ -4,14 +4,15 @@
   import { appState, getLedger, addTxs, type TxType } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
 
-  let { id = '' } = $props();
+  let { params } = $props();
 
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
 
   $effect.pre(() => {
-    getLedger(id);
+    console.log(params);
+    getLedger(parseInt(params.ledger_id));
   });
 
   type newTx = {
@@ -109,7 +110,7 @@
         >
       </h3>
       <div class="overflow-x-auto">
-        <table class="table w-full table-auto is-bordered is-hoverable">
+        <table class="table w-full table-auto is-striped is-hoverable">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
               <th>Date</th>
@@ -200,9 +201,6 @@
                 >
                 <td>
                   <span>
-                    <button class="btn rounded-full px-2 mt-1 mb-0" onclick={() => addTx()}
-                      >+</button
-                    >
                     <button
                       class="btn rounded-full px-2 mt-1 mb-0"
                       onclick={() => newTxs.splice(i, 1)}>-</button
@@ -214,7 +212,9 @@
           </tbody>
           <tfoot class="border-b border-t border-gray-700">
             <tr class="*:p-1">
-              <th> </th>
+              <th>
+                <button class="btn rounded-full px-2 mt-1 mb-0" onclick={() => addTx()}>+</button>
+              </th>
               <th></th>
               <th></th>
               <th>

@@ -4,7 +4,7 @@
   import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
-  import { Link } from 'svelte-pilot';
+  // import { Link } from 'svelte-pilot';
 
   let { book_id } = $props();
   let isModalOpen = $state(false);
@@ -20,16 +20,8 @@
   let ledgers = $derived(appState.ledgers.data);
 
   $effect(() => {
-    if (book_id === 0) {
-      book_id = appState.book_id;
-    }
-
     if (ledgersStatus === 'idle') {
-      getLedgers(book_id);
-    }
-
-    if (ledgersStatus === 'loaded' && book_id !== appState.book_id) {
-      getLedgers(book_id);
+      getLedgers(1);
     }
   });
 
@@ -86,7 +78,8 @@
       <ul class="flex-row-reverse" role="menu">
         {#each appState.books as book (book.id)}
           <li title={book.period} class:is-active={appState.book_id === book.id}>
-            <Link to={`/ledgers?fin_year=${book.id}`}>{book.fin_year}</Link>
+            <a href="#/ledgers/${book_id}">{book.fin_year}</a>
+            <!-- <Link to={`/ledgers?fin_year=${book.id}`}>{book.fin_year}</Link> -->
           </li>
         {/each}
       </ul>
@@ -118,7 +111,7 @@
       <div>Error occurred: {appState.ledgers.error}</div>
     {:else if ledgersStatus === 'loaded'}
       <div class="overflow-x-auto">
-        <table class="table w-full is-bordered is-striped">
+        <table class="table w-full is-striped is-hoverable">
           <thead>
             <tr>
               <th class="text-right">#</th>
@@ -132,14 +125,14 @@
               <tr>
                 <td class="text-right">{i + 1}</td>
                 <td>
-                  <Link to={`/ledgers/${encodeURIComponent(ledger.id)}`}>{ledger.name}</Link>
+                  <a href={`#/ledger/${ledger.id}`}>{ledger.name}</a>
                   <ul class="tags inline-block pl-2">
                     <li class="tag inline bg-orange-200">{ledger.code}</li>
                     <li class="tag inline bg-blue-200">{ledger.region}</li>
                     <li class="tag inline bg-purple-300">{ledger.is_gov ? 'GOV' : 'PVT'}</li>
                   </ul>
                   <button on:click={() => ledgerDetails(ledger.id)}>
-                    <span class="hero-information-circle text-blue-600"></span>
+                    <span class="hero-information-circle text-blue-400 h-4"></span>
                   </button>
                 </td>
                 <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
