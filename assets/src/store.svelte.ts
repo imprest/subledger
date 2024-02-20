@@ -131,6 +131,24 @@ export const disconnected = () => {
   appState.connected = false;
 };
 
+export const promise = new Promise((resolve, reject) => {
+  channel
+    .push('books:get', {})
+    .receive('ok', (msg: { books: Book[] }) => {
+      appState.books = msg.books;
+      appState.book_id = msg.books[0].id;
+      resolve('Books loaded');
+    })
+    .receive('error', (msg: unknown) => {
+      console.error(msg);
+      reject(msg);
+    })
+    .receive('timeout', () => {
+      console.log('timedout');
+      reject('timedout');
+    });
+});
+
 export function getBooks() {
   if (appState.books.length > 0) return;
   channel
@@ -153,9 +171,9 @@ export function getLedgers(book_id: number) {
   get('ledgers', { book_id: book_id });
 }
 
-export function getLedger(id: string) {
-  if (appState.ledger.status === 'loaded' && appState.ledger.data?.id === id) return;
-  get('ledger', { id: id });
+export function getLedger(code: string, book_id: number) {
+  if (appState.ledger.status === 'loaded' && appState.ledger.data?.code === code) return;
+  get('ledger', { code: code, book_id: book_id });
 }
 
 type store = 'ledgers' | 'ledger';

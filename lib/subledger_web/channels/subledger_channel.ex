@@ -60,8 +60,8 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledger:get", %{"id" => id}, socket) do
-    {:reply, Ledgers.get_ledger(id), socket}
+  def handle_in("ledger:get", %{"code" => code, "book_id" => book_id}, socket) do
+    {:reply, Ledgers.get_ledger(code, book_id), socket}
   end
 
   @impl true

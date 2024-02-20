@@ -36,13 +36,16 @@ defmodule Subledger.Ledgers do
           WHERE s.ledger_id = b.ledger_id AND book_id = $2
         ),
         trans AS (
-          SELECT t.ledger_id, SUM(t.amount) as changes
+          SELECT t.ledger_id, 
+            SUM(COALESCE(amount, 0)) FILTER (WHERE amount >= 0) as total_debit,
+            SUM(COALESCE(amount, 0)) FILTER (WHERE amount < 0) as total_credit
           FROM txs t, scope s
           WHERE (SELECT period FROM books WHERE id = $2) @> t.date
-            AND t.ledger_id = s.ledger_id
+          AND t.ledger_id = s.ledger_id
           GROUP BY t.ledger_id
         )
-        SELECT l.id, l.code, l.name, l.region, o.op_bal, (o.op_bal+t.changes) as cl_bal 
+        SELECT l.id, l.code, l.name, l.region, o.op_bal, t.total_debit, t.total_credit,
+          (o.op_bal+t.total_debit+t.total_credit) as cl_bal 
         FROM ledgers l, trans t, op_bal o
         WHERE l.id = t.ledger_id AND o.ledger_id = l.id
         ORDER BY l.name
@@ -79,12 +82,15 @@ defmodule Subledger.Ledgers do
 
   Return {:ok, %{Ledger: ledger}} | {:error, Error} exist.
   """
-  def get_ledger(ledger_id) do
+  def get_ledger(code, book_id) do
     q = ~Q"""
       SELECT row_to_json(j)::text as ledger 
       FROM (
-        WITH op_bal AS (
-          SELECT op_bal, book_id FROM books_ledgers WHERE ledger_id = $1 AND book_id = 1
+        WITH l AS (
+          SELECT id as lid FROM ledgers where code = $1
+        ),
+          op_bal AS (
+          SELECT op_bal, book_id FROM books_ledgers, l WHERE ledger_id = l.lid AND book_id = $2
         ),
         period AS (
           SELECT period FROM books WHERE id = 1 
@@ -92,7 +98,8 @@ defmodule Subledger.Ledgers do
         trans AS (
           SELECT *,
           o.op_bal + (SUM(amount) OVER(ORDER BY date, id)) AS bal
-          FROM txs, op_bal o, period p WHERE ledger_id = $1 AND  p.period @> date
+          FROM txs, op_bal o, period p, l 
+          WHERE ledger_id = l.lid AND  p.period @> date
           ORDER BY date, id
         ),
         total_debit AS (SELECT COALESCE(SUM(amount), 0) as total_debit FROM trans WHERE amount >= 0),
@@ -104,11 +111,11 @@ defmodule Subledger.Ledgers do
         (SELECT total_credit FROM total_credit) AS total_credit,
         (SELECT op_bal+(SELECT total_debit FROM total_debit)+(SELECT total_credit FROM total_credit)) AS cl_bal,
         (SELECT COALESCE(json_agg(p), '[]'::json) FROM (SELECT * from trans) p) AS txs 
-        FROM op_bal o, ledgers where id = $1
+        FROM op_bal o, ledgers, l WHERE id = l.lid
       ) j;
     """
 
-    case Repo.query(q, [ledger_id]) do
+    case Repo.query(q, [code, book_id]) do
       {:ok, %{num_rows: 1, rows: rows}} ->
         {:ok, %{ledger: Repo.json_frag(hd(rows))}}
 

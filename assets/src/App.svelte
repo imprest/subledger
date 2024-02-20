@@ -1,15 +1,15 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-  import { appState, getBooks } from './store.svelte';
-  // import { Link, View } from 'svelte-pilot';
+  import { appState, promise } from './store.svelte';
   import Router from 'svelte-spa-router';
   import routes from './routes';
 
   let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
-  $effect(() => {
-    getBooks();
-  });
+  promise.then(
+    (result: any) => console.log(result),
+    (error: any) => console.log(error)
+  );
 </script>
 
 {#if !appState.connected}

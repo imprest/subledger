@@ -4,9 +4,9 @@
   import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
-  // import { Link } from 'svelte-pilot';
 
-  let { book_id } = $props();
+  type props = { params: { fin_year: string } | undefined };
+  let { params } = $props<props>();
   let isModalOpen = $state(false);
   let text = $state('');
   let filter: Ledger[] = $state([]);
@@ -18,10 +18,16 @@
 
   let ledgersStatus = $derived(appState.ledgers.status);
   let ledgers = $derived(appState.ledgers.data);
+  let books = $derived(appState.books);
 
   $effect(() => {
-    if (ledgersStatus === 'idle') {
-      getLedgers(1);
+    if (books.length > 0) {
+      if (params === undefined) {
+        getLedgers(books[0].id);
+      } else {
+        let book = books.find(({ fin_year }) => fin_year === parseInt(params!.fin_year, 10));
+        if (book) getLedgers(book.id);
+      }
     }
   });
 
@@ -78,8 +84,7 @@
       <ul class="flex-row-reverse" role="menu">
         {#each appState.books as book (book.id)}
           <li title={book.period} class:is-active={appState.book_id === book.id}>
-            <a href="#/ledgers/${book_id}">{book.fin_year}</a>
-            <!-- <Link to={`/ledgers?fin_year=${book.id}`}>{book.fin_year}</Link> -->
+            <a href="#/ledgers/{book.fin_year}">{book.fin_year}</a>
           </li>
         {/each}
       </ul>
@@ -117,6 +122,8 @@
               <th class="text-right">#</th>
               <th class="text-left">Name</th>
               <th class="text-right">Opening</th>
+              <th class="text-right">Debits</th>
+              <th class="text-right">Credits</th>
               <th class="text-right">Closing</th>
             </tr>
           </thead>
@@ -125,7 +132,7 @@
               <tr>
                 <td class="text-right">{i + 1}</td>
                 <td>
-                  <a href={`#/ledger/${ledger.id}`}>{ledger.name}</a>
+                  <a href={`#/ledger/${encodeURIComponent(ledger.code)}`}>{ledger.name}</a>
                   <ul class="tags inline-block pl-2">
                     <li class="tag inline bg-orange-200">{ledger.code}</li>
                     <li class="tag inline bg-blue-200">{ledger.region}</li>
@@ -136,6 +143,8 @@
                   </button>
                 </td>
                 <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
+                <td class="text-right">{moneyFmt(ledger.total_debit)}</td>
+                <td class="text-right">{moneyFmt(Math.abs(ledger.total_credit))}</td>
                 <td class="text-right">{moneyFmt(ledger.cl_bal)}</td>
               </tr>
             {/each}

@@ -3,16 +3,29 @@
 <script lang="ts">
   import { appState, getLedger, addTxs, type TxType } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
+  import { querystring } from 'svelte-spa-router';
 
-  let { params } = $props();
+  type props = { params: { code: string } };
+  let { params } = $props<props>();
 
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
+  let books = $derived(appState.books);
+  let parsed = $derived($querystring);
 
   $effect.pre(() => {
-    console.log(params);
-    getLedger(parseInt(params.ledger_id));
+    if (books.length > 0) {
+      if (params.code || parsed) {
+        if (parsed) {
+          let year = parseInt(parsed.split('=')[1], 10);
+          let book = books.find(({ fin_year }) => fin_year === year);
+          getLedger(params.code, book!.id);
+        } else {
+          getLedger(params.code, books[0].id);
+        }
+      }
+    }
   });
 
   type newTx = {

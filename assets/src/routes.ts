@@ -1,10 +1,12 @@
 import Home from './routes/Home.svelte';
 import Ledger from './routes/Ledger.svelte';
 import Activity from './routes/Activity.svelte';
+import { wrap } from 'svelte-spa-router/wrap';
 
 export default {
-  '/': Home,
-  '/ledger/:ledger_id': Ledger,
+  '/': wrap({ component: Home }),
+  '/ledgers/:fin_year': Home,
+  '/ledger/:code': Ledger,
   '/activity': Activity,
   '*': Home
 };

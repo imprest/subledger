@@ -250,7 +250,7 @@
     }
 
     li.is-active a {
-      @apply border-primary;
+      @apply border-primary text-primary;
     }
   }
 
