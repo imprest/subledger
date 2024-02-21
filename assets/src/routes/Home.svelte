@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-  import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
+  import { appState, getLedger, getLedgers, type Ledger, type Book } from '../store.svelte';
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
 
@@ -19,15 +19,17 @@
   let ledgersStatus = $derived(appState.ledgers.status);
   let ledgers = $derived(appState.ledgers.data);
   let books = $derived(appState.books);
+  let book: Book = $derived.by(() => {
+    if (params === undefined) {
+      return books[0].id;
+    }
+    return books.find(({ fin_year }) => fin_year === parseInt(params!.fin_year, 10));
+  });
 
   $effect(() => {
     if (books.length > 0) {
-      if (params === undefined) {
-        getLedgers(books[0].id);
-      } else {
-        let book = books.find(({ fin_year }) => fin_year === parseInt(params!.fin_year, 10));
-        if (book) getLedgers(book.id);
-      }
+      console.log('hello');
+      getLedgers(book.id);
     }
   });
 

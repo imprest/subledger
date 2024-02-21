@@ -6,7 +6,7 @@ import { wrap } from 'svelte-spa-router/wrap';
 export default {
   '/': wrap({ component: Home }),
   '/ledgers/:fin_year': Home,
-  '/ledger/:code': Ledger,
+  '/ledger/:code/:fin_year?': Ledger,
   '/activity': Activity,
   '*': Home
 };

@@ -61,10 +61,14 @@ defmodule Subledger.Import do
   end
 
   def make_user_1_owner do
+    ids = Repo.all(from p in Permission, select: p.ledger_id, where: p.org_id == 1)
+
+    new_ids = Repo.all(from l in Ledger, select: l.id, where: l.org_id == 1 and l.id not in ^ids)
+
     permissions =
-      for x <- Repo.all(Ledger, select: [:id], where: [org_id: 1]),
+      for x <- new_ids,
           do: %{
-            ledger_id: x.id,
+            ledger_id: x,
             org_id: 1,
             user_id: 1,
             role: :owner,

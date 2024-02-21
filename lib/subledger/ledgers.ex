@@ -93,7 +93,7 @@ defmodule Subledger.Ledgers do
           SELECT op_bal, book_id FROM books_ledgers, l WHERE ledger_id = l.lid AND book_id = $2
         ),
         period AS (
-          SELECT period FROM books WHERE id = 1 
+          SELECT period FROM books WHERE id = $2 
         ),
         trans AS (
           SELECT *,

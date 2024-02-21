@@ -164,7 +164,6 @@ export function getBooks() {
 export function getLedgers(book_id: number) {
   if (appState.ledgers.status === 'loaded' && appState.book_id === book_id) return;
 
-  appState.ledgers.status = 'loading';
   if (book_id !== 0) {
     appState.book_id = book_id;
   }
@@ -172,7 +171,13 @@ export function getLedgers(book_id: number) {
 }
 
 export function getLedger(code: string, book_id: number) {
-  if (appState.ledger.status === 'loaded' && appState.ledger.data?.code === code) return;
+  if (
+    appState.ledger.status === 'loaded' &&
+    appState.ledger.data?.code === code &&
+    appState.ledger.data?.book_id === book_id
+  )
+    return;
+  console.log('getLedger');
   get('ledger', { code: code, book_id: book_id });
 }
 
