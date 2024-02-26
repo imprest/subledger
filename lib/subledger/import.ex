@@ -114,6 +114,7 @@ defmodule Subledger.Import do
          {:ok, ctx} <- import_tx(ctx, f.jul),
          {:ok, ctx} <- import_tx(ctx, f.aug),
          {:ok, ctx} <- import_tx(ctx, f.sep) do
+      make_user_1_owner()
       Logger.info("Imported #{ctx.year}:\n#{inspect(Map.drop(ctx, [:year, :ledger_code_to_id]), pretty: true)}")
     else
       unexpected ->
@@ -184,13 +185,34 @@ defmodule Subledger.Import do
         end
       )
 
-    upsert_ledgers = Enum.map(ledgers, fn x -> Map.drop(x, [:book]) end)
+    org_id = ctx.org_id
+    # Get list of ledgers = %{code => %{id, updated_at}}
+    db_ledgers =
+      for x <- Repo.all(from l in Ledger, select: [:id, :code, :updated_at], where: [org_id: ^org_id]),
+          into: %{},
+          do: {x.code, x}
+
+    # Determine ledgers to be inserted or updated i.e. upserted
+    upsert_ledgers =
+      Enum.reduce(ledgers, [], fn x, acc ->
+        case db_ledgers[x.code] do
+          nil ->
+            [Map.drop(x, [:book]) | acc]
+
+          y ->
+            if Date.compare(x.updated_at, y.updated_at) === :gt do
+              [Map.put(Map.drop(x, [:book]), :id, y.id) | acc]
+            else
+              acc
+            end
+        end
+      end)
 
     # Upsert ledgers
     {rows, _} =
       Repo.insert_all(Ledger, upsert_ledgers,
         conflict_target: [:org_id, :code],
-        on_conflict: {:replace_all_except, [:id]}
+        on_conflict: {:replace_all_except, [:id, :org_id, :code]}
       )
 
     # Get Map of %{code => ledger_id}

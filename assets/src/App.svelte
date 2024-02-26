@@ -2,7 +2,7 @@
 
 <script lang="ts">
   import { appState, promise } from './store.svelte';
-  import Router from 'svelte-spa-router';
+  import Router from './Router.svelte';
   import routes from './routes';
 
   let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
