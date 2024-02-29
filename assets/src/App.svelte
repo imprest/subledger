@@ -1,15 +1,17 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-  import { appState, promise } from './store.svelte';
-  import Router from './Router.svelte';
-  import routes from './routes';
+  import Home from './routes/Home.svelte';
+  import { appState, getBooks } from './store.svelte';
 
+  let booksLoaded = $derived(appState.books.length > 0);
   let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
-  promise.then(
-    (result: any) => console.log(result),
-    (error: any) => console.log(error)
-  );
+  $effect.pre(() => {
+    getBooks();
+  });
+  $effect(() => {
+    console.log(booksLoaded);
+  });
 </script>
 
 {#if !appState.connected}
@@ -29,8 +31,8 @@
         <div
           class="ml-4 min-w-0 flex item-baseline space-x-1 overflow-y-hidden overflow-x-auto scroller grow"
         >
-          <a href="#/" class="m-1 px-1">Ledgers</a>
-          <a href="#/activity" class="m-1 px-1">Activity</a>
+          <a href="/" class="m-1 px-1">Ledgers</a>
+          <a href="/activity" class="m-1 px-1">Activity</a>
         </div>
         <div class="p-2 print:hidden">
           <a
@@ -45,5 +47,8 @@
   </nav>
 </header>
 <main class="h-full pt-[calc(var(--header-height)+0.25rem)] print:pt-1">
-  <Router {routes} />
+  {#if booksLoaded}
+    <div>Hello</div>
+    <Home params={{ fin_year: '2023' }} />
+  {/if}
 </main>

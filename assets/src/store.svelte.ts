@@ -104,6 +104,15 @@ export type appState = {
   ledger: Store<Ledger>;
 };
 
+export const ledgers = $state<Store<Ledger[]>>({
+  status: 'idle',
+  data: [],
+  updated_at: undefined,
+  sortOrder: 'asc',
+  sortBy: 'name',
+  error: ''
+});
+
 export const appState = $state<appState>({
   connected: false,
   books: [],
@@ -131,24 +140,6 @@ export const disconnected = () => {
   appState.connected = false;
 };
 
-export const promise = new Promise((resolve, reject) => {
-  channel
-    .push('books:get', {})
-    .receive('ok', (msg: { books: Book[] }) => {
-      appState.books = msg.books;
-      appState.book_id = msg.books[0].id;
-      resolve('Books loaded');
-    })
-    .receive('error', (msg: unknown) => {
-      console.error(msg);
-      reject(msg);
-    })
-    .receive('timeout', () => {
-      console.log('timedout');
-      reject('timedout');
-    });
-});
-
 export function getBooks() {
   if (appState.books.length > 0) return;
   channel
@@ -164,9 +155,9 @@ export function getBooks() {
 export function getLedgers(book_id: number) {
   if (appState.ledgers.status === 'loaded' && appState.book_id === book_id) return;
 
-  if (book_id !== 0) {
-    appState.book_id = book_id;
-  }
+  // if (book_id !== 0) {
+  //   appState.book_id = book_id;
+  // }
   get('ledgers', { book_id: book_id });
 }
 
@@ -188,9 +179,12 @@ function get(store: store, args: object) {
   channel
     .push(store + ':get', args)
     .receive('ok', (msg) => {
-      appState[store].status = 'loaded';
-      appState[store].error = '';
-      appState[store].data = msg[store];
+      // appState[store].status = 'loaded';
+      // appState[store].error = '';
+      // appState[store].data = msg[store];
+      ledgers.status = 'loaded';
+      ledgers.error = '';
+      ledgers.data = msg['ledgers'];
     })
     .receive('error', (msg: string) => {
       appState[store].status = 'error';

@@ -10,6 +10,7 @@ declare module '*.svelte' {
 declare global {
   interface Window {
     userToken?: string;
+    location: string;
   }
   // interface document {}
 }

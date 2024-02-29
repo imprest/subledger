@@ -1,12 +1,8 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-
-  const dispatch = createEventDispatcher();
-
-  export let open = false;
+  let { open = false, onclose } = $props<{ open: boolean }>();
 
   function close() {
-    dispatch('close');
+    open = false;
   }
 
   function keydown(e: KeyboardEvent) {

@@ -27,10 +27,8 @@
   });
 
   $effect(() => {
-    if (books.length > 0) {
-      console.log('hello');
-      getLedgers(book.id);
-    }
+    console.log(book);
+    getLedgers(book.id);
   });
 
   $effect(() => {
@@ -156,7 +154,7 @@
     {/if}
   </div>
 </section>
-<Modal open={isModalOpen} on:close={() => (isModalOpen = false)}>
+<Modal open={isModalOpen} onclose={() => (isModalOpen = false)}>
   <section>
     <div class="wrapper flex items-center justify-center">
       {#if appState.ledger.data}
