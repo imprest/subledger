@@ -5,7 +5,7 @@ import Activity from './routes/Activity.svelte';
 export default {
   '/': Home,
   '/ledgers/:fin_year': Home,
-  '/ledger/:ledger_id': Ledger,
+  '/ledger/:code': Ledger,
   '/activity': Activity,
   '*': Home
 };

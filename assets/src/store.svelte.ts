@@ -152,24 +152,23 @@ export function getBooks() {
     .receive('timeout', () => console.log('timedout'));
 }
 
-export function getLedgers(book_id: number) {
-  if (appState.ledgers.status === 'loaded' && appState.book_id === book_id) return;
+// export function getLedgers(book_id: number) {
+//   if (appState.ledgers.status === 'loaded' && appState.book_id === book_id) return;
+//
+//   // if (book_id !== 0) {
+//   //   appState.book_id = book_id;
+//   // }
+//   get('ledgers', { book_id: book_id });
+// }
 
-  // if (book_id !== 0) {
-  //   appState.book_id = book_id;
-  // }
-  get('ledgers', { book_id: book_id });
+export function getLedgers(fin_year: number) {
+  get('ledgers', { fin_year: fin_year });
 }
 
-export function getLedger(code: string, book_id: number) {
-  if (
-    appState.ledger.status === 'loaded' &&
-    appState.ledger.data?.code === code &&
-    appState.ledger.data?.book_id === book_id
-  )
-    return;
+export function getLedger(code: string, fin_year: number) {
+  if (appState.ledger.status === 'loaded' && appState.ledger.data?.code === code) return;
   console.log('getLedger');
-  get('ledger', { code: code, book_id: book_id });
+  get('ledger', { code: code, fin_year: fin_year });
 }
 
 type store = 'ledgers' | 'ledger';

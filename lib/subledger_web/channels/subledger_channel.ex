@@ -42,15 +42,9 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledgers:get", %{"book_id" => book_id}, socket) do
-    case book_id do
-      "" ->
-        book_id = hd(socket.assigns.books)
-        {:reply, Ledgers.list_ledgers(socket.assigns.user_id, book_id), socket}
-
-      _ ->
-        {:reply, Ledgers.list_ledgers(socket.assigns.user_id, book_id), socket}
-    end
+  def handle_in("ledgers:get", %{"fin_year" => fin_year}, socket) do
+    book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
+    {:reply, Ledgers.list_ledgers(socket.assigns.user_id, book_id), socket}
   end
 
   @impl true
@@ -60,7 +54,8 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledger:get", %{"code" => code, "book_id" => book_id}, socket) do
+  def handle_in("ledger:get", %{"code" => code, "fin_year" => fin_year}, socket) do
+    book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
     {:reply, Ledgers.get_ledger(code, book_id), socket}
   end
 
@@ -84,4 +79,8 @@ defmodule SubledgerWeb.SubledgerChannel do
     push(socket, "presence_state", Presence.list(socket))
     {:noreply, socket}
   end
+
+  defp fin_year_to_book_id(books, 0), do: Map.get(hd(books), :id)
+
+  defp fin_year_to_book_id(books, fin_year), do: books |> Enum.find(fn x -> x.fin_year == fin_year end) |> Map.get(:id)
 end

@@ -10,19 +10,16 @@
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
-  let books = $derived(appState.books);
   let code = $derived(params.code);
   let year = $derived(parseInt(params.fin_year, 10));
 
   $effect(() => {
-    if (books && books.length > 0) {
-      if (code || year) {
-        if (year) {
-          let book = books.find(({ fin_year }) => fin_year === year);
-          getLedger(code, book!.id);
-        } else {
-          getLedger(code, books[0].id);
-        }
+    console.log(params);
+    if (params) {
+      if (year) {
+        getLedger(code, year);
+      } else {
+        getLedger(code, 0);
       }
     }
   });

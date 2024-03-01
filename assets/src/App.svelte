@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-  import Home from './routes/Home.svelte';
   import { appState, getBooks } from './store.svelte';
   import Router from 'svelte-spa-router';
   import routes from './routes';
@@ -30,8 +29,8 @@
         <div
           class="ml-4 min-w-0 flex item-baseline space-x-1 overflow-y-hidden overflow-x-auto scroller grow"
         >
-          <a href="/" class="m-1 px-1">Ledgers</a>
-          <a href="/activity" class="m-1 px-1">Activity</a>
+          <a href="#/" class="m-1 px-1">Ledgers</a>
+          <a href="#/activity" class="m-1 px-1">Activity</a>
         </div>
         <div class="p-2 print:hidden">
           <a
@@ -49,6 +48,6 @@
   {#if booksLoaded}
     <Router {routes} />
   {:else}
-    <div>Hello</div>
+    <div>Initialising App...</div>
   {/if}
 </main>

@@ -35,7 +35,7 @@ defmodule SubledgerWeb.UserSocket do
             select: [u.username, u.org_id],
             where: u.id == ^user_id
 
-        [username, org_id] = Subledger.Repo.one(query, skip_org_id: true)
+        [username, org_id] = Subledger.Repo.one(query)
 
         socket = assign(socket, :username, username)
         socket = assign(socket, :org_id, org_id)

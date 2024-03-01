@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-  import { appState, getLedger, getLedgers, type Ledger, type Book } from '../store.svelte';
+  import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
 
@@ -11,9 +11,9 @@
   let text = $state('');
   let filter: Ledger[] = $state([]);
 
-  function ledgerDetails(id: string) {
+  function ledgerDetails(code: string) {
     isModalOpen = true;
-    getLedger(id);
+    getLedger(code, 8);
   }
 
   let ledgersStatus = $derived(appState.ledgers.status);
@@ -21,12 +21,11 @@
 
   $effect(() => {
     if (params === undefined) {
-      getLedgers(appState.books[0].id);
+      console.log(params);
+      getLedgers(0);
     } else {
-      let year = params.fin_year;
-      let book = appState.books.find(({ fin_year }) => fin_year === parseInt(year, 10));
-      console.log(book!.id);
-      getLedgers(book!.id);
+      console.log(params);
+      getLedgers(parseInt(params.fin_year, 10));
     }
   });
 
@@ -137,7 +136,7 @@
                     <li class="tag inline bg-blue-200">{ledger.region}</li>
                     <li class="tag inline bg-purple-300">{ledger.is_gov ? 'GOV' : 'PVT'}</li>
                   </ul>
-                  <button on:click={() => ledgerDetails(ledger.id)}>
+                  <button on:click={() => ledgerDetails(ledger.code)}>
                     <span class="hero-information-circle text-blue-400 h-4"></span>
                   </button>
                 </td>

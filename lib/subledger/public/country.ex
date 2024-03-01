@@ -13,7 +13,8 @@ defmodule Subledger.Public.Country do
   @doc false
   def changeset(country, attrs) do
     country
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+    |> cast(attrs, [:id, :name])
+    |> validate_required([:id, :name])
+    |> unique_constraint([:name])
   end
 end
