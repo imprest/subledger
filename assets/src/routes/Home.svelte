@@ -18,17 +18,16 @@
 
   let ledgersStatus = $derived(appState.ledgers.status);
   let ledgers = $derived(appState.ledgers.data);
-  let books = $derived(appState.books);
-  let book: Book = $derived.by(() => {
-    if (params === undefined) {
-      return books[0].id;
-    }
-    return books.find(({ fin_year }) => fin_year === parseInt(params!.fin_year, 10));
-  });
 
   $effect(() => {
-    console.log(book);
-    getLedgers(book.id);
+    if (params === undefined) {
+      getLedgers(appState.books[0].id);
+    } else {
+      let year = params.fin_year;
+      let book = appState.books.find(({ fin_year }) => fin_year === parseInt(year, 10));
+      console.log(book!.id);
+      getLedgers(book!.id);
+    }
   });
 
   $effect(() => {

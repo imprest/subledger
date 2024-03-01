@@ -179,12 +179,9 @@ function get(store: store, args: object) {
   channel
     .push(store + ':get', args)
     .receive('ok', (msg) => {
-      // appState[store].status = 'loaded';
-      // appState[store].error = '';
-      // appState[store].data = msg[store];
-      ledgers.status = 'loaded';
-      ledgers.error = '';
-      ledgers.data = msg['ledgers'];
+      appState[store].status = 'loaded';
+      appState[store].error = '';
+      appState[store].data = msg[store];
     })
     .receive('error', (msg: string) => {
       appState[store].status = 'error';

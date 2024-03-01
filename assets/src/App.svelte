@@ -3,14 +3,13 @@
 <script lang="ts">
   import Home from './routes/Home.svelte';
   import { appState, getBooks } from './store.svelte';
+  import Router from 'svelte-spa-router';
+  import routes from './routes';
 
   let booksLoaded = $derived(appState.books.length > 0);
   let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
   $effect.pre(() => {
     getBooks();
-  });
-  $effect(() => {
-    console.log(booksLoaded);
   });
 </script>
 
@@ -48,7 +47,8 @@
 </header>
 <main class="h-full pt-[calc(var(--header-height)+0.25rem)] print:pt-1">
   {#if booksLoaded}
+    <Router {routes} />
+  {:else}
     <div>Hello</div>
-    <Home params={{ fin_year: '2023' }} />
   {/if}
 </main>
