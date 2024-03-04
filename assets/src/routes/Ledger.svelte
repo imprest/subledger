@@ -10,12 +10,12 @@
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
-  let code = $derived(params.code);
-  let year = $derived(parseInt(params.fin_year, 10));
 
   $effect(() => {
-    console.log(params);
     if (params) {
+      let code = params.code;
+      let year = parseInt(params.fin_year, 10);
+      console.log(year);
       if (year) {
         getLedger(code, year);
       } else {

@@ -166,8 +166,6 @@ export function getLedgers(fin_year: number) {
 }
 
 export function getLedger(code: string, fin_year: number) {
-  if (appState.ledger.status === 'loaded' && appState.ledger.data?.code === code) return;
-  console.log('getLedger');
   get('ledger', { code: code, fin_year: fin_year });
 }
 
