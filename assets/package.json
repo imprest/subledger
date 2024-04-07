@@ -22,7 +22,7 @@
     "@tailwindcss/nesting": "0.0.0-insiders.565cd3e",
     "@tailwindcss/typography": "^0.5.12",
     "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^20.12.4",
+    "@types/node": "^20.12.5",
     "@types/phoenix": "^1.6.4",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",

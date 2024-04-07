@@ -61,9 +61,19 @@ defmodule SubledgerWeb.SubledgerChannel do
 
   @impl true
   def handle_in("ledger:add_txs", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
-    IO.inspect(ledger_id)
-    IO.inspect(txs)
-    {:noreply, socket}
+    tx =
+      txs
+      |> hd()
+      |> Map.put("ledger_id", ledger_id)
+      |> Map.merge(%{"org_id" => 1, "book_id" => 8, "updated_by_id" => 1, "inserted_by_id" => 1})
+
+    case Subledger.Ledgers.create_tx(tx) do
+      {:ok, result} ->
+        {:reply, Ledgers.get_ledger("1/FOUN", result.book_id), socket}
+
+      {:error, reason} ->
+        {:reply, %{error: reason}, socket}
+    end
   end
 
   @impl true

@@ -34,7 +34,32 @@ defmodule Subledger.Ledgers.Tx do
   @doc false
   def changeset(tx, attrs) do
     tx
-    |> cast(attrs, [:date, :type, :narration, :amount, :is_deleted, :is_paid, :note, :pvt_note, :ref_id])
-    |> validate_required([:date, :type, :narration, :amount, :is_deleted, :is_paid, :note, :pvt_note, :ref_id])
+    |> cast(attrs, [
+      :date,
+      :type,
+      :narration,
+      :amount,
+      :is_deleted,
+      :is_paid,
+      :note,
+      :pvt_note,
+      :ref_id,
+      :book_id,
+      :ledger_id,
+      :org_id,
+      :inserted_by_id,
+      :updated_by_id
+    ])
+    |> validate_required([
+      :date,
+      :type,
+      :narration,
+      :amount,
+      :book_id,
+      :ledger_id,
+      :org_id,
+      :inserted_by_id,
+      :updated_by_id
+    ])
   end
 end
