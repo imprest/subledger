@@ -99,7 +99,7 @@ interface Book {
 export type appState = {
   connected: boolean;
   books: Book[];
-  book_id: number;
+  fin_year: number;
   ledgers: Store<Ledger[]>;
   ledger: Store<Ledger>;
 };
@@ -116,7 +116,7 @@ export const ledgers = $state<Store<Ledger[]>>({
 export const appState = $state<appState>({
   connected: false,
   books: [],
-  book_id: 0,
+  fin_year: 0,
   ledgers: {
     status: 'idle',
     data: [],
@@ -146,22 +146,15 @@ export function getBooks() {
     .push('books:get', {})
     .receive('ok', (msg: { books: Book[] }) => {
       appState.books = msg.books;
-      appState.book_id = msg.books[0].id;
+      appState.fin_year = msg.books[0].fin_year;
     })
     .receive('error', (msg: unknown) => console.error(msg))
     .receive('timeout', () => console.log('timedout'));
 }
 
-// export function getLedgers(book_id: number) {
-//   if (appState.ledgers.status === 'loaded' && appState.book_id === book_id) return;
-//
-//   // if (book_id !== 0) {
-//   //   appState.book_id = book_id;
-//   // }
-//   get('ledgers', { book_id: book_id });
-// }
-
 export function getLedgers(fin_year: number) {
+  if (appState.ledgers.status === 'loaded' && appState.fin_year === fin_year) return;
+  appState.fin_year = fin_year;
   get('ledgers', { fin_year: fin_year });
 }
 
@@ -191,7 +184,7 @@ export function addTxs(txs: object) {
   channel
     .push('ledger:add_txs', { txs: txs, ledger_id: appState.ledger.data!.id })
     .receive('ok', (msg) => {
-      appState.ledger.data = msg.ledger
+      appState.ledger.data = msg.ledger;
     })
     .receive('error', (msg) => {
       console.log(msg);

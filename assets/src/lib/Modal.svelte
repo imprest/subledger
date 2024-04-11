@@ -1,5 +1,5 @@
 <script lang="ts">
-  let { open = false, onclose } = $props<{ open: boolean }>();
+  let { open = false }: { open: boolean } = $props();
 
   function close() {
     open = false;

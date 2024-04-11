@@ -260,8 +260,8 @@
   }
 
   .tag {
-    @apply text-gray-600 bg-gray-100 py-1 px-2 rounded shadow-sm align-middle;
-    font-size: 0.7rem;
+    @apply text-gray-600 bg-gray-100 py-1 px-2 rounded shadow-sm align-middle font-semibold;
+    font-size: 0.6rem;
   }
 
   /* TABLES */

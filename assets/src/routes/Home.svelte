@@ -4,9 +4,10 @@
   import { appState, getLedger, getLedgers, type Ledger } from '../store.svelte';
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
+  import { untrack } from 'svelte';
 
-  type props = { params: { fin_year: string } | undefined };
-  let { params } = $props<props>();
+  type MyProps = { params: { fin_year: string } | undefined };
+  let { params }: MyProps = $props();
   let isModalOpen = $state(false);
   let text = $state('');
   let filter: Ledger[] = $state([]);
@@ -18,14 +19,13 @@
 
   let ledgersStatus = $derived(appState.ledgers.status);
   let ledgers = $derived(appState.ledgers.data);
+  let default_fin_year = $derived(appState.books[0].fin_year);
 
   $effect(() => {
     if (params === undefined) {
-      console.log(params);
-      getLedgers(0);
+      untrack(() => getLedgers(default_fin_year));
     } else {
-      console.log(params);
-      getLedgers(parseInt(params.fin_year, 10));
+      untrack(() => getLedgers(parseInt(params!.fin_year, 10)));
     }
   });
 
@@ -81,7 +81,7 @@
     <div class="tabs">
       <ul class="flex-row-reverse" role="menu">
         {#each appState.books as book (book.id)}
-          <li title={book.period} class:is-active={appState.book_id === book.id}>
+          <li title={book.period} class:is-active={appState.fin_year === book.fin_year}>
             <a href="#/ledgers/{book.fin_year}">{book.fin_year}</a>
           </li>
         {/each}
@@ -130,7 +130,9 @@
               <tr>
                 <td class="text-right">{i + 1}</td>
                 <td>
-                  <a href={`#/ledger/${encodeURIComponent(ledger.code)}`}>{ledger.name}</a>
+                  <a href={`#/ledger/${encodeURIComponent(ledger.code)}/${appState.fin_year}`}
+                    >{ledger.name}</a
+                  >
                   <ul class="tags inline-block pl-2">
                     <li class="tag inline bg-orange-200">{ledger.code}</li>
                     <li class="tag inline bg-blue-200">{ledger.region}</li>
@@ -152,7 +154,7 @@
     {/if}
   </div>
 </section>
-<Modal open={isModalOpen} onclose={() => (isModalOpen = false)}>
+<Modal open={isModalOpen} on:close={() => (isModalOpen = false)}>
   <section>
     <div class="wrapper flex items-center justify-center">
       {#if appState.ledger.data}

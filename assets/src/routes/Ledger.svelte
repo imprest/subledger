@@ -1,26 +1,23 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { appState, getLedger, addTxs, type TxType } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
 
-  type props = { params: { code: string; fin_year: string } };
-  let { params } = $props<props>();
+  type MyProps = { params: { code: string; fin_year: string } };
+  let { params }: MyProps = $props();
 
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
+  let default_fin_year = $derived(appState.books[0].fin_year);
 
   $effect(() => {
-    if (params) {
-      let code = params.code;
-      let year = parseInt(params.fin_year, 10);
-      console.log(year);
-      if (year) {
-        getLedger(code, year);
-      } else {
-        getLedger(code, 0);
-      }
+    if (params !== undefined && params.fin_year) {
+      untrack(() => getLedger(params.code, parseInt(params.fin_year, 10)));
+    } else {
+      untrack(() => getLedger(params.code, default_fin_year));
     }
   });
 
