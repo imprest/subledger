@@ -165,8 +165,8 @@
               <th class="w-5">Date</th>
               <th class="w-5">Type</th>
               <th class="text-left min-w-10">Narration</th>
-              <th class="text-right min-w-10">Debit</th>
-              <th class="text-right min-w-10">Credit</th>
+              <th class="text-right min-w-32">Debit</th>
+              <th class="text-right min-w-32">Credit</th>
               <th class="text-right w-5">Action</th>
             </tr>
           </thead>
@@ -174,7 +174,7 @@
             {#each newTxs as t, i}
               <tr class="*:align-middle">
                 <td class="text-right">{i + 1}</td>
-                <td class="text-center"><input type="date" value={t.date} /></td>
+                <td class="text-center"><input type="date" bind:value={t.date} /></td>
                 <td>
                   <select
                     id="type"
@@ -191,14 +191,14 @@
                   </select>
                 </td>
                 <td class="text-left"><input class="w-full" bind:value={t.narration} /></td>
-                <td
+                <td class="min-w-32"
                   ><input
                     bind:value={t.debit}
                     class="text-right w-full disabled:hidden"
                     disabled={debitOrCreditTx(t.type)}
                   /></td
                 >
-                <td>
+                <td class="min-w-32">
                   <input
                     bind:value={t.credit}
                     class="text-right w-full disabled:hidden"

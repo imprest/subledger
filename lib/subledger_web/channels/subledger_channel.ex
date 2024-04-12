@@ -56,16 +56,21 @@ defmodule SubledgerWeb.SubledgerChannel do
   @impl true
   def handle_in("ledger:get", %{"code" => code, "fin_year" => fin_year}, socket) do
     book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
+    socket = socket |> assign(:ledger_code, code) |> assign(:ledger_year, fin_year)
     {:reply, Ledgers.get_ledger(code, book_id), socket}
   end
 
   @impl true
   def handle_in("ledger:add_txs", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
+    org_id = socket.assigns.org_id
+    user_id = socket.assigns.user_id
+    book_id = txs |> hd() |> Map.get("date") |> Date.from_iso8601!() |> date_to_book_id(socket.assigns.books)
+
     tx =
       txs
       |> hd()
       |> Map.put("ledger_id", ledger_id)
-      |> Map.merge(%{"org_id" => 1, "book_id" => 8, "updated_by_id" => 1, "inserted_by_id" => 1})
+      |> Map.merge(%{"org_id" => org_id, "book_id" => book_id, "updated_by_id" => user_id, "inserted_by_id" => user_id})
 
     case Subledger.Ledgers.create_tx(tx) do
       {:ok, result} ->
@@ -93,4 +98,14 @@ defmodule SubledgerWeb.SubledgerChannel do
   defp fin_year_to_book_id(books, 0), do: Map.get(hd(books), :id)
 
   defp fin_year_to_book_id(books, fin_year), do: books |> Enum.find(fn x -> x.fin_year == fin_year end) |> Map.get(:id)
+
+  defp date_to_book_id(date, books) do
+    book =
+      Enum.find(books, fn x ->
+        (Date.after?(date, x.period.lower) || Date.compare(date, x.period.lower) == :eq) &&
+          Date.before?(date, x.period.upper)
+      end)
+
+    Map.get(book, :id)
+  end
 end
