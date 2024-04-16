@@ -193,6 +193,7 @@
                 <td class="text-left"><input class="w-full" bind:value={t.narration} /></td>
                 <td class="min-w-32"
                   ><input
+                    type="number"
                     bind:value={t.debit}
                     class="text-right w-full disabled:hidden"
                     disabled={debitOrCreditTx(t.type)}
@@ -200,17 +201,15 @@
                 >
                 <td class="min-w-32">
                   <input
+                    type="number"
                     bind:value={t.credit}
                     class="text-right w-full disabled:hidden"
                     disabled={!debitOrCreditTx(t.type)}
                   /></td
                 >
                 <td>
-                  <span>
-                    <button
-                      class="btn rounded-full px-2 mt-1 mb-0"
-                      onclick={() => newTxs.splice(i, 1)}>-</button
-                    >
+                  <span class="flex justify-center items-baseline">
+                    <button class="btn mb-0" onclick={() => newTxs.splice(i, 1)}>-</button>
                   </span>
                 </td>
               </tr>
@@ -219,7 +218,7 @@
           <tfoot class="border-b border-t border-gray-700">
             <tr class="*:p-1">
               <th>
-                <button class="btn rounded-full px-2 mt-1 mb-0" onclick={() => addTx()}>+</button>
+                <button class="btn mt-1 mb-0" onclick={() => addTx()}>+</button>
               </th>
               <th></th>
               <th></th>
