@@ -61,7 +61,7 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledger:add_txs", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
+  def handle_in("ledger:add_tx", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
     org_id = socket.assigns.org_id
     user_id = socket.assigns.user_id
     book_id = txs |> hd() |> Map.get("date") |> Date.from_iso8601!() |> date_to_book_id(socket.assigns.books)
@@ -74,6 +74,42 @@ defmodule SubledgerWeb.SubledgerChannel do
 
     case Subledger.Ledgers.create_tx(tx) do
       {:ok, result} ->
+        {:reply, Ledgers.get_ledger("1/FOUN", result.book_id), socket}
+
+      {:error, reason} ->
+        {:reply, %{error: reason}, socket}
+    end
+  end
+
+  @impl true
+  def handle_in("ledger:add_txs", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
+    org_id = socket.assigns.org_id
+    user_id = socket.assigns.user_id
+    book_id = txs |> hd() |> Map.get("date") |> Date.from_iso8601!() |> date_to_book_id(socket.assigns.books)
+
+    txs =
+      for tx <- txs do
+        tx
+        |> Map.put("ledger_id", ledger_id)
+        |> Map.merge(%{"org_id" => org_id, "book_id" => book_id, "updated_by_id" => user_id, "inserted_by_id" => user_id})
+      end
+
+    Subledger.Ledgers.create_txs(txs)
+    # case Subledger.Ledgers.create_txs(txs) do
+    #   {:ok, result} ->
+    #     {:reply, Ledgers.get_ledger("1/FOUN", result.book_id), socket}
+    #
+    #   {:error, reason} ->
+    #     {:reply, %{error: reason}, socket}
+    # end
+    {:reply, Ledgers.get_ledger("1/FOUN", book_id), socket}
+  end
+
+  @impl true
+  def handle_in("ledger:delete_txs", %{"txs" => txs}, socket) do
+    case Subledger.Ledgers.delete_tx(hd(txs)) do
+      {:ok, result} ->
+        {}
         {:reply, Ledgers.get_ledger("1/FOUN", result.book_id), socket}
 
       {:error, reason} ->

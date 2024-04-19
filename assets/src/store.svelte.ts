@@ -62,6 +62,7 @@ export interface Tx {
   inserted_at: string;
   updated_at: string;
   verified_at: string;
+  selected: boolean;
 }
 
 export interface Ledger {
@@ -159,7 +160,46 @@ export function getLedgers(fin_year: number) {
 }
 
 export function getLedger(code: string, fin_year: number) {
-  get('ledger', { code: code, fin_year: fin_year });
+  // get('ledger', { code: code, fin_year: fin_year });
+  appState.ledger.status = 'loading';
+  channel
+    .push('ledger:get', { code: code, fin_year: fin_year })
+    .receive('ok', (msg) => {
+      appState.ledger.status = 'loaded';
+      appState.ledger.error = '';
+      const ledger = msg.ledger;
+      ledger.txs = ledger.txs.map((x: Tx) => {
+        x.selected = false;
+        return x;
+      });
+      console.log(ledger);
+      appState.ledger.data = ledger;
+    })
+    .receive('error', (msg: string) => {
+      appState.ledger.status = 'error';
+      appState.ledger.error = msg;
+    })
+    .receive('timeout', () => (appState.ledger.status = 'timedout'));
+}
+
+export function deleteTxs(txs: string[]) {
+  channel
+    .push('ledger:delete_txs', { txs: txs })
+    .receive('ok', (msg) => {
+      appState.ledger.status = 'loaded';
+      appState.ledger.error = '';
+      const ledger = msg.ledger;
+      ledger.txs = ledger.txs.map((x: Tx) => {
+        x.selected = false;
+        return x;
+      });
+      appState.ledger.data = ledger;
+    })
+    .receive('error', (msg: string) => {
+      appState.ledger.status = 'error';
+      appState.ledger.error = msg;
+    })
+    .receive('timeout', () => (appState.ledger.status = 'timedout'));
 }
 
 type store = 'ledgers' | 'ledger';

@@ -237,6 +237,42 @@ defmodule Subledger.Ledgers do
   end
 
   @doc """
+  Creates txs.
+
+  ## Examples
+
+      iex> create_txs([%{field: value}])
+      {:ok, %Tx{}}
+
+      iex> create_tx([%{field: bad_value}])
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_txs(tx_maps) do
+    txs =
+      for tx <- tx_maps do
+        Tx.changeset(%Tx{}, tx)
+      end
+
+    valid_changesets = Enum.map(txs, &Map.get(&1, :valid?))
+
+    if Enum.all?(valid_changesets, fn x -> x end) do
+      changes =
+        for x <- txs do
+          x.changes
+          |> Map.put(:id, Uniq.UUID.uuid7())
+          |> Map.put(:inserted_at, DateTime.utc_now(:second))
+          |> Map.put(:updated_at, DateTime.utc_now(:second))
+        end
+
+      Repo.insert_all(Tx, changes)
+      {:ok, "Inserted all txs"}
+    else
+      {:error, "There is an error in one of the txs"}
+    end
+  end
+
+  @doc """
   Updates a tx.
 
   ## Examples
@@ -268,6 +304,22 @@ defmodule Subledger.Ledgers do
   """
   def delete_tx(%Tx{} = tx) do
     Repo.delete(tx)
+  end
+
+  @doc """
+  Deletes a txs.
+
+  ## Examples
+
+      iex> delete_txs([tx_id])
+      {:ok, %Tx{}}
+
+      iex> delete_txs([tx_id])
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_tx(txs) do
+    Repo.delete_all(t in Tx, where: t.id == ^txs)
   end
 
   @doc """

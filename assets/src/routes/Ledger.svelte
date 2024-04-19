@@ -2,7 +2,7 @@
 
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { appState, getLedger, addTxs, type TxType } from '../store.svelte';
+  import { appState, getLedger, deleteTxs, addTxs, type TxType, type Tx } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
 
   type MyProps = { params: { code: string; fin_year: string } };
@@ -11,6 +11,7 @@
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
+  let selectedTxs = $derived(ledger!.txs.filter((x: Tx) => x.selected).map((x) => x.id));
   let default_fin_year = $derived(appState.books[0].fin_year);
 
   $effect(() => {
@@ -115,10 +116,14 @@
           {ledger.op_bal === 0 ? '0.00' : moneyFmt(ledger.op_bal)}</span
         >
       </h3>
+      <button class="btn bg-red-700 text-white" onclick={() => deleteTxs(selectedTxs)}
+        >Delete</button
+      >
       <div class="overflow-x-auto">
         <table class="table w-full table-auto is-striped is-hoverable">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
+              <th><input type="checkbox" /></th>
               <th>Date</th>
               <th class="hidden sm:table-cell">Type</th>
               <th class="text-left">Narration</th>
@@ -130,6 +135,7 @@
           <tbody>
             {#each ledger.txs as t (t.id)}
               <tr>
+                <td class="text-center"><input type="checkbox" bind:checked={t.selected} /></td>
                 <td class="text-center w-6">{dateFmt(new Date(t.date))}</td>
                 <td class="text-center w-10 hidden sm:table-cell">{t.type}</td>
                 <td class="text-left">{t.narration}</td>
@@ -141,6 +147,7 @@
           </tbody>
           <tfoot class="border-b border-t border-gray-700">
             <tr class="h-10">
+              <th></th>
               <th></th>
               <th class="hidden sm:table-cell"></th>
               <th class="text-right">Total:</th>
