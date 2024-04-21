@@ -47,8 +47,8 @@ defmodule Subledger.Books do
       {:ok, %{num_rows: _cols, rows: rows}} ->
         {:ok, %{books: Repo.json_frag(rows)}}
 
-      {:error, Error} ->
-        Logger.error(Error)
+      {:error, error} ->
+        Logger.error(error)
     end
   end
 

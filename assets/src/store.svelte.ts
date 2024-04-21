@@ -156,7 +156,20 @@ export function getBooks() {
 export function getLedgers(fin_year: number) {
   if (appState.ledgers.status === 'loaded' && appState.fin_year === fin_year) return;
   appState.fin_year = fin_year;
-  get('ledgers', { fin_year: fin_year });
+  const ledgers = appState.ledgers;
+  ledgers.status = 'loading';
+  channel
+    .push('ledgers:get', { fin_year: fin_year })
+    .receive('ok', (msg) => {
+      ledgers.status = 'loaded';
+      ledgers.error = '';
+      ledgers.data = msg.ledgers;
+    })
+    .receive('error', (msg: string) => {
+      ledgers.status = 'error';
+      ledgers.error = msg;
+    })
+    .receive('timeout', () => (ledgers.status = 'timedout'));
 }
 
 export function getLedger(code: string, fin_year: number) {
@@ -172,7 +185,6 @@ export function getLedger(code: string, fin_year: number) {
         x.selected = false;
         return x;
       });
-      console.log(ledger);
       appState.ledger.data = ledger;
     })
     .receive('error', (msg: string) => {
@@ -182,47 +194,30 @@ export function getLedger(code: string, fin_year: number) {
     .receive('timeout', () => (appState.ledger.status = 'timedout'));
 }
 
-export function deleteTxs(txs: string[]) {
+export function deleteTxs(code: string, fin_year: number, txs: string[]) {
+  const ledger = appState.ledger;
   channel
-    .push('ledger:delete_txs', { txs: txs })
+    .push('ledger:delete_txs', { code: code, fin_year: fin_year, txs: txs })
     .receive('ok', (msg) => {
-      appState.ledger.status = 'loaded';
-      appState.ledger.error = '';
-      const ledger = msg.ledger;
-      ledger.txs = ledger.txs.map((x: Tx) => {
+      ledger.status = 'loaded';
+      ledger.error = '';
+      const data = msg.ledger;
+      data.txs = data.txs.map((x: Tx) => {
         x.selected = false;
         return x;
       });
-      appState.ledger.data = ledger;
+      ledger.data = data;
     })
     .receive('error', (msg: string) => {
-      appState.ledger.status = 'error';
-      appState.ledger.error = msg;
+      ledger.status = 'error';
+      ledger.error = msg;
     })
-    .receive('timeout', () => (appState.ledger.status = 'timedout'));
+    .receive('timeout', () => (ledger.status = 'timedout'));
 }
 
-type store = 'ledgers' | 'ledger';
-
-function get(store: store, args: object) {
-  appState[store].status = 'loading';
+export function addTxs(code: string, fin_year: number, txs: object) {
   channel
-    .push(store + ':get', args)
-    .receive('ok', (msg) => {
-      appState[store].status = 'loaded';
-      appState[store].error = '';
-      appState[store].data = msg[store];
-    })
-    .receive('error', (msg: string) => {
-      appState[store].status = 'error';
-      appState[store].error = msg;
-    })
-    .receive('timeout', () => (appState[store].status = 'timedout'));
-}
-
-export function addTxs(txs: object) {
-  channel
-    .push('ledger:add_txs', { txs: txs, ledger_id: appState.ledger.data!.id })
+    .push('ledger:add_txs', { code: code, fin_year: fin_year, txs: txs })
     .receive('ok', (msg) => {
       appState.ledger.data = msg.ledger;
     })

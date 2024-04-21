@@ -9,6 +9,7 @@ defmodule Subledger.Ledgers do
   alias Subledger.Ledgers.Ledger
   alias Subledger.Ledgers.Tx
   alias Subledger.Repo
+  alias Subledger.Users.Permission
 
   require Logger
 
@@ -56,9 +57,23 @@ defmodule Subledger.Ledgers do
       {:ok, %{num_rows: _cols, rows: rows}} ->
         {:ok, %{ledgers: Repo.json_frag(rows)}}
 
-      {:error, Error} ->
-        Logger.error(Error)
+      {:error, error} ->
+        Logger.error(error)
     end
+  end
+
+  @doc """
+  Gets a map of code => {:ledger_id, :role} for a given user depending on org_id and user permissions
+  """
+  def get_ledger_permissions(user_id, org_id) do
+    q =
+      from p in Permission,
+        join: l in Ledger,
+        on: l.id == p.ledger_id,
+        where: p.user_id == ^user_id and p.org_id == ^org_id,
+        select: {l.code, {p.ledger_id, p.role}}
+
+    q |> Repo.all() |> Map.new()
   end
 
   @doc """
@@ -82,15 +97,12 @@ defmodule Subledger.Ledgers do
 
   Return {:ok, %{Ledger: ledger}} | {:error, Error} exist.
   """
-  def get_ledger(code, book_id) do
+  def get_ledger(ledger_id, book_id) do
     q = ~Q"""
       SELECT row_to_json(j)::text as ledger 
       FROM (
-        WITH l AS (
-          SELECT id as lid FROM ledgers where code = $1
-        ),
-          op_bal AS (
-          SELECT op_bal, book_id FROM books_ledgers, l WHERE ledger_id = l.lid AND book_id = $2
+        WITH op_bal AS (
+          SELECT op_bal, book_id FROM books_ledgers WHERE ledger_id = $1 AND book_id = $2
         ),
         period AS (
           SELECT period FROM books WHERE id = $2 
@@ -98,8 +110,8 @@ defmodule Subledger.Ledgers do
         trans AS (
           SELECT *,
           o.op_bal + (SUM(amount) OVER(ORDER BY date, id)) AS bal
-          FROM txs, op_bal o, period p, l 
-          WHERE ledger_id = l.lid AND  p.period @> date
+          FROM txs, op_bal o, period p
+          WHERE ledger_id = $1 AND  p.period @> date
           ORDER BY date, id
         ),
         total_debit AS (SELECT COALESCE(SUM(amount), 0) as total_debit FROM trans WHERE amount >= 0),
@@ -111,16 +123,16 @@ defmodule Subledger.Ledgers do
         (SELECT total_credit FROM total_credit) AS total_credit,
         (SELECT op_bal+(SELECT total_debit FROM total_debit)+(SELECT total_credit FROM total_credit)) AS cl_bal,
         (SELECT COALESCE(json_agg(p), '[]'::json) FROM (SELECT * from trans) p) AS txs 
-        FROM op_bal o, ledgers, l WHERE id = l.lid
+        FROM op_bal o, ledgers WHERE id = $1
       ) j;
     """
 
-    case Repo.query(q, [code, book_id]) do
+    case Repo.query(q, [ledger_id, book_id]) do
       {:ok, %{num_rows: 1, rows: rows}} ->
         {:ok, %{ledger: Repo.json_frag(hd(rows))}}
 
-      {:error, Error} ->
-        Logger.error(Error)
+      {:error, error} ->
+        Logger.error(error)
     end
   end
 
@@ -266,7 +278,7 @@ defmodule Subledger.Ledgers do
         end
 
       Repo.insert_all(Tx, changes)
-      {:ok, "Inserted all txs"}
+      :ok
     else
       {:error, "There is an error in one of the txs"}
     end
@@ -318,8 +330,11 @@ defmodule Subledger.Ledgers do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_tx(txs) do
-    Repo.delete_all(t in Tx, where: t.id == ^txs)
+  def delete_txs(txs) do
+    case Repo.delete_all(from t in Tx, where: t.id in ^txs) do
+      {_count, nil} -> :ok
+      _ -> {:error, "Could not delete transactions."}
+    end
   end
 
   @doc """

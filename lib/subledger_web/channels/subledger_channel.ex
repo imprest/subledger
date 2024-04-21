@@ -14,7 +14,9 @@ defmodule SubledgerWeb.SubledgerChannel do
   def join("subledger:" <> user_id, _payload, socket) do
     # if authorized?(payload) do
     if socket.assigns.user_id === String.to_integer(user_id) do
-      socket = assign(socket, :books, Books.list_books(socket.assigns.org_id))
+      org_id = socket.assigns.org_id
+      socket = assign(socket, :books, Books.list_books(org_id))
+      socket = assign(socket, :ledgers, Ledgers.get_ledger_permissions(user_id, org_id))
       {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
@@ -43,21 +45,26 @@ defmodule SubledgerWeb.SubledgerChannel do
 
   @impl true
   def handle_in("ledgers:get", %{"fin_year" => fin_year}, socket) do
+    user_id = socket.assigns.user_id
     book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
-    {:reply, Ledgers.list_ledgers(socket.assigns.user_id, book_id), socket}
-  end
-
-  @impl true
-  def handle_in("ledgers:get", _payload, socket) do
-    book_id = hd(socket.assigns.books)
-    {:reply, Ledgers.list_ledgers(socket.assigns.user_id, book_id), socket}
+    socket = assign(socket, :book_id, book_id)
+    {:reply, Ledgers.list_ledgers(user_id, book_id), socket}
   end
 
   @impl true
   def handle_in("ledger:get", %{"code" => code, "fin_year" => fin_year}, socket) do
     book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
-    socket = socket |> assign(:ledger_code, code) |> assign(:ledger_year, fin_year)
-    {:reply, Ledgers.get_ledger(code, book_id), socket}
+    {ledger_id, role} = Map.get(socket.assigns.ledgers, code)
+
+    socket =
+      socket
+      |> assign(:fin_year, fin_year)
+      |> assign(:book_id, book_id)
+      |> assign(:code, code)
+      |> assign(:ledger_id, ledger_id)
+      |> assign(:role, role)
+
+    {:reply, Ledgers.get_ledger(ledger_id, book_id), socket}
   end
 
   @impl true
@@ -82,35 +89,39 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledger:add_txs", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
+  def handle_in("ledger:add_txs", %{"code" => code, "fin_year" => fin_year, "txs" => txs}, socket) do
     org_id = socket.assigns.org_id
     user_id = socket.assigns.user_id
-    book_id = txs |> hd() |> Map.get("date") |> Date.from_iso8601!() |> date_to_book_id(socket.assigns.books)
+    books = socket.assigns.books
+    book_id = fin_year_to_book_id(books, fin_year)
+    {ledger_id, _role} = Map.get(socket.assigns.ledgers, code)
 
     txs =
       for tx <- txs do
+        book_id = tx |> Map.get("date") |> Date.from_iso8601!() |> date_to_book_id(books)
+
         tx
         |> Map.put("ledger_id", ledger_id)
         |> Map.merge(%{"org_id" => org_id, "book_id" => book_id, "updated_by_id" => user_id, "inserted_by_id" => user_id})
       end
 
-    Subledger.Ledgers.create_txs(txs)
-    # case Subledger.Ledgers.create_txs(txs) do
-    #   {:ok, result} ->
-    #     {:reply, Ledgers.get_ledger("1/FOUN", result.book_id), socket}
-    #
-    #   {:error, reason} ->
-    #     {:reply, %{error: reason}, socket}
-    # end
-    {:reply, Ledgers.get_ledger("1/FOUN", book_id), socket}
+    case Subledger.Ledgers.create_txs(txs) do
+      :ok ->
+        {:reply, Ledgers.get_ledger(ledger_id, book_id), socket}
+
+      {:error, reason} ->
+        {:reply, %{error: reason}, socket}
+    end
   end
 
   @impl true
-  def handle_in("ledger:delete_txs", %{"txs" => txs}, socket) do
-    case Subledger.Ledgers.delete_tx(hd(txs)) do
-      {:ok, result} ->
-        {}
-        {:reply, Ledgers.get_ledger("1/FOUN", result.book_id), socket}
+  def handle_in("ledger:delete_txs", %{"code" => code, "fin_year" => fin_year, "txs" => txs}, socket) do
+    book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
+    {ledger_id, _role} = Map.get(socket.assigns.ledgers, code)
+
+    case Subledger.Ledgers.delete_txs(txs) do
+      :ok ->
+        {:reply, Ledgers.get_ledger(ledger_id, book_id), socket}
 
       {:error, reason} ->
         {:reply, %{error: reason}, socket}

@@ -4,11 +4,12 @@
   import { appState, getBooks } from './store.svelte';
   import Router from 'svelte-spa-router';
   import routes from './routes';
+  import { untrack } from 'svelte';
 
   let booksLoaded = $derived(appState.books.length > 0);
   let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
   $effect.pre(() => {
-    getBooks();
+    untrack(() => getBooks());
   });
 </script>
 

@@ -12,13 +12,29 @@
 
   let ledger = $derived(appState.ledger.data);
   let selectedTxs = $derived(ledger!.txs.filter((x: Tx) => x.selected).map((x) => x.id));
-  let default_fin_year = $derived(appState.books[0].fin_year);
+  let fin_year = $derived.by(() => {
+    if (params !== undefined && params.fin_year) {
+      return parseInt(params.fin_year, 10);
+    } else {
+      return appState.books[0].fin_year;
+    }
+  });
 
   $effect(() => {
     if (params !== undefined && params.fin_year) {
-      untrack(() => getLedger(params.code, parseInt(params.fin_year, 10)));
+      untrack(() => getLedger(params.code, fin_year));
     } else {
-      untrack(() => getLedger(params.code, default_fin_year));
+      untrack(() => getLedger(params.code, fin_year));
+    }
+  });
+
+  let selectAll = $state(false);
+  $effect(() => {
+    selectAll;
+    if (ledger && ledger.txs.length > 0) {
+      untrack(() => {
+        ledger!.txs.map((tx) => (tx.selected = selectAll));
+      });
     }
   });
 
@@ -88,7 +104,7 @@
       alert('New transactions has an "Empty" narration.');
       return;
     }
-    addTxs(txs);
+    addTxs(ledger.code, fin_year, txs);
   }
 </script>
 
@@ -116,14 +132,15 @@
           {ledger.op_bal === 0 ? '0.00' : moneyFmt(ledger.op_bal)}</span
         >
       </h3>
-      <button class="btn bg-red-700 text-white" onclick={() => deleteTxs(selectedTxs)}
-        >Delete</button
+      <button
+        class="btn bg-red-700 text-white"
+        onclick={() => deleteTxs(ledger!.code, fin_year, selectedTxs)}>Delete</button
       >
       <div class="overflow-x-auto">
         <table class="table w-full table-auto is-striped is-hoverable">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
-              <th><input type="checkbox" /></th>
+              <th><input type="checkbox" bind:checked={selectAll} /></th>
               <th>Date</th>
               <th class="hidden sm:table-cell">Type</th>
               <th class="text-left">Narration</th>
