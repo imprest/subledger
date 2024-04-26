@@ -54,6 +54,7 @@ defmodule Subledger.MixProject do
       {:uniq, "~> 0.6.1"},
       {:ex_dbase, "~> 1.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:lexical_credo, "~> 0.1.0", only: [:dev, :test]},
       {:styler, "~> 0.11.1", only: [:dev, :test], runtime: false}
     ]
   end
