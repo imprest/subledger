@@ -114,38 +114,37 @@
       <div>Error occurred: {appState.ledgers.error}</div>
     {:else if ledgersStatus === 'loaded'}
       <div class="overflow-x-auto">
-        <table class="table w-full is-striped is-hoverable">
+        <table class="table is-fullwidth is-striped is-hoverable is-narrow">
           <thead>
             <tr>
-              <th class="text-right">#</th>
-              <th class="text-left">Name</th>
-              <th class="text-right">Opening</th>
-              <th class="text-right">Debits</th>
-              <th class="text-right">Credits</th>
-              <th class="text-right">Closing</th>
+              <th class="has-text-right">#</th>
+              <th class="has-text-left">Name</th>
+              <th class="has-text-right">Opening</th>
+              <th class="has-text-right">Debits</th>
+              <th class="has-text-right">Credits</th>
+              <th class="has-text-right">Closing</th>
             </tr>
           </thead>
           <tbody>
             {#each filter as ledger, i (ledger.id)}
               <tr>
-                <td class="text-right">{i + 1}</td>
+                <td class="has-text-right">{i + 1}</td>
                 <td>
                   <a href={`#/ledger/${encodeURIComponent(ledger.code)}/${appState.fin_year}`}
                     >{ledger.name}</a
                   >
-                  <ul class="tags inline-block pl-2">
-                    <li class="tag inline bg-orange-200">{ledger.code}</li>
-                    <li class="tag inline bg-blue-200">{ledger.region}</li>
-                    <li class="tag inline bg-purple-300">{ledger.is_gov ? 'GOV' : 'PVT'}</li>
-                  </ul>
-                  <button onclick={() => ledgerDetails(ledger.code)}>
-                    <span class="hero-information-circle text-blue-400 h-4"></span>
-                  </button>
+                  <span class="tag is-normal is-link is-light">{ledger.code}</span>
+                  <span class="tag is-info is-light">{ledger.region}</span>
+                  <span class="tag is-warning is-light">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
+                  <button
+                    class="hero-information-circle text-blue-400"
+                    onclick={() => ledgerDetails(ledger.code)}>i</button
+                  >
                 </td>
-                <td class="text-right">{moneyFmt(ledger.op_bal)}</td>
-                <td class="text-right">{moneyFmt(ledger.total_debit)}</td>
-                <td class="text-right">{moneyFmt(Math.abs(ledger.total_credit))}</td>
-                <td class="text-right">{moneyFmt(ledger.cl_bal)}</td>
+                <td class="has-text-right">{moneyFmt(ledger.op_bal)}</td>
+                <td class="has-text-right">{moneyFmt(ledger.total_debit)}</td>
+                <td class="has-text-right">{moneyFmt(Math.abs(ledger.total_credit))}</td>
+                <td class="has-text-right">{moneyFmt(ledger.cl_bal)}</td>
               </tr>
             {/each}
           </tbody>
@@ -162,7 +161,7 @@
           <tbody>
             {#each Object.entries(appState.ledger.data) as [key, value]}
               <tr>
-                <th class="text-right">{key}:</th>
+                <th class="has-text-right">{key}:</th>
                 <td>{value}</td>
               </tr>
             {/each}

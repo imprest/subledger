@@ -18,29 +18,51 @@
     •
   </div>
 {/if}
-<header
-  class="header print:relative fixed top-0 left-0 z-30 border-b border-gray-300 w-full bg-white h-[--header-height]"
->
-  <nav>
+<header>
+  <nav class="navbar is-fixed-top has-shadow" aria-label="main navigation">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <img width="50px" height="500px" src="/images/logo.svg" alt="Logo" />
+      </div>
+
+      <button
+        class="navbar-burger"
+        aria-label="menu"
+        aria-expanded="false"
+        data-target="navbarBasicExample"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
+    <div id="navbarBasicExample" class="navbar-menu">
+      <div class="navbar-start">
+        <a href="#/" class="navbar-item">Ledgers</a>
+        <a href="#/activity" class="navbar-item">Activity</a>
+      </div>
+
+      <div class="navbar-end">
+        <div class="navbar-item">
+          <div class="buttons">
+            <a
+              data-csrf={csrfToken}
+              data-method="delete"
+              data-to="/users/log_out"
+              href="/users/log_out">Logout</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="max-w-7xl mx-auto px-4 sm:px-2 lg:px-4">
       <div class="flex items-center">
-        <div>
-          <img class="h-8 w-8" src="/images/logo.svg" alt="Logo" />
-        </div>
+        <div></div>
         <div
           class="ml-4 min-w-0 flex item-baseline space-x-1 overflow-y-hidden overflow-x-auto scroller grow"
-        >
-          <a href="#/" class="m-1 px-1">Ledgers</a>
-          <a href="#/activity" class="m-1 px-1">Activity</a>
-        </div>
-        <div class="p-2 print:hidden">
-          <a
-            data-csrf={csrfToken}
-            data-method="delete"
-            data-to="/users/log_out"
-            href="/users/log_out">Logout</a
-          >
-        </div>
+        ></div>
+        <div class="p-2 print:hidden"></div>
       </div>
     </div>
   </nav>

@@ -133,32 +133,32 @@
         >
       </h3>
       <button
-        class="btn bg-red-700 text-white"
+        class="button is-danger is-outlined"
         onclick={() => deleteTxs(ledger!.code, fin_year, selectedTxs)}>Delete</button
       >
       <div class="overflow-x-auto">
-        <table class="table w-full table-auto is-striped is-hoverable">
+        <table class="table is-fullwidth is-striped is-hoverable">
           <thead>
             <tr class="border-b border-gray-700" style="background-color: white;">
               <th><input type="checkbox" bind:checked={selectAll} /></th>
               <th>Date</th>
               <th class="hidden sm:table-cell">Type</th>
-              <th class="text-left">Narration</th>
-              <th class="text-right">Debit</th>
-              <th class="text-right">Credit</th>
-              <th class="text-right">Balance</th>
+              <th class="has-text-left">Narration</th>
+              <th class="has-text-right">Debit</th>
+              <th class="has-text-right">Credit</th>
+              <th class="has-text-right">Balance</th>
             </tr>
           </thead>
           <tbody>
             {#each ledger.txs as t (t.id)}
               <tr>
-                <td class="text-center"><input type="checkbox" bind:checked={t.selected} /></td>
-                <td class="text-center w-6">{dateFmt(new Date(t.date))}</td>
-                <td class="text-center w-10 hidden sm:table-cell">{t.type}</td>
-                <td class="text-left">{t.narration}</td>
-                <td class="text-right">{moneyFmt(t.amount >= 0 ? t.amount : 0)}</td>
-                <td class="text-right">{moneyFmt(t.amount < 0 ? Math.abs(t.amount) : 0)}</td>
-                <td class="text-right">{moneyFmt(t.bal)}</td>
+                <td class="has-text-center"><input type="checkbox" bind:checked={t.selected} /></td>
+                <td class="has-text-center w-6">{dateFmt(new Date(t.date))}</td>
+                <td class="has-text-center w-10 hidden sm:table-cell">{t.type}</td>
+                <td class="has-text-left">{t.narration}</td>
+                <td class="has-text-right">{moneyFmt(t.amount >= 0 ? t.amount : 0)}</td>
+                <td class="has-text-right">{moneyFmt(t.amount < 0 ? Math.abs(t.amount) : 0)}</td>
+                <td class="has-text-right">{moneyFmt(t.bal)}</td>
               </tr>
             {/each}
           </tbody>
@@ -167,10 +167,10 @@
               <th></th>
               <th></th>
               <th class="hidden sm:table-cell"></th>
-              <th class="text-right">Total:</th>
-              <th class="text-right">{moneyFmt(ledger.total_debit)}</th>
-              <th class="text-right">{moneyFmt(Math.abs(ledger.total_credit))}</th>
-              <th class="text-right">{moneyFmt(ledger.cl_bal)}</th>
+              <th class="has-text-right">Total:</th>
+              <th class="has-text-right">{moneyFmt(ledger.total_debit)}</th>
+              <th class="has-text-right">{moneyFmt(Math.abs(ledger.total_credit))}</th>
+              <th class="has-text-right">{moneyFmt(ledger.cl_bal)}</th>
             </tr>
           </tfoot>
         </table>
@@ -185,20 +185,20 @@
         <table class="table w-full is-bordered">
           <thead>
             <tr class="border-b border-gray-700">
-              <th class="text-right max-w-5">#</th>
+              <th class="has-text-right max-w-5">#</th>
               <th class="w-5">Date</th>
               <th class="w-5">Type</th>
-              <th class="text-left min-w-10">Narration</th>
-              <th class="text-right min-w-32">Debit</th>
-              <th class="text-right min-w-32">Credit</th>
-              <th class="text-right w-5">Action</th>
+              <th class="has-text-left min-w-10">Narration</th>
+              <th class="has-text-right min-w-32">Debit</th>
+              <th class="has-text-right min-w-32">Credit</th>
+              <th class="has-text-right w-5">Action</th>
             </tr>
           </thead>
           <tbody>
             {#each newTxs as t, i}
               <tr class="*:align-middle">
                 <td class="text-right">{i + 1}</td>
-                <td class="text-center"><input type="date" bind:value={t.date} /></td>
+                <td class="has-text-center"><input type="date" bind:value={t.date} /></td>
                 <td>
                   <select
                     id="type"
@@ -214,7 +214,7 @@
                     {/each}
                   </select>
                 </td>
-                <td class="text-left"><input class="w-full" bind:value={t.narration} /></td>
+                <td class="has-text-left"><input class="w-full" bind:value={t.narration} /></td>
                 <td class="min-w-32"
                   ><input
                     type="number"
@@ -227,13 +227,13 @@
                   <input
                     type="number"
                     bind:value={t.credit}
-                    class="text-right w-full disabled:hidden"
+                    class="has-text-right w-full disabled:hidden"
                     disabled={!debitOrCreditTx(t.type)}
                   /></td
                 >
                 <td>
                   <span class="flex justify-center items-baseline">
-                    <button class="btn mb-0" onclick={() => newTxs.splice(i, 1)}>-</button>
+                    <button class="button mb-0" onclick={() => newTxs.splice(i, 1)}>-</button>
                   </span>
                 </td>
               </tr>
@@ -242,23 +242,23 @@
           <tfoot class="border-b border-t border-gray-700">
             <tr class="*:p-1">
               <th>
-                <button class="btn mt-1 mb-0" onclick={() => addTx()}>+</button>
+                <button class="button mt-1 mb-0" onclick={() => addTx()}>+</button>
               </th>
               <th></th>
               <th></th>
               <th>
-                <button class="btn btn-primary mb-0" onclick={() => submit()}>Submit</button>
+                <button class="button is-primary mb-0" onclick={() => submit()}>Submit</button>
               </th>
-              <th class="text-right">{moneyFmt(debit)}</th>
-              <th class="text-right">{moneyFmt(credit)}</th>
-              <th class="text-right">{moneyFmt(total)}</th>
+              <th class="has-text-right">{moneyFmt(debit)}</th>
+              <th class="has-text-right">{moneyFmt(credit)}</th>
+              <th class="has-text-right">{moneyFmt(total)}</th>
             </tr>
           </tfoot>
         </table>
       </div>
     {:else}
       <div class="flex flex-row-reverse pr-2">
-        <button class="btn btn-primary" onclick={() => addTx()}>+</button>
+        <button class="button is-primary" onclick={() => addTx()}>+</button>
       </div>
     {/if}
   </div>
