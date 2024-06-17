@@ -67,7 +67,7 @@
     </div>
   </nav>
 </header>
-<main class="h-full pt-[calc(var(--header-height)+0.25rem)] print:pt-1">
+<main>
   {#if booksLoaded}
     <Router {routes} />
   {:else}

@@ -108,8 +108,8 @@
   }
 </script>
 
-<section>
-  <div class="wrapper">
+<section class="section pt-2">
+  <div class="container">
     {#if ledgerStatus === 'idle'}
       <div>Idle</div>
     {:else if ledgerStatus === 'loading'}
@@ -119,18 +119,21 @@
     {:else if ledgerStatus === 'error'}
       <div>Error occurred: {appState.ledgers.error}</div>
     {:else if ledgerStatus === 'loaded' && ledger}
-      <h3 class="title text-3xl">{ledger.name}</h3>
-      <div class="tags">
+      <h3 class="title pb-2">{ledger.name}</h3>
+      <div class="subtitle tags pb-2">
         <span class="tag">{ledger.code}</span>
         <span class="tag">{ledger.region}</span>
         <span class="tag">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
         <span class="tag">{ledger.tags}</span>
       </div>
-      <h3 class="text-right pb-5">
-        <span class="subtitle pr-2">Opening Bal:</span>
-        <span class="title text-lg font-semibold pr-2 ml-20">
-          {ledger.op_bal === 0 ? '0.00' : moneyFmt(ledger.op_bal)}</span
-        >
+      <h3 class="level">
+        <div class="level-left"></div>
+        <div class="level-right">
+          <span class="subtitle is-3 mb-0">Opening Bal:</span>
+          <span class="subtitle is-3">
+            {ledger.op_bal === 0 ? '0.00' : moneyFmt(ledger.op_bal)}</span
+          >
+        </div>
       </h3>
       <button
         class="button is-danger is-outlined"

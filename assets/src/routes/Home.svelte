@@ -76,10 +76,10 @@
 <!--     </Autocomplete> -->
 <!--   </div> -->
 <!-- </section> -->
-<section>
-  <div class="wrapper">
-    <div class="tabs">
-      <ul class="flex-row-reverse" role="menu">
+<section class="section pt-0 pb-4">
+  <div class="container">
+    <div class="tabs pt-2">
+      <ul role="menu" class="is-flex-direction-row-reverse">
         {#each appState.books as book (book.id)}
           <li title={book.period} class:is-active={appState.fin_year === book.fin_year}>
             <a href="#/ledgers/{book.fin_year}">{book.fin_year}</a>
@@ -89,21 +89,26 @@
     </div>
   </div>
 </section>
-<section>
-  <div class="wrapper flex-row flex gap-2 align-baseline text-center">
-    <label for="filter" class="p-2">Filter:</label>
-    <div class="flex-grow flex-1 flex">
-      <input
-        id="filter"
-        type="search"
-        class="flex-grow pl-2 border-gray-500 border"
-        bind:value={text}
-      />
+<section class="section pt-0 pb-4">
+  <div class="container">
+    <div class="field has-addons">
+      <div class="control">
+        <button class="button is-static"> Filter </button>
+      </div>
+      <div class="control is-expanded">
+        <input
+          id="filter"
+          class="input"
+          type="search"
+          bind:value={text}
+          placeholder="Find a customer ledger"
+        />
+      </div>
     </div>
   </div>
 </section>
-<section>
-  <div class="wrapper">
+<section class="section pt-0">
+  <div class="container">
     {#if ledgersStatus === 'idle'}
       <div>Idle</div>
     {:else if ledgersStatus === 'loading'}
@@ -137,8 +142,8 @@
                   <span class="tag is-info is-light">{ledger.region}</span>
                   <span class="tag is-warning is-light">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
                   <button
-                    class="hero-information-circle text-blue-400"
-                    onclick={() => ledgerDetails(ledger.code)}>i</button
+                    class="button button-primary is-small"
+                    onclick={() => ledgerDetails(ledger.code)}>ð</button
                   >
                 </td>
                 <td class="has-text-right">{moneyFmt(ledger.op_bal)}</td>
