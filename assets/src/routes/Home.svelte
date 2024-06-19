@@ -12,9 +12,9 @@
   let text = $state('');
   let filter: Ledger[] = $state([]);
 
-  function ledgerDetails(code: string) {
+  function ledgerDetails(code: string, fin_year: number) {
     isModalOpen = true;
-    getLedger(code, 8);
+    getLedger(code, fin_year);
   }
 
   let ledgersStatus = $derived(appState.ledgers.status);
@@ -76,7 +76,7 @@
 <!--     </Autocomplete> -->
 <!--   </div> -->
 <!-- </section> -->
-<section class="section pt-0 pb-4">
+<section class="section pt-0 pb-4 px-0">
   <div class="container">
     <div class="tabs pt-2">
       <ul role="menu" class="is-flex-direction-row-reverse">
@@ -89,7 +89,7 @@
     </div>
   </div>
 </section>
-<section class="section pt-0 pb-4">
+<section class="section pt-0 pb-4 px-2">
   <div class="container">
     <div class="field has-addons">
       <div class="control">
@@ -107,7 +107,7 @@
     </div>
   </div>
 </section>
-<section class="section pt-0">
+<section class="section pt-0 px-0">
   <div class="container">
     {#if ledgersStatus === 'idle'}
       <div>Idle</div>
@@ -143,7 +143,7 @@
                   <span class="tag is-warning is-light">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
                   <button
                     class="button button-primary is-small"
-                    onclick={() => ledgerDetails(ledger.code)}>ð</button
+                    onclick={() => ledgerDetails(ledger.code, appState.fin_year)}>ð</button
                   >
                 </td>
                 <td class="has-text-right">{moneyFmt(ledger.op_bal)}</td>
@@ -158,11 +158,11 @@
     {/if}
   </div>
 </section>
-<Modal open={isModalOpen} onclose={() => (isModalOpen = false)}>
-  <section>
-    <div class="wrapper flex items-center justify-center">
+<Modal open={isModalOpen}>
+  <section class="section">
+    <div class="container">
       {#if appState.ledger.data}
-        <table class="table">
+        <table class="table is-fullwidth is-striped is-hoverable is-narrow">
           <tbody>
             {#each Object.entries(appState.ledger.data) as [key, value]}
               <tr>

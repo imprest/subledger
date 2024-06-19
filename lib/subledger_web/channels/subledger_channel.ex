@@ -53,6 +53,8 @@ defmodule SubledgerWeb.SubledgerChannel do
 
   @impl true
   def handle_in("ledger:get", %{"code" => code, "fin_year" => fin_year}, socket) do
+    IO.inspect code
+    IO.inspect fin_year
     book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
     {ledger_id, role} = Map.get(socket.assigns.ledgers, code)
 

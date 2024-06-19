@@ -56,15 +56,6 @@
         </div>
       </div>
     </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-2 lg:px-4">
-      <div class="flex items-center">
-        <div></div>
-        <div
-          class="ml-4 min-w-0 flex item-baseline space-x-1 overflow-y-hidden overflow-x-auto scroller grow"
-        ></div>
-        <div class="p-2 print:hidden"></div>
-      </div>
-    </div>
   </nav>
 </header>
 <main>
