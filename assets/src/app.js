@@ -8,3 +8,14 @@ import 'phoenix_html';
 // import {Socket} from "phoenix"
 
 // let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// Recommended way, to include lucide icons you need for web
+import { createIcons, Menu, ArrowRight, Globe } from 'lucide';
+
+createIcons({
+  icons: {
+    Menu,
+    ArrowRight,
+    Globe
+  }
+});

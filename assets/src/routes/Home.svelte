@@ -5,6 +5,7 @@
   import { moneyFmt } from '../utils';
   import Modal from '../lib/Modal.svelte';
   import { untrack } from 'svelte';
+  import { Info } from 'lucide-svelte';
 
   type MyProps = { params: { fin_year: string } | undefined };
   let { params }: MyProps = $props();
@@ -143,8 +144,10 @@
                   <span class="tag is-warning is-light">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
                   <button
                     class="button button-primary is-small"
-                    onclick={() => ledgerDetails(ledger.code, appState.fin_year)}>ð</button
+                    onclick={() => ledgerDetails(ledger.code, appState.fin_year)}
                   >
+                    <Info size="14" />
+                  </button>
                 </td>
                 <td class="has-text-right">{moneyFmt(ledger.op_bal)}</td>
                 <td class="has-text-right">{moneyFmt(ledger.total_debit)}</td>
@@ -158,21 +161,19 @@
     {/if}
   </div>
 </section>
-<Modal open={isModalOpen}>
-  <section class="section">
-    <div class="container">
-      {#if appState.ledger.data}
-        <table class="table is-fullwidth is-striped is-hoverable is-narrow">
-          <tbody>
-            {#each Object.entries(appState.ledger.data) as [key, value]}
-              <tr>
-                <th class="has-text-right">{key}:</th>
-                <td>{value}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </div>
+<Modal bind:open={isModalOpen}>
+  <section class="modal-card-body">
+    {#if appState.ledger.data}
+      <table class="table is-fullwidth is-striped is-hoverable is-narrow">
+        <tbody>
+          {#each Object.entries(appState.ledger.data) as [key, value]}
+            <tr>
+              <th class="has-text-right">{key}:</th>
+              <td>{value}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {/if}
   </section>
 </Modal>

@@ -1,23 +1,21 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  let { open, children }: { open: boolean; children: Snippet } = $props();
-
-  let isOpen = $state(false);
+  let { open = $bindable(), children }: { open: boolean; children: Snippet } = $props();
 
   function close() {
-    isOpen = false;
+    open = false;
   }
 
   function keydown(e: KeyboardEvent) {
     if (open && e.key === 'Escape') {
-      isOpen = false;
+      open = false;
     }
   }
 </script>
 
 <svelte:window onkeydown={keydown} />
-<div class="modal" class:is-active={!isOpen}>
-  <div class="modal-background"></div>
+<div class="modal" class:is-active={open}>
+  <button class="modal-background" onclick={close} aria-label="close"></button>
   <div class="modal-content">
     {#if children}
       {@render children()}

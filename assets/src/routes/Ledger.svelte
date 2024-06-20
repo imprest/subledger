@@ -4,10 +4,15 @@
   import { untrack } from 'svelte';
   import { appState, getLedger, deleteTxs, addTxs, type TxType, type Tx } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
+  import { ChevronDown } from 'lucide-svelte';
 
   type MyProps = { params: { code: string; fin_year: string } };
   let { params }: MyProps = $props();
 
+  let dropDownOpen = $state(false);
+  function toggleDropDown() {
+    dropDownOpen = !dropDownOpen;
+  }
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
@@ -125,6 +130,27 @@
         <span class="tag">{ledger.region}</span>
         <span class="tag">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
         <span class="tag">{ledger.tags}</span>
+      </div>
+      <div class="dropdown" onclick={toggleDropDown} class:is-active={dropDownOpen}>
+        <div class="dropdown-trigger">
+          <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+            <span>Dropdown button</span>
+            <span class="icon"
+              ><ChevronDown size="26" aria-hidden="true" class="flex-center" />
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            {#each appState.books as book (book.id)}
+              <a
+                class="dropdown-item"
+                href={`#/ledgers/${encodeURIComponent(ledger.code)}/${book.fin_year}`}
+                >{book.fin_year}</a
+              >
+            {/each}
+          </div>
+        </div>
       </div>
       <h3 class="level">
         <div class="level-left"></div>
