@@ -4,15 +4,11 @@
   import { untrack } from 'svelte';
   import { appState, getLedger, deleteTxs, addTxs, type TxType, type Tx } from '../store.svelte';
   import { moneyFmt, dateFmt } from '../utils';
-  import { ChevronDown } from 'lucide-svelte';
+  import { push } from 'svelte-spa-router';
 
   type MyProps = { params: { code: string; fin_year: string } };
   let { params }: MyProps = $props();
 
-  let dropDownOpen = $state(false);
-  function toggleDropDown() {
-    dropDownOpen = !dropDownOpen;
-  }
   let ledgerStatus = $derived(appState.ledger.status);
 
   let ledger = $derived(appState.ledger.data);
@@ -24,6 +20,10 @@
       return appState.books[0].fin_year;
     }
   });
+
+  function goToLedger(code: string, year: number) {
+    push(`#/ledger/${encodeURIComponent(code)}/${year}`);
+  }
 
   $effect(() => {
     if (params !== undefined && params.fin_year) {
@@ -124,35 +124,32 @@
     {:else if ledgerStatus === 'error'}
       <div>Error occurred: {appState.ledgers.error}</div>
     {:else if ledgerStatus === 'loaded' && ledger}
-      <h3 class="title pb-2">{ledger.name}</h3>
-      <div class="subtitle tags pb-2">
-        <span class="tag">{ledger.code}</span>
-        <span class="tag">{ledger.region}</span>
-        <span class="tag">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
-        <span class="tag">{ledger.tags}</span>
-      </div>
-      <div class="dropdown" onclick={toggleDropDown} class:is-active={dropDownOpen}>
-        <div class="dropdown-trigger">
-          <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-            <span>Dropdown button</span>
-            <span class="icon"
-              ><ChevronDown size="26" aria-hidden="true" class="flex-center" />
-            </span>
-          </button>
+      <div class="columns is-vcentered">
+        <div class="column is-four-fifths">
+          <h3 class="title pb-2">{ledger.name}</h3>
+          <div class="subtitle tags pb-2">
+            <span class="tag">{ledger.code}</span>
+            <span class="tag">{ledger.region}</span>
+            <span class="tag">{ledger.is_gov ? 'GOV' : 'PVT'}</span>
+            <span class="tag">{ledger.tags}</span>
+          </div>
         </div>
-        <div class="dropdown-menu" id="dropdown-menu" role="menu">
-          <div class="dropdown-content">
-            {#each appState.books as book (book.id)}
-              <a
-                class="dropdown-item"
-                href={`#/ledgers/${encodeURIComponent(ledger.code)}/${book.fin_year}`}
-                >{book.fin_year}</a
-              >
-            {/each}
+        <div class="column">
+          <div class="select is-primary is-focused level-right">
+            <select
+              name="fin_year"
+              id="fin_year"
+              bind:value={appState.fin_year}
+              onchange={(e: HTMLChangeEvent) => goToLedger(ledger.code, e.target.value)}
+            >
+              {#each appState.books as book (book.id)}
+                <option class="dropdown-item" value={book.fin_year}>{book.fin_year}</option>
+              {/each}
+            </select>
           </div>
         </div>
       </div>
-      <h3 class="level">
+      <h3 class="level mb-0">
         <div class="level-left"></div>
         <div class="level-right">
           <span class="subtitle is-3 mb-0">Opening Bal:</span>
