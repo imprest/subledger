@@ -25,10 +25,5 @@ defmodule Subledger.Repo.Migrations.CreatePermissions do
     end
 
     create unique_index(:permissions, [:org_id, :ledger_id, :user_id])
-    create index(:permissions, [:org_id])
-    create index(:permissions, [:ledger_id])
-    create index(:permissions, [:user_id])
-    create index(:permissions, [:inserted_by_id])
-    create index(:permissions, [:updated_by_id])
   end
 end

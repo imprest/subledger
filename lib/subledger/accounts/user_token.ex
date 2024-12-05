@@ -1,10 +1,8 @@
-defmodule Subledger.Users.UserToken do
+defmodule Subledger.Accounts.UserToken do
   @moduledoc false
   use Ecto.Schema
-
   import Ecto.Query
-
-  alias Subledger.Users.UserToken
+  alias Subledger.Accounts.UserToken
 
   @hash_algorithm :sha256
   @rand_size 32
@@ -20,9 +18,9 @@ defmodule Subledger.Users.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, Subledger.Users.User
+    belongs_to :user, Subledger.Accounts.User
 
-    timestamps(updated_at: false)
+    timestamps type: :utc_datetime, updated_at: false
   end
 
   @doc """

@@ -1,4 +1,4 @@
-defmodule Subledger.Ledgers.Ledger do
+defmodule Subledger.Books.Ledger do
   @moduledoc false
   use Ecto.Schema
 
@@ -24,13 +24,13 @@ defmodule Subledger.Ledgers.Ledger do
     field :payment_terms, :string, default: "Cash or Immediate Chq"
     field :tags, {:array, :string}
     belongs_to :org, Subledger.Orgs.Org
-    belongs_to :country, Subledger.Public.Country, type: :string
+    belongs_to :country, Subledger.Global.Country, type: :string
     belongs_to :inserted_by, Subledger.Users.User
     belongs_to :updated_by, Subledger.Users.User
-    belongs_to :currency, Subledger.Public.Currency, type: :string
+    belongs_to :currency, Subledger.Global.Currency, type: :string
     many_to_many :books, Book, join_through: BookLedger
 
-    timestamps(type: :utc_datetime)
+    timestamps type: :utc_datetime
   end
 
   @doc false

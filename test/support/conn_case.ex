@@ -20,15 +20,14 @@ defmodule SubledgerWeb.ConnCase do
   using do
     quote do
       # The default endpoint for testing
-      use SubledgerWeb, :verified_routes
+      @endpoint SubledgerWeb.Endpoint
 
-      import Phoenix.ConnTest
+      use SubledgerWeb, :verified_routes
 
       # Import conveniences for testing with connections
       import Plug.Conn
+      import Phoenix.ConnTest
       import SubledgerWeb.ConnCase
-
-      @endpoint SubledgerWeb.Endpoint
     end
   end
 
@@ -57,32 +56,6 @@ defmodule SubledgerWeb.ConnCase do
   """
   def log_in_user(conn, user) do
     token = Subledger.Accounts.generate_user_session_token(user)
-
-    conn
-    |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:user_token, token)
-  end
-
-  @doc """
-  Setup helper that registers and logs in users.
-
-      setup :register_and_log_in_user
-
-  It stores an updated connection and a registered user in the
-  test context.
-  """
-  def register_and_log_in_user(%{conn: conn}) do
-    user = Subledger.UsersFixtures.user_fixture()
-    %{conn: log_in_user(conn, user), user: user}
-  end
-
-  @doc """
-  Logs the given `user` into the `conn`.
-
-  It returns an updated `conn`.
-  """
-  def log_in_user(conn, user) do
-    token = Subledger.Users.generate_user_session_token(user)
 
     conn
     |> Phoenix.ConnTest.init_test_session(%{})

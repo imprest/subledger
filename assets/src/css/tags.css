@@ -1,0 +1,6 @@
+.tags {
+	@apply items-center flex flex-wrap justify-start gap-1;
+	span {
+		@apply text-xs mb-2 text-gray-600 bg-gray-100 py-0 px-2 rounded shadow-sm align-middle;
+	}
+}

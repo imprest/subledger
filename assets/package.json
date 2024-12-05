@@ -1,39 +1,40 @@
 {
-  "name": "subledger",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite build && vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "lint": "prettier --check . && eslint .",
-    "format": "prettier --write ."
-  },
-  "dependencies": {
-    "bulma": "^1.0.1",
-    "lucide": "^0.395.0",
-    "lucide-svelte": "^0.395.0",
-    "phoenix": "file:../deps/phoenix",
-    "phoenix_html": "file:../deps/phoenix_html",
-    "svelte-spa-router": "^4.0.1"
-  },
-  "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.1.1",
-    "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^20.14.6",
-    "@types/phoenix": "^1.6.5",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-svelte": "^2.40.0",
-    "prettier-plugin-svelte": "^3.2.5",
-    "sass": "^1.77.6",
-    "svelte": "5.0.0-next.160",
-    "svelte-check": "^3.8.1",
-    "tslib": "^2.6.3",
-    "typescript": "^5.5.2",
-    "vite": "^5.3.1"
-  }
+	"name": "subledger",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite build && vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write ."
+	},
+	"dependencies": {
+		"@mateothegreat/svelte5-router": "^0.1.35",
+		"@tailwindcss/vite": "4.0.0-beta.5",
+		"phoenix": "file:../deps/phoenix",
+		"phoenix_html": "file:../deps/phoenix_html",
+		"tailwindcss": "4.0.0-beta.5"
+	},
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^5.0.1",
+		"@tailwindcss/forms": "^0.5.9",
+		"@tsconfig/svelte": "^5.0.4",
+		"@types/eslint": "^9.6.1",
+		"@types/phoenix": "^1.6.6",
+		"eslint": "^9.16.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-svelte": "^2.46.1",
+		"globals": "^15.13.0",
+		"prettier": "^3.4.2",
+		"prettier-plugin-svelte": "^3.3.2",
+		"svelte": "^5.6.2",
+		"svelte-check": "^4.1.1",
+		"tslib": "^2.8.1",
+		"typescript": "~5.7.2",
+		"typescript-eslint": "^8.17.0",
+		"vite": "^6.0.2"
+	}
 }

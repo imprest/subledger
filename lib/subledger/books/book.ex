@@ -18,7 +18,7 @@ defmodule Subledger.Books.Book do
     belongs_to :updated_by, User
     many_to_many :ledgers, Ledger, join_through: BookLedger
 
-    timestamps(type: :utc_datetime)
+    timestamps type: :utc_datetime
   end
 
   @doc false

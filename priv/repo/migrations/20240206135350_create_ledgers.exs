@@ -29,12 +29,6 @@ defmodule Subledger.Repo.Migrations.CreateLedgers do
     create unique_index(:ledgers, [:id, :org_id])
     create unique_index(:ledgers, [:org_id, :code])
 
-    create index(:ledgers, [:org_id])
-    create index(:ledgers, [:country_id])
-    create index(:ledgers, [:inserted_by_id])
-    create index(:ledgers, [:updated_by_id])
-    create index(:ledgers, [:currency_id])
-
     create table(:books_ledgers, primary_key: false) do
       add :org_id, :bigint, null: false, primary_key: true
 

@@ -45,6 +45,7 @@ defmodule SubledgerWeb.SubledgerChannel do
 
   @impl true
   def handle_in("ledgers:get", %{"fin_year" => fin_year}, socket) do
+    # :timer.sleep(3000)
     user_id = socket.assigns.user_id
     book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
     socket = assign(socket, :book_id, book_id)
@@ -53,8 +54,8 @@ defmodule SubledgerWeb.SubledgerChannel do
 
   @impl true
   def handle_in("ledger:get", %{"code" => code, "fin_year" => fin_year}, socket) do
-    IO.inspect code
-    IO.inspect fin_year
+    IO.inspect(code)
+    IO.inspect(fin_year)
     book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
     {ledger_id, role} = Map.get(socket.assigns.ledgers, code)
 
@@ -73,13 +74,24 @@ defmodule SubledgerWeb.SubledgerChannel do
   def handle_in("ledger:add_tx", %{"txs" => txs, "ledger_id" => ledger_id}, socket) do
     org_id = socket.assigns.org_id
     user_id = socket.assigns.user_id
-    book_id = txs |> hd() |> Map.get("date") |> Date.from_iso8601!() |> date_to_book_id(socket.assigns.books)
+
+    book_id =
+      txs
+      |> hd()
+      |> Map.get("date")
+      |> Date.from_iso8601!()
+      |> date_to_book_id(socket.assigns.books)
 
     tx =
       txs
       |> hd()
       |> Map.put("ledger_id", ledger_id)
-      |> Map.merge(%{"org_id" => org_id, "book_id" => book_id, "updated_by_id" => user_id, "inserted_by_id" => user_id})
+      |> Map.merge(%{
+        "org_id" => org_id,
+        "book_id" => book_id,
+        "updated_by_id" => user_id,
+        "inserted_by_id" => user_id
+      })
 
     case Subledger.Ledgers.create_tx(tx) do
       {:ok, result} ->
@@ -104,7 +116,12 @@ defmodule SubledgerWeb.SubledgerChannel do
 
         tx
         |> Map.put("ledger_id", ledger_id)
-        |> Map.merge(%{"org_id" => org_id, "book_id" => book_id, "updated_by_id" => user_id, "inserted_by_id" => user_id})
+        |> Map.merge(%{
+          "org_id" => org_id,
+          "book_id" => book_id,
+          "updated_by_id" => user_id,
+          "inserted_by_id" => user_id
+        })
       end
 
     case Subledger.Ledgers.create_txs(txs) do
@@ -117,7 +134,11 @@ defmodule SubledgerWeb.SubledgerChannel do
   end
 
   @impl true
-  def handle_in("ledger:delete_txs", %{"code" => code, "fin_year" => fin_year, "txs" => txs}, socket) do
+  def handle_in(
+        "ledger:delete_txs",
+        %{"code" => code, "fin_year" => fin_year, "txs" => txs},
+        socket
+      ) do
     book_id = fin_year_to_book_id(socket.assigns.books, fin_year)
     {ledger_id, _role} = Map.get(socket.assigns.ledgers, code)
 
@@ -146,7 +167,8 @@ defmodule SubledgerWeb.SubledgerChannel do
 
   defp fin_year_to_book_id(books, 0), do: Map.get(hd(books), :id)
 
-  defp fin_year_to_book_id(books, fin_year), do: books |> Enum.find(fn x -> x.fin_year == fin_year end) |> Map.get(:id)
+  defp fin_year_to_book_id(books, fin_year),
+    do: books |> Enum.find(fn x -> x.fin_year == fin_year end) |> Map.get(:id)
 
   defp date_to_book_id(date, books) do
     book =

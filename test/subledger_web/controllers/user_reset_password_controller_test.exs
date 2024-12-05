@@ -1,9 +1,9 @@
 defmodule SubledgerWeb.UserResetPasswordControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  alias Subledger.Users
+  alias Subledger.Accounts
   alias Subledger.Repo
-  import Subledger.UsersFixtures
+  import Subledger.AccountsFixtures
 
   setup do
     %{user: user_fixture()}
@@ -21,30 +21,30 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
     @tag :capture_log
     test "sends a new reset password token", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/reset_password", %{
+        post conn, ~p"/users/reset_password", %{
           "user" => %{"email" => user.email}
-        })
+        }
 
       assert redirected_to(conn) == ~p"/"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.get_by!(Users.UserToken, user_id: user.id).context == "reset_password"
+      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "reset_password"
     end
 
     test "does not send reset password token if email is invalid", %{conn: conn} do
       conn =
-        post(conn, ~p"/users/reset_password", %{
+        post conn, ~p"/users/reset_password", %{
           "user" => %{"email" => "unknown@example.com"}
-        })
+        }
 
       assert redirected_to(conn) == ~p"/"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.all(Users.UserToken) == []
+      assert Repo.all(Accounts.UserToken) == []
     end
   end
 
@@ -52,7 +52,7 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
     setup %{user: user} do
       token =
         extract_user_token(fn url ->
-          Users.deliver_user_reset_password_instructions(user, url)
+          Accounts.deliver_user_reset_password_instructions(user, url)
         end)
 
       %{token: token}
@@ -76,7 +76,7 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
     setup %{user: user} do
       token =
         extract_user_token(fn url ->
-          Users.deliver_user_reset_password_instructions(user, url)
+          Accounts.deliver_user_reset_password_instructions(user, url)
         end)
 
       %{token: token}
@@ -84,12 +84,12 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
 
     test "resets password once", %{conn: conn, user: user, token: token} do
       conn =
-        put(conn, ~p"/users/reset_password/#{token}", %{
+        put conn, ~p"/users/reset_password/#{token}", %{
           "user" => %{
             "password" => "new valid password",
             "password_confirmation" => "new valid password"
           }
-        })
+        }
 
       assert redirected_to(conn) == ~p"/users/log_in"
       refute get_session(conn, :user_token)
@@ -97,17 +97,17 @@ defmodule SubledgerWeb.UserResetPasswordControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "Password reset successfully"
 
-      assert Users.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
     end
 
     test "does not reset password on invalid data", %{conn: conn, token: token} do
       conn =
-        put(conn, ~p"/users/reset_password/#{token}", %{
+        put conn, ~p"/users/reset_password/#{token}", %{
           "user" => %{
             "password" => "too short",
             "password_confirmation" => "does not match"
           }
-        })
+        }
 
       assert html_response(conn, 200) =~ "something went wrong"
     end

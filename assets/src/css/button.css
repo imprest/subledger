@@ -1,0 +1,58 @@
+.btn {
+	@apply appearance-none flex-center border border-gray-300
+    inline-flex py-1 h-full px-4 font-semibold shadow-sm rounded-sm
+    cursor-pointer outline-none
+    transition-colors duration-100
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+    disabled:opacity-50 disabled:pointer-events-none 
+    text-foreground;
+
+	&:is([aria-current], :focus-visible) {
+		@apply ring-primary-focus;
+	}
+
+	&:is([aria-current], :hover) {
+		@apply bg-gray-100;
+	}
+
+	&:is(:active) {
+		@apply bg-gray-200;
+	}
+}
+
+.btn-primary {
+	@apply bg-primary text-white border-primary;
+
+	&:is([aria-current], :hover, :focus-visible) {
+		@apply bg-primary-hover ring-primary-focus;
+	}
+
+	&:is(:active) {
+		@apply bg-primary-active;
+	}
+}
+
+.btn-danger {
+	@apply bg-danger text-white border-danger;
+
+	&:is([aria-current], :hover, :focus-visible) {
+		@apply bg-danger-hover ring-danger-focus;
+	}
+
+	&:is(:active) {
+		@apply bg-danger-active;
+	}
+}
+
+/* .btn-error { */
+/*   @apply bg-error text-error-foreground; */
+/* } */
+/* .btn-warning { */
+/*   @apply bg-warning text-warning-foreground; */
+/* } */
+/* .btn-info { */
+/*   @apply bg-info text-info-foreground; */
+/* } */
+/* .btn-success { */
+/*   @apply bg-success text-success-foreground; */
+/* } */

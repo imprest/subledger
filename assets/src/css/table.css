@@ -1,0 +1,92 @@
+.table {
+	@apply divide-y divide-solid divide-gray-300 tabular-nums;
+	th {
+		@apply px-2 py-1 font-semibold text-gray-600 align-top cursor-pointer;
+	}
+	thead > tr {
+		@apply border-b border-gray-500;
+	}
+	thead {
+		tr {
+			th:first-child {
+				@apply pl-2;
+			}
+			th:last-child {
+				@apply pr-2;
+			}
+		}
+	}
+	td {
+		@apply px-2 py-1;
+	}
+	tbody {
+		tr {
+			@apply align-top print:border-b print:border-gray-600;
+			td:first-child {
+				@apply pl-2;
+			}
+			td:last-child {
+				@apply pr-2;
+			}
+		}
+	}
+
+	&.is-bordered td {
+		border-width: 1px;
+	}
+	&.is-bordered th {
+		border-width: 0px;
+	}
+	&.is-bordered tr {
+		&:last-child td,
+		th {
+			border-bottom-width: 1px;
+		}
+	}
+
+	&.is-striped {
+		tbody {
+			tr:nth-child(even) {
+				@apply bg-even-row;
+			}
+		}
+	}
+
+	&.is-hoverable {
+		tbody {
+			tr {
+				@apply hover:bg-highlight;
+			}
+		}
+	}
+
+	&.is-sticky {
+		thead,
+		tfoot {
+			@apply sticky z-30;
+		}
+
+		thead {
+			inset-block-start: 0;
+		}
+		thead tr th {
+			@apply sticky bg-white;
+		}
+		tfoot {
+			@apply bg-white;
+			inset-block-end: 0;
+		}
+
+		thead tr th:first-child,
+		tbody tr td:first-child {
+			@apply sticky z-20;
+			inset-inline-start: 0;
+		}
+
+		thead tr th:nth-child(2),
+		tbody tr td:nth-child(2) {
+			@apply sticky z-20;
+			/* inset-inline-start: 40px;  This has to been done dynamically in javascript*/
+		}
+	}
+}

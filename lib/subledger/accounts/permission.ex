@@ -1,11 +1,11 @@
-defmodule Subledger.Users.Permission do
+defmodule Subledger.Accounts.Permission do
   @moduledoc false
   use Ecto.Schema
 
   import Ecto.Changeset
 
+  alias Subledger.Accounts.User
   alias Subledger.Ledgers.Ledger
-  alias Subledger.Users.User
 
   @required [:ledger_id, :user_id, :org_id, :inserted_by_id, :updated_by_id, :role]
   @fields @required
@@ -19,7 +19,7 @@ defmodule Subledger.Users.Permission do
     belongs_to :inserted_by, User
     belongs_to :updated_by, User
 
-    timestamps(type: :utc_datetime)
+    timestamps type: :utc_datetime
   end
 
   @doc false

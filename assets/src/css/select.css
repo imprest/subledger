@@ -1,0 +1,10 @@
+/* Select Combo */
+.select-combo {
+	@apply flex flex-center mt-0.5;
+	> label {
+		@apply py-1.5 border border-gray-300 rounded-s-sm border-r-0 py-1 px-2 bg-gray-200;
+	}
+	> select {
+		@apply py-1 pr-9 ml-0 bg-white border rounded-e-sm border-gray-300;
+	}
+}

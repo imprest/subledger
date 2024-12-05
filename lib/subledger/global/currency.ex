@@ -1,4 +1,4 @@
-defmodule Subledger.Public.Currency do
+defmodule Subledger.Global.Currency do
   @moduledoc false
   use Ecto.Schema
 

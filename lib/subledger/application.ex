@@ -16,7 +16,7 @@ defmodule Subledger.Application do
       {Finch, name: Subledger.Finch},
       # Start Presence
       SubledgerWeb.Presence,
-      # Start the Endpoint (http/https)
+      # Start to serve requests, typically the last entry
       SubledgerWeb.Endpoint
     ]
 

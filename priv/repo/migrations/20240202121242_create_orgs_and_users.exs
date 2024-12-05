@@ -1,13 +1,12 @@
-defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
+defmodule Subledger.Repo.Migrations.CreateOrgsUsersGlobals do
   use Ecto.Migration
 
   def change do
     execute "CREATE EXTENSION IF NOT EXISTS citext", ""
 
-    create table(:orgs, primary_key: false) do
-      add :id, :bigserial, primary_key: true
-      add :sname, :text, null: false
-      add :name, :text, null: false
+    create table(:orgs) do
+      add :sname, :string
+      add :name, :string
 
       timestamps(type: :utc_datetime)
     end
@@ -21,7 +20,8 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
       add :hashed_password, :string, null: false
       add :is_admin, :boolean, null: false, default: false
       add :name, :string, null: false
-      add :confirmed_at, :naive_datetime
+      add :confirmed_at, :utc_datetime
+
       timestamps(type: :utc_datetime)
     end
 
@@ -34,10 +34,25 @@ defmodule Subledger.Repo.Migrations.CreateUsersAuthTables do
       add :token, :binary, null: false
       add :context, :string, null: false
       add :sent_to, :string
-      timestamps(updated_at: false)
+
+      timestamps(type: :utc_datetime, updated_at: false)
     end
 
     create index(:users_tokens, [:user_id])
     create unique_index(:users_tokens, [:context, :token])
+
+    # Global tables
+    create table(:countries, primary_key: false) do
+      add :id, :text, primary_key: true
+      add :name, :string
+    end
+
+    create unique_index(:countries, [:name])
+
+    create table(:currencies, primary_key: false) do
+      add :id, :text, primary_key: true
+      add :name, :string
+      add :symbol, :text
+    end
   end
 end

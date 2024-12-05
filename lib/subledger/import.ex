@@ -3,11 +3,11 @@ defmodule Subledger.Import do
   import Ecto.Query
 
   alias Decimal, as: D
+  alias Subledger.Accounts.Permission
   alias Subledger.Books
-  alias Subledger.Ledgers.Ledger
-  alias Subledger.Ledgers.Tx
+  alias Subledger.Books.Ledger
+  alias Subledger.Books.Tx
   alias Subledger.Repo
-  alias Subledger.Users.Permission
 
   require Logger
 
@@ -115,7 +115,10 @@ defmodule Subledger.Import do
          {:ok, ctx} <- import_tx(ctx, f.aug),
          {:ok, ctx} <- import_tx(ctx, f.sep) do
       make_user_1_owner()
-      Logger.info("Imported #{ctx.year}:\n#{inspect(Map.drop(ctx, [:year, :ledger_code_to_id]), pretty: true)}")
+
+      Logger.info(
+        "Imported #{ctx.year}:\n#{inspect(Map.drop(ctx, [:year, :ledger_code_to_id]), pretty: true)}"
+      )
     else
       unexpected ->
         Logger.error("Error occurred #{inspect(%{:error => unexpected})}")
@@ -188,7 +191,10 @@ defmodule Subledger.Import do
     org_id = ctx.org_id
     # Get list of ledgers = %{code => %{id, updated_at}}
     db_ledgers =
-      for x <- Repo.all(from l in Ledger, select: [:id, :code, :updated_at], where: [org_id: ^org_id]),
+      for x <-
+            Repo.all(
+              from l in Ledger, select: [:id, :code, :updated_at], where: [org_id: ^org_id]
+            ),
           into: %{},
           do: {x.code, x}
 
@@ -278,8 +284,10 @@ defmodule Subledger.Import do
               org_id: ctx.org_id,
               date: to_date(x["TR_DATE"]),
               narration:
-                if x["TR_TYPE"] == "SA" or x["TR_TYPE"] == "SB" do
-                  x["TR_NOC"] <> "/" <> Integer.to_string(x["TR_NON"])
+                if x["TR_TYPE"] == "SA" or x["TR_TYPE"] == "SB" or
+                     x["TR_TYPE"] ==
+                       "SN" do
+                  x["TR_NOC"] <> Integer.to_string(x["TR_NON"])
                 else
                   if String.length(String.trim(x["TR_DESC"])) == 0 do
                     if String.length(String.trim(x["TR_QTY"])) != 0 do
@@ -295,19 +303,24 @@ defmodule Subledger.Import do
                     end
                   end
                 end,
-              ref_id: old_tx_id(x["TR_DATE"], x["TR_TYPE"], x["TR_CODE"], x["TR_NOC"], x["TR_NON"]),
+              ref_id:
+                old_tx_id(x["TR_DATE"], x["TR_TYPE"], x["TR_CODE"], x["TR_NOC"], x["TR_NON"]),
               type: x["TR_TYPE"],
               ledger_id: ledger_id,
               amount:
-                case x["TR_DRCR"] do
-                  "D" ->
-                    Decimal.new(x["TR_AMT"])
+                if x["TR_TYPE"] == "SN" do
+                  Decimal.new(x["TR_AMT"])
+                else
+                  case x["TR_DRCR"] do
+                    "D" ->
+                      Decimal.new(x["TR_AMT"])
 
-                  "C" ->
-                    D.mult(Decimal.new(x["TR_AMT"]), -1)
+                    "C" ->
+                      D.mult(Decimal.new(x["TR_AMT"]), -1)
 
-                  _ ->
-                    Decimal.new(x["TR_AMT"])
+                    _ ->
+                      Decimal.new(x["TR_AMT"])
+                  end
                 end,
               updated_by_id: 1,
               inserted_by_id: 1,
@@ -324,6 +337,11 @@ defmodule Subledger.Import do
               "SB" ->
                 tmp
                 |> Map.put(:type, :invoice)
+                |> Map.put(:is_paid, true)
+
+              "SN" ->
+                tmp
+                |> Map.put(:type, :refund)
                 |> Map.put(:is_paid, true)
 
               "BP" ->
@@ -362,7 +380,9 @@ defmodule Subledger.Import do
     # Get list of txs = %{ref_id => %{id, updated_at}}
     db_tx =
       for x <-
-            Repo.all(from i in "txs", select: [:id, :ref_id, :updated_at], where: [book_id: ^book_id]),
+            Repo.all(
+              from i in "txs", select: [:id, :ref_id, :updated_at], where: [book_id: ^book_id]
+            ),
           into: %{},
           do: {x.ref_id, x}
 
@@ -383,7 +403,11 @@ defmodule Subledger.Import do
       end)
 
     # Upsert tx
-    {rows, _} = Repo.insert_all(Tx, upsert_tx, conflict_target: [:id], on_conflict: {:replace_all_except, [:id]})
+    {rows, _} =
+      Repo.insert_all(Tx, upsert_tx,
+        conflict_target: [:id],
+        on_conflict: {:replace_all_except, [:id]}
+      )
 
     # Upsert tx
     {:ok, %{ctx | upserted: Map.put(ctx.upserted, Path.basename(dbf, ".dbf"), rows)}}

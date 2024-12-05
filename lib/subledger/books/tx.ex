@@ -1,18 +1,31 @@
-defmodule Subledger.Ledgers.Tx do
+defmodule Subledger.Books.Tx do
   @moduledoc false
   use Ecto.Schema
 
   import Ecto.Changeset
 
+  alias Subledger.Accounts.Org
+  alias Subledger.Accounts.User
   alias Subledger.Books.Book
-  alias Subledger.Ledgers.Ledger
-  alias Subledger.Orgs.Org
-  alias Subledger.Users.User
+  alias Subledger.Books.Ledger
 
   @primary_key {:id, Uniq.UUID, version: 7, autogenerate: true}
   schema "txs" do
     field :type, Ecto.Enum,
-      values: [:invoice, :chq, :cash, :momo, :rtn_chq, :write_off, :discount, :tcc, :debit, :credit, :transfer]
+      values: [
+        :invoice,
+        :refund,
+        :chq,
+        :cash,
+        :momo,
+        :rtn_chq,
+        :write_off,
+        :discount,
+        :tcc,
+        :debit,
+        :credit,
+        :transfer
+      ]
 
     field :date, :date
     field :narration, :string
@@ -28,7 +41,7 @@ defmodule Subledger.Ledgers.Tx do
     belongs_to :inserted_by, User
     belongs_to :updated_by, User
 
-    timestamps(type: :utc_datetime)
+    timestamps type: :utc_datetime
   end
 
   @doc false

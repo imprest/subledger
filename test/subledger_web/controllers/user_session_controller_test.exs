@@ -1,7 +1,7 @@
 defmodule SubledgerWeb.UserSessionControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  import Subledger.UsersFixtures
+  import Subledger.AccountsFixtures
 
   setup do
     %{user: user_fixture()}
@@ -25,9 +25,9 @@ defmodule SubledgerWeb.UserSessionControllerTest do
   describe "POST /users/log_in" do
     test "logs the user in", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log_in", %{
+        post conn, ~p"/users/log_in", %{
           "user" => %{"email" => user.email, "password" => valid_user_password()}
-        })
+        }
 
       assert get_session(conn, :user_token)
       assert redirected_to(conn) == ~p"/"
@@ -42,13 +42,13 @@ defmodule SubledgerWeb.UserSessionControllerTest do
 
     test "logs the user in with remember me", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log_in", %{
+        post conn, ~p"/users/log_in", %{
           "user" => %{
             "email" => user.email,
             "password" => valid_user_password(),
             "remember_me" => "true"
           }
-        })
+        }
 
       assert conn.resp_cookies["_subledger_web_user_remember_me"]
       assert redirected_to(conn) == ~p"/"
@@ -71,9 +71,9 @@ defmodule SubledgerWeb.UserSessionControllerTest do
 
     test "emits error message with invalid credentials", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log_in", %{
+        post conn, ~p"/users/log_in", %{
           "user" => %{"email" => user.email, "password" => "invalid_password"}
-        })
+        }
 
       response = html_response(conn, 200)
       assert response =~ "Log in"

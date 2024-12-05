@@ -21,6 +21,7 @@ erl_crash.dump
 
 # Temporary files, for example, from tests.
 /tmp/
+/.elixir_ls/
 
 # Ignore package tarball (built via "mix hex.build").
 subledger-*.tar
@@ -34,5 +35,12 @@ subledger-*.tar
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
 /assets/node_modules/
-/.elixir-tools/
-
+/assets/logs
+/assets/*.log
+/assets/npm-debug.log*
+/assets/pnpm-debug.log*
+/assets/dist
+/assets/dist-ssr
+/assets/*.local
+/assets/.vscode/*
+/assets/!.vscode/extensions.json

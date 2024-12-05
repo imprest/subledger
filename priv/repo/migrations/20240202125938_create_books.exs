@@ -15,9 +15,5 @@ defmodule Subledger.Repo.Migrations.CreateBooks do
 
     create unique_index(:books, [:id, :org_id])
     create unique_index(:books, [:org_id, :fin_year])
-    create index(:books, [:inserted_by_id])
-    create index(:books, [:updated_by_id])
-    create index(:books, [:org_id])
-    create index(:books, [:currency_id])
   end
 end

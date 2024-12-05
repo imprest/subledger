@@ -1,9 +1,9 @@
 defmodule Subledger.AccountsTest do
   use Subledger.DataCase
 
-  import Subledger.AccountsFixtures
-
   alias Subledger.Accounts
+
+  import Subledger.AccountsFixtures
   alias Subledger.Accounts.User
   alias Subledger.Accounts.UserToken
 

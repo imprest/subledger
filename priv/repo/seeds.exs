@@ -11,20 +11,20 @@
 # and so on) as they will fail if something goes wrong.
 
 alias PgRanges.DateRange
+alias Subledger.Accounts
+alias Subledger.Accounts.Org
+alias Subledger.Accounts.User
 alias Subledger.Books.Book
-alias Subledger.Orgs
-alias Subledger.Public
+alias Subledger.Global
 alias Subledger.Repo
-alias Subledger.Users
-alias Subledger.Users.User
 
 inserted_at = ~U[2023-10-01 08:00:00Z]
 updated_at = ~U[2023-10-01 08:00:00Z]
 
-Repo.insert!(%Public.Country{id: "GHA", name: "Ghana"})
+Repo.insert!(%Global.Country{id: "GHA", name: "Ghana"})
 
 Repo.insert_all(
-  Public.Currency,
+  Global.Currency,
   [
     %{id: "GHS", name: "Ghana Cedis", symbol: "Gh¢"},
     %{id: "USD", name: "U.S. Dollar", symbol: "$"},
@@ -34,7 +34,7 @@ Repo.insert_all(
 )
 
 org =
-  Repo.insert!(%Orgs.Org{
+  Repo.insert!(%Org{
     id: 1,
     sname: "MGP",
     name: "M&G Pharmaceuticals Ltd",
@@ -45,7 +45,7 @@ org =
 org_id = org.id
 
 {:ok, u} =
-  Users.register_user(%{
+  Accounts.register_user(%{
     org_id: org_id,
     username: "hvaria",
     email: "hardikvaria@gmail.com",
@@ -58,86 +58,22 @@ user_id = u.id
 
 Repo.update!(User.confirm_changeset(u))
 
-Repo.insert_all(Book, [
-  %{
-    org_id: org_id,
-    fin_year: 2016,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2016-10-01], ~D[2017-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  },
-  %{
-    org_id: org_id,
-    fin_year: 2017,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2017-10-01], ~D[2018-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  },
-  %{
-    org_id: org_id,
-    fin_year: 2018,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2018-10-01], ~D[2019-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  },
-  %{
-    org_id: org_id,
-    fin_year: 2019,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2019-10-01], ~D[2020-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  },
-  %{
-    org_id: org_id,
-    fin_year: 2020,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2020-10-01], ~D[2021-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  },
-  %{
-    org_id: org_id,
-    fin_year: 2021,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2021-10-01], ~D[2022-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  },
-  %{
-    org_id: org_id,
-    fin_year: 2022,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2022-10-01], ~D[2023-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  },
-  %{
-    org_id: org_id,
-    fin_year: 2023,
-    currency_id: "GHS",
-    period: DateRange.new(~D[2023-10-01], ~D[2024-10-01]),
-    inserted_by_id: user_id,
-    updated_by_id: user_id,
-    inserted_at: inserted_at,
-    updated_at: updated_at
-  }
-])
+books =
+  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+  |> Enum.map(fn year ->
+    start_date = Date.new!(year, 10, 01)
+    end_date = Date.shift(start_date, year: 1)
 
+    %{
+      org_id: org_id,
+      fin_year: year,
+      currency_id: "GHS",
+      period: DateRange.new(start_date, end_date),
+      inserted_by_id: user_id,
+      updated_by_id: user_id,
+      inserted_at: inserted_at,
+      updated_at: updated_at
+    }
+  end)
+
+Repo.insert_all(Book, books)

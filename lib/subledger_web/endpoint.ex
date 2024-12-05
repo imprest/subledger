@@ -7,11 +7,13 @@ defmodule SubledgerWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_subledger_key",
-    signing_salt: "+mMk1q7Y",
+    signing_salt: "afutkjc6",
     same_site: "Lax"
   ]
 
-  # socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
+  # socket "/live", Phoenix.LiveView.Socket,
+  #   websocket: [connect_info: [session: @session_options]],
+  #   longpoll: [connect_info: [session: @session_options]]
   socket "/socket", SubledgerWeb.UserSocket, websocket: true, longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -32,6 +34,10 @@ defmodule SubledgerWeb.Endpoint do
     # plug Phoenix.CodeReloader
     # plug Phoenix.Ecto.CheckRepoStatus, otp_app: :subledger
   end
+
+  plug Phoenix.LiveDashboard.RequestLogger,
+    param_key: "request_logger",
+    cookie_key: "request_logger"
 
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]

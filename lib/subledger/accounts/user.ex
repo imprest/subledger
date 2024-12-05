@@ -1,7 +1,6 @@
-defmodule Subledger.Users.User do
+defmodule Subledger.Accounts.User do
   @moduledoc false
   use Ecto.Schema
-
   import Ecto.Changeset
 
   schema "users" do
@@ -11,10 +10,12 @@ defmodule Subledger.Users.User do
     field :is_admin, :boolean, default: false
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
-    field :confirmed_at, :naive_datetime
-    belongs_to :org, Subledger.Orgs.Org
+    field :current_password, :string, virtual: true, redact: true
+    field :confirmed_at, :utc_datetime
 
-    timestamps(type: :utc_datetime)
+    belongs_to :org, Subledger.Accounts.Org
+
+    timestamps type: :utc_datetime
   end
 
   @doc """
@@ -72,9 +73,11 @@ defmodule Subledger.Users.User do
 
     if hash_password? && password && changeset.valid? do
       changeset
+      # If using Bcrypt, then further validate it is at most 72 bytes long
+      |> validate_length(:password, max: 72, count: :bytes)
       # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
       # would keep the database transaction open longer and hurt performance.
-      |> put_change(:hashed_password, Argon2.hash_pwd_salt(password))
+      |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
       |> delete_change(:password)
     else
       changeset
@@ -129,7 +132,7 @@ defmodule Subledger.Users.User do
   Confirms the account by setting `confirmed_at`.
   """
   def confirm_changeset(user) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = DateTime.truncate(DateTime.utc_now(), :second)
     change(user, confirmed_at: now)
   end
 
@@ -137,15 +140,15 @@ defmodule Subledger.Users.User do
   Verifies the password.
 
   If there is no user or the user doesn't have a password, we call
-  `Argon2.no_user_verify/0` to avoid timing attacks.
+  `Bcrypt.no_user_verify/0` to avoid timing attacks.
   """
-  def valid_password?(%Subledger.Users.User{hashed_password: hashed_password}, password)
+  def valid_password?(%Subledger.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
-    Argon2.verify_pass(password, hashed_password)
+    Bcrypt.verify_pass(password, hashed_password)
   end
 
   def valid_password?(_, _) do
-    Argon2.no_user_verify()
+    Bcrypt.no_user_verify()
     false
   end
 
@@ -153,6 +156,8 @@ defmodule Subledger.Users.User do
   Validates the current password otherwise adds an error to the changeset.
   """
   def validate_current_password(changeset, password) do
+    changeset = cast(changeset, %{current_password: password}, [:current_password])
+
     if valid_password?(changeset.data, password) do
       changeset
     else

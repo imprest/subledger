@@ -1,8 +1,8 @@
 defmodule SubledgerWeb.UserSettingsControllerTest do
   use SubledgerWeb.ConnCase, async: true
 
-  alias Subledger.Users
-  import Subledger.UsersFixtures
+  alias Subledger.Accounts
+  import Subledger.AccountsFixtures
 
   setup :register_and_log_in_user
 
@@ -23,14 +23,14 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
   describe "PUT /users/settings (change password form)" do
     test "updates the user password and resets tokens", %{conn: conn, user: user} do
       new_password_conn =
-        put(conn, ~p"/users/settings", %{
+        put conn, ~p"/users/settings", %{
           "action" => "update_password",
           "current_password" => valid_user_password(),
           "user" => %{
             "password" => "new valid password",
             "password_confirmation" => "new valid password"
           }
-        })
+        }
 
       assert redirected_to(new_password_conn) == ~p"/users/settings"
 
@@ -39,19 +39,19 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(new_password_conn.assigns.flash, :info) =~
                "Password updated successfully"
 
-      assert Users.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
     end
 
     test "does not update password on invalid data", %{conn: conn} do
       old_password_conn =
-        put(conn, ~p"/users/settings", %{
+        put conn, ~p"/users/settings", %{
           "action" => "update_password",
           "current_password" => "invalid",
           "user" => %{
             "password" => "too short",
             "password_confirmation" => "does not match"
           }
-        })
+        }
 
       response = html_response(old_password_conn, 200)
       assert response =~ "Settings"
@@ -67,27 +67,27 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
     @tag :capture_log
     test "updates the user email", %{conn: conn, user: user} do
       conn =
-        put(conn, ~p"/users/settings", %{
+        put conn, ~p"/users/settings", %{
           "action" => "update_email",
           "current_password" => valid_user_password(),
           "user" => %{"email" => unique_user_email()}
-        })
+        }
 
       assert redirected_to(conn) == ~p"/users/settings"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "A link to confirm your email"
 
-      assert Users.get_user_by_email(user.email)
+      assert Accounts.get_user_by_email(user.email)
     end
 
     test "does not update email on invalid data", %{conn: conn} do
       conn =
-        put(conn, ~p"/users/settings", %{
+        put conn, ~p"/users/settings", %{
           "action" => "update_email",
           "current_password" => "invalid",
           "user" => %{"email" => "with spaces"}
-        })
+        }
 
       response = html_response(conn, 200)
       assert response =~ "Settings"
@@ -102,7 +102,7 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
 
       token =
         extract_user_token(fn url ->
-          Users.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
+          Accounts.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 
       %{token: token, email: email}
@@ -115,8 +115,8 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "Email changed successfully"
 
-      refute Users.get_user_by_email(user.email)
-      assert Users.get_user_by_email(email)
+      refute Accounts.get_user_by_email(user.email)
+      assert Accounts.get_user_by_email(email)
 
       conn = get(conn, ~p"/users/settings/confirm_email/#{token}")
 
@@ -133,7 +133,7 @@ defmodule SubledgerWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "Email change link is invalid or it has expired"
 
-      assert Users.get_user_by_email(user.email)
+      assert Accounts.get_user_by_email(user.email)
     end
 
     test "redirects if user is not logged in", %{token: token} do

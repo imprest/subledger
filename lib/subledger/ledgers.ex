@@ -6,10 +6,10 @@ defmodule Subledger.Ledgers do
   import Ecto.Query, warn: false
   import MySigils
 
-  alias Subledger.Ledgers.Ledger
-  alias Subledger.Ledgers.Tx
+  alias Subledger.Accounts.Permission
+  alias Subledger.Books.Ledger
+  alias Subledger.Books.Tx
   alias Subledger.Repo
-  alias Subledger.Users.Permission
 
   require Logger
 
@@ -55,7 +55,7 @@ defmodule Subledger.Ledgers do
 
     case Repo.query(q, [user_id, book_id]) do
       {:ok, %{num_rows: _cols, rows: rows}} ->
-        {:ok, %{ledgers: Repo.json_frag(rows)}}
+        {:ok, %{ledgers: json_frag(rows)}}
 
       {:error, error} ->
         Logger.error(error)
@@ -129,7 +129,7 @@ defmodule Subledger.Ledgers do
 
     case Repo.query(q, [ledger_id, book_id]) do
       {:ok, %{num_rows: 1, rows: rows}} ->
-        {:ok, %{ledger: Repo.json_frag(hd(rows))}}
+        {:ok, %{ledger: json_frag(hd(rows))}}
 
       {:error, error} ->
         Logger.error(error)

@@ -8,17 +8,18 @@
       <%= assigns[:page_title] || "Subledger" %>
     </.live_title>
     <%= if System.get_env("PHX_SERVER", "false") == "false" do %>
+      <script type="module" src="http://localhost:5173/@vite/client">
+      </script>
       <link rel="stylesheet" href="http://localhost:5173/src/app.css" />
       <script src="http://localhost:5173/src/app.js" type="module">
       </script>
-      <link phx-track-static rel="stylesheet" href={~p"/assets/main.css"} />
     <% else %>
-      <link phx-track-static rel="stylesheet" href={~p"/assets/main.css"} />
+      <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
       <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
       </script>
     <% end %>
   </head>
-  <body class="has-navbar-fixed-top">
+  <body>
     <%= @inner_content %>
   </body>
 </html>

@@ -1,4 +1,4 @@
-defmodule Subledger.Public.Country do
+defmodule Subledger.Global.Country do
   @moduledoc false
   use Ecto.Schema
 

@@ -34,11 +34,5 @@ defmodule Subledger.Repo.Migrations.CreateTxs do
 
       timestamps(type: :utc_datetime)
     end
-
-    create index(:txs, [:org_id])
-    create index(:txs, [:book_id])
-    create index(:txs, [:ledger_id])
-    create index(:txs, [:inserted_by_id])
-    create index(:txs, [:updated_by_id])
   end
 end

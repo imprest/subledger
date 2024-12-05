@@ -7,18 +7,20 @@
 # General application configuration
 import Config
 
-config :subledger, ecto_repos: [Subledger.Repo], migration_timestamps: [type: :utc_datetime]
+config :subledger,
+  ecto_repos: [Subledger.Repo],
+  generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
 config :subledger, SubledgerWeb.Endpoint,
-  adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
+  adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: SubledgerWeb.ErrorHTML, json: SubledgerWeb.ErrorJSON],
     layout: false
   ],
   pubsub_server: Subledger.PubSub,
-  live_view: [signing_salt: "NxYRRUpr"]
+  live_view: [signing_salt: "V96u9DCp"]
 
 # Configures the mailer
 #
@@ -28,6 +30,16 @@ config :subledger, SubledgerWeb.Endpoint,
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
 config :subledger, Subledger.Mailer, adapter: Swoosh.Adapters.Local
+
+# Configure esbuild (the version is required)
+# config :esbuild,
+#   version: "0.17.11",
+#   subledger: [
+#     args:
+#       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+#     cd: Path.expand("../assets", __DIR__),
+#     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+#   ]
 
 # Configures Elixir's Logger
 config :logger, :console,

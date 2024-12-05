@@ -1,67 +1,42 @@
-<svelte:options runes={true} />
-
 <script lang="ts">
-  import { appState, getBooks } from './store.svelte';
-  import Router from 'svelte-spa-router';
-  import routes from './routes';
-  import { untrack } from 'svelte';
+	import Home from './routes/Home.svelte';
+	import Activity from './routes/Activity.svelte';
+	import Ledger from './routes/Ledger.svelte';
+	import type { Route } from '@mateothegreat/svelte5-router';
+	import { route, Router } from '@mateothegreat/svelte5-router';
+	import { channel } from './service.svelte';
 
-  let booksLoaded = $derived(appState.books.length > 0);
-  let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
-  $effect.pre(() => {
-    untrack(() => getBooks());
-  });
+	let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute('content');
+
+	const routes: Route[] = [
+		{ path: '/activity', component: Activity },
+		{ path: '/ledgers/(?<code>.*)/(?<fin_year>.*)', component: Ledger },
+		{ path: '/ledgers/(?<code>.*)', component: Ledger },
+		{ path: '(?<route>.*)', component: Home }
+	];
+
+	const appInitHook = async (route: Route): Promise<Route> => {
+		await channel.getBooks();
+		return route;
+	};
 </script>
 
-{#if !appState.connected}
-  <div title="In Off-line mode" class="fixed bottom-0 right-3 text-red-600 text-4xl cursor-pointer">
-    •
-  </div>
-{/if}
-<header>
-  <nav class="navbar is-fixed-top has-shadow" aria-label="main navigation">
-    <div class="navbar-brand">
-      <div class="navbar-item">
-        <img width="50px" height="500px" src="/images/logo.svg" alt="Logo" />
-      </div>
-
-      <button
-        class="navbar-burger"
-        aria-label="menu"
-        aria-expanded="false"
-        data-target="navbarBasicExample"
-      >
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-      </button>
-    </div>
-    <div id="navbarBasicExample" class="navbar-menu">
-      <div class="navbar-start">
-        <a href="#/" class="navbar-item">Ledgers</a>
-        <a href="#/activity" class="navbar-item">Activity</a>
-      </div>
-
-      <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            <a
-              data-csrf={csrfToken}
-              data-method="delete"
-              data-to="/users/log_out"
-              href="/users/log_out">Logout</a
-            >
-          </div>
-        </div>
-      </div>
-    </div>
-  </nav>
+<header class="header print:hidden">
+	<nav class="nav">
+		<ul>
+			<li><strong>SubLedger</strong></li>
+			<li><a use:route href="/app">Home</a></li>
+			<li><a use:route href="/app/activity">Activity</a></li>
+		</ul>
+		<ul>
+			<li>
+				<a data-csrf={csrfToken} data-method="delete" data-to="/users/log_out" href="/users/log_out"
+					>Logout</a
+				>
+			</li>
+		</ul>
+	</nav>
 </header>
-<main>
-  {#if booksLoaded}
-    <Router {routes} />
-  {:else}
-    <div>Initialising App...</div>
-  {/if}
+<main class="pt-3">
+	<Router basePath="/app" {routes} pre={appInitHook} />
 </main>

@@ -21,7 +21,7 @@ defmodule Subledger.Books do
 
   """
   def list_books(org_id) do
-    q = from(b in Book, where: b.org_id == ^org_id, order_by: [desc: b.fin_year])
+    q = from b in Book, where: b.org_id == ^org_id, order_by: [desc: b.fin_year]
     Repo.all(q)
   end
 
@@ -45,7 +45,7 @@ defmodule Subledger.Books do
 
     case Repo.query(q, [org_id]) do
       {:ok, %{num_rows: _cols, rows: rows}} ->
-        {:ok, %{books: Repo.json_frag(rows)}}
+        {:ok, %{books: json_frag(rows)}}
 
       {:error, error} ->
         Logger.error(error)

@@ -9,8 +9,17 @@ defmodule SubledgerWeb.UserSocket do
   # assign values that can be accessed by your channel topics.
 
   ## Channels
-
+  # Uncomment the following line to define a "room:*" topic
+  # pointing to the `SubledgerWeb.RoomChannel`:
+  #
   channel "subledger:*", SubledgerWeb.SubledgerChannel
+  #
+  # To create a channel file, use the mix task:
+  #
+  #     mix phx.gen.channel Room
+  #
+  # See the [`Channels guide`](https://hexdocs.pm/phoenix/channels.html)
+  # for further details.
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -27,7 +36,7 @@ defmodule SubledgerWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
-  def connect(%{"token" => token}, socket, _connect_info) do
+  def connect %{"token" => token}, socket, _connect_info do
     case Phoenix.Token.verify(socket, "user socket", token, max_age: 1_209_600) do
       {:ok, user_id} ->
         query =
@@ -46,17 +55,16 @@ defmodule SubledgerWeb.UserSocket do
     end
   end
 
-  # Socket id's are topics that allow you to identify all sockets for a given user:
+  # Socket IDs are topics that allow you to identify all sockets for a given user:
   #
   #     def id(socket), do: "user_socket:#{socket.assigns.user_id}"
   #
   # Would allow you to broadcast a "disconnect" event and terminate
   # all active sockets and channels for a given user:
   #
-  #     Elixir.GhrWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
+  #     Elixir.SubledgerWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
-  # def id(_socket), do: nil
   @impl true
   def id(socket), do: "user_socket:#{socket.assigns.user_id}"
 end

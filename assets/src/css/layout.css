@@ -1,0 +1,12 @@
+.section {
+	@apply px-2 max-w-7xl mx-auto;
+}
+.section-full {
+	@apply px-2 max-w-none;
+}
+.section:not(:last-child) {
+	@apply mb-4;
+}
+.section-full:not(:last-child) {
+	@apply mb-4;
+}
