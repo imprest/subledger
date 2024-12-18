@@ -22,7 +22,9 @@
 	});
 
 	function yearChanged() {
-		goto(`/app/${year}`);
+		history.replaceState(null, '', `/app/${year}`);
+		// history.pushState(null, '', `/app/${year}`);
+		// goto(`/app/${year}`);
 	}
 
 	// On mount determine which year to use
